@@ -1,84 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <title>Vue toast</title>
-    <link rel="stylesheet" href="https://rawgit.com/AStaroverov/vue-toast/master/dist/vue-toast.css" charset="utf-8">
-    <style type="text/css"></style>
-  </head>
-  <body id="app">
-    <h3>Options of component.</h3>
-    <br>
-    <label>
-      <input type="text">
-      maxToasts
-    </label>
-    <br>
-    <label>
-      <input type="text">
-      position
-    </label>
+<head>
+  <meta charset="UTF-8">
+  <title>Vue toast</title>
+  <link rel="stylesheet" href="https://rawgit.com/AStaroverov/vue-toast/master/dist/vue-toast.css" charset="utf-8">
+</head>
+<body id='app'>
+  <h3>Options of component.</h3>
+  <br>
+  <label>
+    <input type="text" v-model="maxToasts">
+    maxToasts
+  </label>
+  <br>
+  <label>
+    <input type="text" v-model="position">
+    position ([left, right] [top, bottom])
+  </label>
 
-    <hr>
+  <hr>
 
-    <h3>Options of toast.</h3>
-    <label>
-      <input type="text">
-      theme
-    </label>
-    <br>
-    <label>
-      <input type="text">
-      timeLife
-    </label>
-    <br>
-    <label>
-      <input type="checkbox">
-      closeBtn
-    </label>
-    <hr>
+  <h3>Options of toast.</h3>
+  <label>
+    <input type="text" v-model="theme">
+    theme (info warning error success)
+  </label>
+  <br>
+  <label>
+    <input type="text" v-model="timeLife" :disabled="closeBtn">
+    timeLife
+  </label>
+  <br>
+  <label>
+    <input type="checkbox" v-model="closeBtn">
+    closeBtn
+  </label>
+  <hr>
 
-    <button type="button" name="button">SHOW TIME</button>
-    <vue-toast v-ref:toast></vue-toast>
+  <button type="button" name="button" @click="showTime">SHOW TIME</button>
+  <vue-toast v-ref:toast></vue-toast>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.16/vue.js" charset="utf-8"></script>
-    <script src="https://rawgit.com/AStaroverov/vue-toast/master/dist/vue-toast.min.js"></script>
-    <script>
-      new Vue({
-        el: '#app',
-        data: {
-          maxToasts: 6,
-          position: 'bottom right',
-          theme: 'error',
-          timeLife: 3000,
-          closeBtn: true,
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.16/vue.js" charset="utf-8"></script>
+  <script src="https://rawgit.com/AStaroverov/vue-toast/master/dist/vue-toast.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        maxToasts: 6,
+        position: 'bottom right',
+        theme: 'error',
+        timeLife: 3000,
+        closeBtn: true,
+      },
+      watch: {
+        'maxToasts + position': 'resetOptions'
+      },
+      attached() {
+        this.resetOptions()
+      },
+      methods: {
+        resetOptions() {
+          this.$refs.toast.setOptions({
+            maxToasts: this.maxToasts,
+            position: this.position
+          })
         },
-        watch: {
-          'delayOfJumps + maxToasts + position': 'resetOptions'
-        },
-        attached() {
-          this.resetOptions()
-        },
-        methods: {
-          resetOptions() {
-            this.$refs.toast.setOptions({
-              delayOfJumps: this.delayOfJumps,
-              maxToasts: this.maxToasts,
-              position: this.position
-            })
-          },
-          showTime() {
-            this.$refs.toast.showToast(new Date, {
-              theme: this.theme,
-              timeLife: this.timeLife,
-              closeBtn: this.closeBtn
-            })
-          }
-        },
-        components: {
-          'vue-toast': window.vueToasts
+        showTime() {
+          this.$refs.toast.showToast(new Date, {
+            theme: this.theme,
+            timeLife: this.timeLife,
+            closeBtn: this.closeBtn
+          })
         }
-      })
-    </script>
-  </body>
+      },
+      components: {
+        'vue-toast': window.vueToasts
+      }
+    })
+  </script>
+</body>
 </html>
