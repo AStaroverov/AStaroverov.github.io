@@ -1,0 +1,40 @@
+<div class="mdl-grid">
+  <div class="mdl-cell mdl-card mdl-cell mdl-cell--12-col mdl-shadow--4dp">
+    <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">Vue toast example</h2>
+    </div>
+    <div class="mdl-card__supporting-text">
+      <h4>Options of component.</h4>
+      <label>
+        <input type="text" v-model="maxToasts">
+        maxToasts
+      </label>
+      <br>
+      <label>
+        <input type="text" v-model="position">
+        position
+      </label>
+
+      <hr>
+
+      <h3>Options of toast.</h3>
+      <label>
+        <input type="text" v-model="theme">
+        theme
+      </label>
+      <br>
+      <label>
+        <input type="text" v-model="timeLife" :disabled="closeBtn">
+        timeLife
+      </label>
+      <br>
+      <label>
+        <input type="checkbox" v-model="closeBtn">
+        closeBtn
+      </label>
+      <hr>
+
+      <button type="button" name="button" @click="showTime">SHOW TIME</button>
+    </div>
+  </div>
+</div>

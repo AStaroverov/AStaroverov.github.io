@@ -1,0 +1,23 @@
+<div class="mdl-grid">
+  <div class="mdl-cell mdl-card mdl-cell mdl-cell--12-col mdl-shadow--4dp">
+    <div class="mdl-card__title">
+        <h2 class="mdl-card__title-text">Vue dynamic component example.</h2>
+    </div>
+    <div class="mdl-card__supporting-text">
+      <div>
+        <vue-dynamic-component v-for="n in 4" :component="comp[n]">
+          <div>component with inlineTemplate {{msg}} <button @click="msg += '!'">add !</button></div>
+        </vue-dynamic-component>
+      </div>
+      <hr>
+      <div>
+        <button @click="index += 1">+1</button>
+        <button @click="index -= 1">-1</button>
+        <span>component index = {{index}}</span> <br>
+        <vue-dynamic-component  :component="comp[index]">
+          <div>component with inlineTemplate {{msg}} <button @click="msg += '!'">add !</button></div>
+        </vue-dynamic-component>
+      </div>
+    </div>
+  </div>
+</div>
