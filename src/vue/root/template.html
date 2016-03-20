@@ -1,16 +1,7 @@
-<div class="mdl-layout__container">
-  <div class="mdl-layout">
-    <div class="mdl-layout__header mdl-layout__header--waterfall is-casting-shadow is-compact">
-      <div class="mdl-layout__header-row">
-        <div class="android-navigation-container">
-          <nav class="android-navigation mdl-navigation">
-            <a class="mdl-navigation__link mdl-typography--text-uppercase" v-link="{ name: 'main' }">about</a>
-            <a class="mdl-navigation__link mdl-typography--text-uppercase" v-link="{ name: 'openSource' }">open source</a>
-          </nav>
-        </div>
-      </div>
-    </div>
-    <div class="mdl-layout__content">
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+  <vue-navigation></vue-navigation>
+  <div class="mdl-layout__content">
+    <div class="blog-content-container">
       <router-view></router-view>
     </div>
   </div>

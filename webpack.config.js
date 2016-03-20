@@ -1,5 +1,6 @@
 var webpack = require('webpack');
 
+
 module.exports = {
   entry: ["./src/index.js"],
   output: {
@@ -30,11 +31,30 @@ module.exports = {
         loader: "vue-html-loader",
         exclude: /node_modules/
       },
-      { test: /\.css$/, loader: "style-loader!css-loader" },
+      {
+        test: /node_modules.*\.css$/g,
+        loader: "style-loader!css-loader"
+      },
+      {
+        test: /\.css$/,
+        loader: "style-loader!css-loader!postcss-loader",
+        exclude: /node_modules/
+      },
+      {
+        test: /\.sss$/,
+        loader: "style-loader!css-loader!postcss-loader?parser=sugarss",
+        exclude: /node_modules/
+      },
       { test: /\.png$/, loader: "url-loader?limit=100000" },
       { test: /\.jpg$/, loader: "file-loader" }
     ]
   },
+  postcss: function() {
+    return [
+      require('postcss-nested'),
+      require('autoprefixer'),
+    ]
+  }
 }
 
 if (process.env.NODE_ENV === 'production') {

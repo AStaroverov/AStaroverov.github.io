@@ -30,6 +30,10 @@ router.map({
   },
 })
 
+router.redirect({
+  '/example/:example': '/open-source/:example',
+})
+
 export default function(app, selector) {
   router.start(app, selector)
 }

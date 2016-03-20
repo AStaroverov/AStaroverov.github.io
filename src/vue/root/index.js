@@ -1,13 +1,14 @@
 import './style.css'
 import template from './template.html'
 
-import 'vue-toast/dist/vue-toast.min.css'
+import VueNavigation from '../components/navigation'
 import VueToast from 'vue-toast'
+import 'vue-toast/dist/vue-toast.min.css'
 
 export default {
-  replace: false,
   template,
   components: {
-    VueToast
+    VueNavigation,
+    VueToast,
   }
 }

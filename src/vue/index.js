@@ -1,6 +1,12 @@
 // Plugins
 import './plugins'
 
+// Filters
+import './filters'
+
+// Global components
+import './components-global'
+
 // Router init  function
 import initRouter from './router'
 

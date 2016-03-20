@@ -1,10 +1,12 @@
 <div class="mdl-grid">
   <div class="mdl-cell mdl-card mdl-cell mdl-cell--12-col mdl-shadow--4dp">
     <div class="mdl-card__title">
-        <h2 class="mdl-card__title-text">Vue toast example</h2>
+        <h2 class="mdl-card__title-text">Vue toast</h2>
     </div>
     <div class="mdl-card__supporting-text">
-      <h4>Options of component.</h4>
+      <div class="mdl-typography--title">Example.</div><br>
+
+      <p>Options of component.</p>
       <label>
         <input type="text" v-model="maxToasts">
         maxToasts
@@ -16,8 +18,8 @@
       </label>
 
       <hr>
+      <p>Options of toast.</p>
 
-      <h3>Options of toast.</h3>
       <label>
         <input type="text" v-model="theme">
         theme
@@ -34,7 +36,13 @@
       </label>
       <hr>
 
-      <button type="button" name="button" @click="showTime">SHOW TIME</button>
+      <div class="mdl-button mdl-button--accent" @click="showTime">Show time</div>
+
+      <br><br>
+      <vue-collapce>
+        <div slot="trigger" class="mdl-typography--title">Source</div>
+        <pre slot="content" v-text="source"></pre>
+      </vue-collapce>
     </div>
   </div>
 </div>
