@@ -1,0 +1,34 @@
+{
+  "root": true,
+  "compilerOptions": {
+    "noEmit": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "moduleResolution": "node",
+    "module": "esnext",
+    "target": "es2017",
+    "allowJs": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "webworker"
+    ],
+    "skipLibCheck": true,
+    "removeComments": false
+  },
+  "include": [
+    "./src/**/*",
+    "./bower_components/**/*.d.ts",
+    "./node_modules/ya-nirvana-renderer/src/**/*.ts"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "./git-submodules/**/*.ts",
+    "./node_modules/ya-nirvana-renderer/tests/**/*.ts",
+    "./node_modules/ace-builds/ace.d.ts",
+    "./bower_components/app-layout/*"
+  ]
+}
