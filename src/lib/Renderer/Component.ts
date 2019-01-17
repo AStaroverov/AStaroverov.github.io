@@ -1,7 +1,7 @@
 import { CoreComponent } from './CoreComponent';
 import { assign } from './utils';
 
-export class Component extends CoreComponent {
+export abstract class Component extends CoreComponent {
   protected firstIterate: boolean = true;
   protected firstRender = true;
   protected firstUpdateChildren = true;

@@ -7,7 +7,7 @@ type TOptions = {
 };
 
 type TCompData = {
-  parent: ICoreComponent | void,
+  parent: CoreComponent | void,
   treeNode: Node,
   context: { scheduler: any },
   children: object,
@@ -16,18 +16,15 @@ type TCompData = {
   updated: boolean,
 };
 
-interface ICoreComponent extends CoreComponent {}
-
 const fakeEmptyOptions: TOptions = {};
 
-export class CoreComponent {
+export abstract class CoreComponent {
   public $: object = {};
   public context: any;
-  protected children: Function;
   protected __comp: TCompData;
 
   constructor (...args: any[])
-  constructor (props: object | void, parent: TFakeParentData | ICoreComponent) {
+  constructor (props: object | void, parent: TFakeParentData | CoreComponent) {
     this.context = parent.context;
 
     this.__comp = {
@@ -45,7 +42,7 @@ export class CoreComponent {
     this.__comp.context.scheduler.scheduleUpdate();
   }
 
-  public getParent (): ICoreComponent | void {
+  public getParent (): CoreComponent | void {
     return this.__comp.parent;
   }
 
@@ -55,12 +52,10 @@ export class CoreComponent {
   }
 
   protected unmount () {}
-  protected render () {}
+  protected abstract render ()
   protected updateChildren (): void | object[] {}
 
   protected setProps (props: object) {}
-  /* deprecated */
-  protected __setProps (props: object) {}
 
   private __unmount () {
     this.__unmountChildren();

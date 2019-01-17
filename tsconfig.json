@@ -1,7 +1,6 @@
 {
   "root": true,
   "compilerOptions": {
-    "noEmit": true,
     "sourceMap": true,
     "baseUrl": ".",
     "moduleResolution": "node",
@@ -20,15 +19,10 @@
     "removeComments": false
   },
   "include": [
-    "./src/**/*",
-    "./bower_components/**/*.d.ts",
-    "./node_modules/ya-nirvana-renderer/src/**/*.ts"
+    "./src/**/*"
   ],
   "exclude": [
     "**/*.spec.ts",
-    "./git-submodules/**/*.ts",
-    "./node_modules/ya-nirvana-renderer/tests/**/*.ts",
-    "./node_modules/ace-builds/ace.d.ts",
-    "./bower_components/app-layout/*"
+    "**/*_test.ts"
   ]
 }

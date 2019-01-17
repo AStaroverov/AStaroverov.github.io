@@ -1,96 +1,25 @@
 import { Node } from './Tree';
+import { taskQueue, Task } from '../Scheduler';
 
-const rAF: Function = typeof window !== 'undefined'
-  ? window.requestAnimationFrame
-  : (fn) => global.setTimeout(fn, 16);
-const cAF: Function = typeof window !== 'undefined'
-  ? window.cancelAnimationFrame
-  : global.clearTimeout;
-const getNow = typeof window !== 'undefined'
-  ? window.performance.now.bind(window.performance)
-  : global.Date.now.bind(global.Date);
-
-interface IScheduler {
-  performUpdate: Function
-}
-
-export class GlobalScheduler {
-  private schedulers: IScheduler[][];
-  private _cAFID: number;
-
-  constructor () {
-    this.tick = this.tick.bind(this);
-
-    this.schedulers = [[], [], [], [], []];
-  }
-
-  addScheduler (scheduler: IScheduler, index = 2) {
-    this.schedulers[index].push(scheduler);
-  }
-
-  removeScheduler (scheduler: IScheduler, index = 2) {
-    const i = this.schedulers[index].indexOf(scheduler);
-
-    if (i !== -1) {
-      this.schedulers[index].slice(i, 1);
-    }
-  }
-
-  start () {
-    this._cAFID = rAF(this.tick)
-  }
-
-  stop () {
-    cAF(this._cAFID);
-  }
-
-  tick () {
-    this.performUpdate();
-    this._cAFID = rAF(this.tick);
-  }
-
-  performUpdate () {
-    const startTime = getNow();
-    let schedulers = [];
-
-    for (let i = 0; i < this.schedulers.length; i += 1) {
-      schedulers = this.schedulers[i];
-
-      for (let j = 0; j < schedulers.length; j += 1) {
-        schedulers[j].performUpdate(getNow() - startTime);
-      }
-    }
-  }
-}
-
-export const globalScheduler = new GlobalScheduler();
-
-export const scheduler = globalScheduler;
 export class Scheduler {
-  private sheduled: boolean;
+  private sheduled: boolean = false;
   private root: Node;
+  private task = new Task(this.update, { context: this });
 
   constructor () {
-    this.performUpdate = this.performUpdate.bind(this);
+    taskQueue.addTask(this.task);
+  }
 
-    this.sheduled = false;
-
-    globalScheduler.addScheduler(this);
+  destroy () {
+    taskQueue.removeTask(this.task);
   }
 
   setRoot (root: Node) {
     this.root = root;
   }
 
-  start () {
-    globalScheduler.addScheduler(this);
-  }
-
-  stop () {
-    globalScheduler.removeScheduler(this);
-  }
-
   update () {
+    this.sheduled = false;
     this.root && this.root.traverseDown(this.iterator);
   }
 
@@ -99,13 +28,8 @@ export class Scheduler {
   }
 
   scheduleUpdate () {
-    this.sheduled = true;
-  }
+    if (this.sheduled) { return; }
 
-  performUpdate () {
-    if (this.sheduled) {
-      this.sheduled = false;
-      this.update();
-    }
+    this.sheduled = true;
   }
 }

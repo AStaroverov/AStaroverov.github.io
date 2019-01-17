@@ -1,0 +1,57 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/bin/yarn add webapck webpack-dev-server webpack-cli ts-loader
+
+PATH: 
+  /usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/astaroverov/.deno/bin:/usr/local/munki:/Users/astaroverov/.deno/bin:/Users/astaroverov/.yarn/bin
+
+Yarn version: 
+  1.2.1
+
+Node version: 
+  8.11.4
+
+Platform: 
+  darwin x64
+
+npm manifest: 
+  {
+    "name": "github_portal",
+    "version": "0.0.999",
+    "description": "my static portal",
+    "main": "index.js",
+    "scripts": {
+      "build": "webpack --config webpack.config.js",
+      "build_min": "NODE_ENV=production webpack --config webpack.config.js",
+      "serverv": "webpack-dev-server --hot --inline"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/AStaroverov/AStaroverov.github.io.git"
+    },
+    "author": "AStaroverov",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/AStaroverov/AStaroverov.github.io/issues"
+    },
+    "homepage": "https://github.com/AStaroverov/AStaroverov.github.io#readme",
+    "dependencies": {}
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: https://registry.yarnpkg.com/webapck: Not found
+      at Request.params.callback [as _callback] (/usr/local/lib/node_modules/yarn/lib/cli.js:62027:18)
+      at Request.self.callback (/usr/local/lib/node_modules/yarn/lib/cli.js:123011:22)
+      at emitTwo (events.js:126:13)
+      at Request.emit (events.js:214:7)
+      at Request.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:123994:10)
+      at emitOne (events.js:116:13)
+      at Request.emit (events.js:211:7)
+      at IncomingMessage.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:123914:12)
+      at Object.onceWrapper (events.js:313:30)
+      at emitNone (events.js:111:20)
