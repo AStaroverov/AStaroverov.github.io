@@ -1,5 +1,5 @@
-import { Scheduler } from './Scheduler';
-import { Node } from './Tree';
+import { scheduler, TaskQueue, Task } from '../Scheduler';
+import { RootTaskQueue, ChildTaskQueue } from './scheduler';
 
 type TOptions = {
   readonly key?: string;
@@ -7,13 +7,13 @@ type TOptions = {
 };
 
 type TCompData = {
-  parent: CoreComponent | void,
-  treeNode: Node,
-  context: { scheduler: any },
+  parent: CoreComponent | undefined,
   children: object,
   childrenKeys: string[],
   prevChildrenArr: object[],
   updated: boolean,
+  task: Task,
+  childTaskQueue: ChildTaskQueue,
 };
 
 const fakeEmptyOptions: TOptions = {};
@@ -21,25 +21,27 @@ const fakeEmptyOptions: TOptions = {};
 export abstract class CoreComponent {
   public $: object = {};
   public context: any;
-  protected __comp: TCompData;
+  public __comp: TCompData;
 
   constructor (...args: any[])
-  constructor (props: object | void, parent: TFakeParentData | CoreComponent) {
+  constructor (props: object | void, parent: CoreComponent | TFakeParentData) {
     this.context = parent.context;
-
     this.__comp = {
-      parent: parent instanceof CoreComponent ? parent : void 0,
-      context: (parent as any).__comp.context,
-      treeNode: new Node(this),
+      parent: parent instanceof CoreComponent ? parent : undefined,
+      task: new Task(this.iterate, { context: this }),
+      updated: false,
       children: {},
       childrenKeys: [],
+      childTaskQueue: new ChildTaskQueue(),
       prevChildrenArr: [],
-      updated: false,
     };
+
+    parent.__comp.childTaskQueue.add(this.__comp.task);
+    parent.__comp.childTaskQueue.add(this.__comp.childTaskQueue);
   }
 
   public performRender () {
-    this.__comp.context.scheduler.scheduleUpdate();
+    this.context.scheduleUpdate();
   }
 
   public getParent (): CoreComponent | void {
@@ -52,6 +54,7 @@ export abstract class CoreComponent {
   }
 
   protected unmount () {}
+  protected abstract iterate ()
   protected abstract render ()
   protected updateChildren (): void | object[] {}
 
@@ -61,10 +64,6 @@ export abstract class CoreComponent {
     this.__unmountChildren();
     this.unmount();
     this.performRender();
-  }
-
-  protected iterate (): boolean {
-    return true;
   }
 
   protected __updateChildren () {
@@ -83,11 +82,7 @@ export abstract class CoreComponent {
     let ref;
     let child;
     let currentChild;
-    const treeNode = __comp.treeNode;
-
     __comp.prevChildrenArr = nextChildrenArr;
-
-    treeNode.clearChildren();
 
     if (nextChildrenArr.length === 0) {
       if (childrenKeys.length > 0) {
@@ -119,7 +114,6 @@ export abstract class CoreComponent {
           }
 
           nextChildrenKeys.push(key);
-          treeNode.append(children[key].__comp.treeNode);
         }
       }
 
@@ -176,17 +170,9 @@ export abstract class CoreComponent {
         this.$[ref] = children[key];
       }
     }
-
-    for (let i = 0; i < nextChildrenKeys.length; i += 1) {
-      if ((child = children[nextChildrenKeys[ i ]]) !== undefined) {
-        treeNode.append(child.__comp.treeNode);
-      }
-    }
   }
 
   private __unmountChildren () {
-    this.__comp.treeNode.clearChildren();
-
     const children = this.__comp.children;
     const childrenKeys = this.__comp.childrenKeys;
 
@@ -200,14 +186,11 @@ export abstract class CoreComponent {
   }
 
   static mount (Component, props?: object) {
-    const context = getRootParentData();
-    const root = new Component(props, context);
+    const fakeParent = getRootParentData();
 
-    const scheduler = root.__comp.context.scheduler;
-    scheduler.setRoot(root.__comp.treeNode);
-    scheduler.scheduleUpdate();
+    fakeParent.context.scheduleUpdate();
 
-    return root;
+    return new Component(props, fakeParent);
   }
 
   static unmount (instance) {
@@ -216,15 +199,17 @@ export abstract class CoreComponent {
 }
 
 type TFakeParentData = {
-  context: any, // public context
-  __comp: any,
+  context: any & { scheduleUpdateL (): void; },
+  __comp: { childTaskQueue: TaskQueue }
 }
 
 function getRootParentData (): TFakeParentData {
+  const q = new RootTaskQueue();
+
+  scheduler.add(q);
+
   return {
-    context: {}, // public context
-    __comp: {
-      context: { scheduler: new Scheduler() }, // private context
-    }
+    context: { scheduleUpdate: () => q.scheduled = true },
+    __comp: { childTaskQueue: q }
   }
 }

@@ -1,4 +1,5 @@
 import { TaskQueue } from './TaskQueue';
+import { Task } from './Task';
 
 export class Scheduler {
   queues = [];
@@ -8,12 +9,12 @@ export class Scheduler {
   private activeQueue: TaskQueue;
   private stopImmediately: boolean;
 
-  addQueue (queue: TaskQueue) {
+  add (queue: Task | TaskQueue) {
     this.queues.push(queue);
     this.queuesUpdated = true;
   }
 
-  removeQueue (queue: TaskQueue) {
+  remove (queue: Task | TaskQueue) {
     const i = this.queues.indexOf(queue);
 
     if (i > -1) {
@@ -26,12 +27,12 @@ export class Scheduler {
     this.cAF = window.requestAnimationFrame(this.frame);
   }
 
-  stopAfterEndFrame () {
+  stopAfterFrame () {
     window.cancelAnimationFrame(this.cAF);
   }
 
   stop () {
-    this.stopAfterEndFrame();
+    this.stopAfterFrame();
 
     if (this.activeQueue) {
       this.stopImmediately = true;
@@ -47,7 +48,7 @@ export class Scheduler {
 
     for (var i = 0; i < this.queues.length; i += 1) {
       if (this.stopImmediately) { return; }
-      (this.activeQueue = this.queues[ i ]).start(startTimestamp);
+      (this.activeQueue = this.queues[ i ]).run(startTimestamp);
     }
 
     this.cAF = window.requestAnimationFrame(this.frame);

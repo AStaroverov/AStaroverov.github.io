@@ -5,6 +5,7 @@ export type OptionsTaskQueue = {
   order?: number,
 }
 export class TaskQueue {
+  once: boolean;
   order: number;
   queue = [];
 
@@ -16,18 +17,18 @@ export class TaskQueue {
     this.order = (options && options.order) || 0;
   }
 
-  addTask (task: Task) {
+  add (task: Task | TaskQueue) {
     this.queue.push(task);
     this.queueUpdated = true;
   }
 
-  scheduleTask (task: Task) {
+  schedule (task: Task | TaskQueue) {
     task.once = true;
     this.queue.push(task);
     this.queueUpdated = true;
   }
 
-  removeTask (task: Task) {
+  remove (task: Task | TaskQueue) {
     const i = this.queue.indexOf(task);
 
     if (i > -1) {
@@ -35,16 +36,17 @@ export class TaskQueue {
     }
   }
 
-  start (startTimestamp) {
+  run (startTimestamp) {
     if (this.queueUpdated) {
       this.queueUpdated = false;
       this.sortQueue();
     }
+
     this.stopImmediately = false;
 
     for (var i = 0; i < this.queue.length; i += 1) {
       if (this.stopImmediately) { return; }
-      this.queue[ i ].run(performance.now() - startTimestamp, this);
+      this.queue[ i ].run(startTimestamp, this);
     }
   }
 
@@ -65,3 +67,5 @@ export class TaskQueue {
     });
   }
 }
+
+

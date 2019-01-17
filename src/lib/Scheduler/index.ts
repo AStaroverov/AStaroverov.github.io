@@ -8,4 +8,4 @@ export * from './Task';
 export const scheduler = new Scheduler();
 export const taskQueue = new TaskQueue();
 
-scheduler.addQueue(taskQueue);
+scheduler.add(taskQueue);

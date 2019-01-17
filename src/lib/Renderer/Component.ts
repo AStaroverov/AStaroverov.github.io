@@ -119,6 +119,6 @@ export abstract class Component extends CoreComponent {
 
     this.firstIterate = false;
 
-    return this.shouldRenderChildren;
+    this.__comp.childTaskQueue.scheduled = this.shouldRenderChildren;
   }
 }
