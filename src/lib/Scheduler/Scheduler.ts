@@ -1,25 +1,9 @@
 import { TaskQueue } from './TaskQueue';
+import { Task } from './Task';
 
-export class Scheduler {
-  queues = [];
-
-  private queuesUpdated = false;
+export class Scheduler extends TaskQueue {
   private cAF: number;
-  private activeQueue: TaskQueue;
-  private stopImmediately: boolean;
-
-  addQueue (queue: TaskQueue) {
-    this.queues.push(queue);
-    this.queuesUpdated = true;
-  }
-
-  removeQueue (queue: TaskQueue) {
-    const i = this.queues.indexOf(queue);
-
-    if (i > -1) {
-      this.queues.splice(i, 1);
-    }
-  }
+  private activeItem: Task | TaskQueue;
 
   start () {
     this.stopImmediately = false;
@@ -33,27 +17,17 @@ export class Scheduler {
   stop () {
     this.stopAfterEndFrame();
 
-    if (this.activeQueue) {
+    if (this.activeItem) {
       this.stopImmediately = true;
-      this.activeQueue.stop();
+
+      if (this.activeItem instanceof TaskQueue) {
+        this.activeItem.stop();
+      }
     }
   }
 
-  protected frame = (startTimestamp) => {
-    if (this.queuesUpdated) {
-      this.sortQueues();
-      this.queuesUpdated = false;
-    }
-
-    for (var i = 0; i < this.queues.length; i += 1) {
-      if (this.stopImmediately) { return; }
-      (this.activeQueue = this.queues[ i ]).start(startTimestamp);
-    }
-
+  protected frame = () => {
+    this.run();
     this.cAF = window.requestAnimationFrame(this.frame);
-  }
-
-  sortQueues () {
-    this.queues = this.queues.sort((a, b) => a.order - b.order);
   }
 }

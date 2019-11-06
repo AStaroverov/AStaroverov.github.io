@@ -1,5 +1,5 @@
 import { CoreComponent } from './CoreComponent';
-import { assign } from './utils';
+import { TaskQueue } from '../Scheduler';
 
 export abstract class Component extends CoreComponent {
   protected firstIterate: boolean = true;
@@ -17,11 +17,12 @@ export abstract class Component extends CoreComponent {
     nextState: void 0,
   };
 
-  constructor (...args) {
-    super(...args);
+  constructor (...args: any[])
+  constructor (parent, props?: object) {
+    super(parent);
 
     this.state = {};
-    this.props = args[0] || {};
+    this.props = props || {};
   }
 
   public setProps (props?: object) {
@@ -30,10 +31,10 @@ export abstract class Component extends CoreComponent {
     const data = this.__data;
 
     if (data.nextProps === void 0) {
-      data.nextProps = assign(assign({}, this.props), props);
+      data.nextProps = Object.assign(Object.assign({}, this.props), props);
       this.performRender();
     } else {
-      assign(data.nextProps, props);
+      Object.assign(data.nextProps, props);
     }
   }
 
@@ -43,10 +44,10 @@ export abstract class Component extends CoreComponent {
     const data = this.__data;
 
     if (data.nextState === void 0) {
-      data.nextState = assign(assign({}, this.state), state);
+      data.nextState = Object.assign(Object.assign({}, this.state), state);
       this.performRender();
     } else {
-      assign(data.nextState, state);
+      Object.assign(data.nextState, state);
     }
   }
 
@@ -58,13 +59,13 @@ export abstract class Component extends CoreComponent {
 
     if (data.nextProps !== void 0) {
       this.propsChanged(data.nextProps);
-      assign(this.props, data.nextProps);
+      Object.assign(this.props, data.nextProps);
       data.nextProps = void 0;
     }
 
     if (data.nextState !== void 0) {
       this.stateChanged(data.nextState);
-      assign(this.state, data.nextState);
+      Object.assign(this.state, data.nextState);
       data.nextState = void 0;
     }
   }

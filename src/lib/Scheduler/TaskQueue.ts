@@ -1,50 +1,48 @@
 import { Task } from './Task';
 import { noop } from './utils';
 
-export type OptionsTaskQueue = {
+export type OptionsItems = {
   order?: number,
 }
 export class TaskQueue {
-  order: number;
-  queue = [];
+  public order: number;
+  public items = [];
 
-  private queueUpdated = false;
-  private stopImmediately: boolean = false;
-  private requestClearQueue: number | undefined;
+  protected itemsUpdated = false;
+  protected stopImmediately: boolean = false;
+  protected requestClearItems: number | undefined;
 
-  constructor (options?: OptionsTaskQueue) {
+  constructor (options?: OptionsItems) {
     this.order = (options && options.order) || 0;
   }
 
-  addTask (task: Task) {
-    this.queue.push(task);
-    this.queueUpdated = true;
+  add (task: Task | TaskQueue) {
+    this.items.push(task);
+    this.itemsUpdated = true;
   }
 
-  scheduleTask (task: Task) {
-    task.once = true;
-    this.queue.push(task);
-    this.queueUpdated = true;
-  }
-
-  removeTask (task: Task) {
-    const i = this.queue.indexOf(task);
+  remove (task: Task | TaskQueue) {
+    const i = this.items.indexOf(task);
 
     if (i > -1) {
-      this.queue.splice(i, 1);
+      this.items.splice(i, 1);
     }
   }
 
-  start (startTimestamp) {
-    if (this.queueUpdated) {
-      this.queueUpdated = false;
-      this.sortQueue();
+  run () {
+    if (this.items.length === 0) { return; }
+
+    if (this.itemsUpdated) {
+      this.itemsUpdated = false;
+      this.sortItems();
     }
+
     this.stopImmediately = false;
 
-    for (var i = 0; i < this.queue.length; i += 1) {
+    for (var i = 0; i < this.items.length; i += 1) {
       if (this.stopImmediately) { return; }
-      this.queue[ i ].run(performance.now() - startTimestamp, this);
+      
+      this.items[ i ].run(this);
     }
   }
 
@@ -52,16 +50,20 @@ export class TaskQueue {
     this.stopImmediately = true;
   }
 
-  sortQueue () {
-    this.queue = this.queue.sort((a, b) => a.order - b.order);
+  sortItems () {
+    this.items = this.items.sort((a, b) => a.order - b.order);
   }
 
-  clearQueue () {
-    if (this.requestClearQueue !== undefined) { return; }
+  filterItems () {
+    if (this.requestClearItems !== undefined) { return; }
     // @ts-ignore
-    this.requestClearQueue = window.requestIdleCallback(() => {
-      this.requestClearQueue = undefined;
-      this.queue = this.queue.filter((task) => task.run !== noop);
+    this.requestClearItems = window.requestIdleCallback(() => {
+      this.requestClearItems = undefined;
+      this.items = this.items.filter((task) => task.run !== noop);
     });
+  }
+
+  clearItems () {
+    this.items = [];
   }
 }

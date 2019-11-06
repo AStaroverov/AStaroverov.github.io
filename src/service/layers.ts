@@ -17,7 +17,7 @@ export class Layers {
     this.setStyle();
     this.updateSize();
 
-    taskQueue.addTask(new Task(this.performUpdate, { context: this }));
+    taskQueue.add(new Task(this.performUpdate, this));
   }
 
   public performUpdate () {

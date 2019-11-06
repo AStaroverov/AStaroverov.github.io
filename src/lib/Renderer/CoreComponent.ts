@@ -1,5 +1,6 @@
-import { Scheduler } from './Scheduler';
-import { Node } from './Tree';
+import { Task, TaskQueue } from '../Scheduler';
+import { RootTaskQueue } from './TaskQueue';
+import { scheduler } from '../Scheduler';
 
 type TOptions = {
   readonly key?: string;
@@ -7,12 +8,13 @@ type TOptions = {
 };
 
 type TCompData = {
-  parent: CoreComponent | void,
-  treeNode: Node,
-  context: { scheduler: any },
-  children: object,
+  parent: CoreComponent,
+  schedule: VoidFunction,
+  task: Task | TaskQueue,
+  childQueue: TaskQueue,
+  children: Map<string, CoreComponent>,
   childrenKeys: string[],
-  prevChildrenArr: object[],
+  prevChildrenArr: CoreComponent[],
   updated: boolean,
 };
 
@@ -21,25 +23,26 @@ const fakeEmptyOptions: TOptions = {};
 export abstract class CoreComponent {
   public $: object = {};
   public context: any;
-  protected __comp: TCompData;
+  public __comp: TCompData;
 
   constructor (...args: any[])
-  constructor (props: object | void, parent: TFakeParentData | CoreComponent) {
+  constructor (parent: TFakeParentData | CoreComponent) {
     this.context = parent.context;
 
     this.__comp = {
       parent: parent instanceof CoreComponent ? parent : void 0,
-      context: (parent as any).__comp.context,
-      treeNode: new Node(this),
-      children: {},
-      childrenKeys: [],
-      prevChildrenArr: [],
+      schedule: parent.__comp.schedule,
+      task: new Task(this.iterate, this),
+      childQueue: new TaskQueue(),
+      children: undefined,
+      childrenKeys: undefined,
+      prevChildrenArr: undefined,
       updated: false,
     };
   }
 
   public performRender () {
-    this.__comp.context.scheduler.scheduleUpdate();
+    this.__comp.schedule();
   }
 
   public getParent (): CoreComponent | void {
@@ -53,7 +56,7 @@ export abstract class CoreComponent {
 
   protected unmount () {}
   protected abstract render ()
-  protected updateChildren (): void | object[] {}
+  protected updateChildren (): void | CoreComponent[] {}
 
   protected setProps (props: object) {}
 
@@ -63,18 +66,19 @@ export abstract class CoreComponent {
     this.performRender();
   }
 
-  protected iterate (): boolean {
-    return true;
-  }
+  protected abstract iterate ()
 
   protected __updateChildren () {
-    const nextChildrenArr = this.updateChildren();
+    let nextChildrenArr = this.updateChildren();
 
-    if (typeof nextChildrenArr === 'undefined') return;
+    if (typeof nextChildrenArr === "undefined") {
+      nextChildrenArr = [];
+    }
 
     const __comp = this.__comp;
-    const children = __comp.children;
-    const childrenKeys = __comp.childrenKeys;
+    const childQueue = __comp.childQueue;
+    const children = __comp.children || new Map();
+    const childrenKeys = __comp.childrenKeys || [];
     const nextChildrenKeys = __comp.childrenKeys = [];
 
     if (nextChildrenArr === __comp.prevChildrenArr) return;
@@ -82,21 +86,21 @@ export abstract class CoreComponent {
     let key;
     let ref;
     let child;
+    let instance;
     let currentChild;
-    const treeNode = __comp.treeNode;
 
     __comp.prevChildrenArr = nextChildrenArr;
 
-    treeNode.clearChildren();
+    childQueue.clearItems();
 
     if (nextChildrenArr.length === 0) {
       if (childrenKeys.length > 0) {
         for (let i= 0; i < childrenKeys.length; i += 1) {
           key = childrenKeys[i];
-          child = children[key];
+          child = children.get(key);
 
           child.__unmount();
-          children[key] = void 0;
+          children.delete(key);
         }
       }
 
@@ -107,19 +111,20 @@ export abstract class CoreComponent {
       if (nextChildrenArr.length > 0) {
         for (let i= 0; i < nextChildrenArr.length; i += 1) {
           child = nextChildrenArr[i];
-          key = child.options.hasOwnProperty('key') ? child.options.key : `${child.klass.name}|${i}|defaultKey`;
+          key = child.options.hasOwnProperty('key')
+            ? child.options.key
+            : `${child.klass.name}|${i}|defaultKey`;
           ref = child.options.ref;
-          children[key] = new child.klass(child.props, this);
+          children.set(key, instance = new child.klass(this, child.props));
 
           if (typeof ref === 'function') {
-            ref(children[key]);
-          }
-          else if (typeof ref === 'string') {
-            this.$[ref] = children[key];
+            ref(instance);
+          } else if (typeof ref === 'string') {
+            this.$[ref] = instance;
           }
 
           nextChildrenKeys.push(key);
-          treeNode.append(children[key].__comp.treeNode);
+          childQueue.add(instance.__comp.task);
         }
       }
 
@@ -131,8 +136,10 @@ export abstract class CoreComponent {
 
     for (let i = 0; i < nextChildrenArr.length; i += 1) {
       child = nextChildrenArr[i];
-      key = child.options.hasOwnProperty('key') ? child.options.key : `${child.klass.name}|${i}|defaultKey`;
-      currentChild = children[key];
+      key = child.options.hasOwnProperty('key')
+        ? child.options.key
+        : `${child.klass.name}|${i}|defaultKey`;
+      currentChild = children.get(key);
 
       nextChildrenKeys.push(key);
 
@@ -151,15 +158,18 @@ export abstract class CoreComponent {
 
     for (let i = 0; i < childrenKeys.length; i += 1) {
       key = childrenKeys[i];
-      child = children[key];
 
-      if (child === undefined) continue;
+      if (!children.has(key)) {
+        continue;
+      }
+
+      child = children.get(key);
 
       if (child.__comp.updated === true) {
         child.__comp.updated = false;
       } else {
         child.__unmount();
-        children[key] = void 0;
+        children.delete(key);
       }
     }
 
@@ -167,31 +177,30 @@ export abstract class CoreComponent {
       child = childForMount[i];
       key = keyForMount[i];
       ref = child.options.ref;
-      child = children[key] = new child.klass(child.props, this);
+      children.set(key, instance = new child.klass(this, child.props));
 
       if (typeof ref === 'function') {
-        ref(children[key]);
-      }
-      else if (typeof ref === 'string') {
-        this.$[ref] = children[key];
+        ref(instance);
+      } else if (typeof ref === 'string') {
+        this.$[ref] = instance;
       }
     }
 
     for (let i = 0; i < nextChildrenKeys.length; i += 1) {
       if ((child = children[nextChildrenKeys[ i ]]) !== undefined) {
-        treeNode.append(child.__comp.treeNode);
+        childQueue.add(child.__comp.task);
       }
     }
   }
 
   private __unmountChildren () {
-    this.__comp.treeNode.clearChildren();
+    if (this.__comp.childQueue) {
+      const children = this.__comp.children;
+      const childrenKeys = this.__comp.childrenKeys;
 
-    const children = this.__comp.children;
-    const childrenKeys = this.__comp.childrenKeys;
-
-    for (let i= 0; i < childrenKeys.length; i += 1) {
-      children[childrenKeys[i]].__unmount();
+      for (let i= 0; i < childrenKeys.length; i += 1) {
+        children.get(childrenKeys[i]).__unmount();
+      }
     }
   }
 
@@ -199,13 +208,17 @@ export abstract class CoreComponent {
     return { props, options, klass: this };
   }
 
-  static mount (Component, props?: object) {
-    const context = getRootParentData();
-    const root = new Component(props, context);
+  static mount (Component: typeof CoreComponent, ...args: unknown[]) {
+    const parentData = getRootParentData();
+    // @ts-ignore
+    const root = new Component(parentData, ...args);
+    
+    parentData.__comp.childQueue.add(root.__comp.task);
+    parentData.__comp.childQueue.add(root.__comp.childQueue);
 
-    const scheduler = root.__comp.context.scheduler;
-    scheduler.setRoot(root.__comp.treeNode);
-    scheduler.scheduleUpdate();
+    scheduler.add(parentData.__comp.childQueue);
+
+    root.performRender();
 
     return root;
   }
@@ -217,14 +230,20 @@ export abstract class CoreComponent {
 
 type TFakeParentData = {
   context: any, // public context
-  __comp: any,
+  __comp: {
+    schedule: VoidFunction,
+    childQueue: TaskQueue,
+  },
 }
 
 function getRootParentData (): TFakeParentData {
+  const rootTaskQueue: RootTaskQueue = new RootTaskQueue();
+
   return {
     context: {}, // public context
     __comp: {
-      context: { scheduler: new Scheduler() }, // private context
+      schedule: rootTaskQueue.schedule.bind(rootTaskQueue),
+      childQueue: rootTaskQueue,
     }
   }
 }

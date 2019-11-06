@@ -13,9 +13,7 @@ class Coube extends Component {
   state: { dx: number, dy: number } = { dx: 0, dy: 0 };
 
   render () {
-    const ctx = this.context.ctx;
-
-    ctx.fillRect(this.props.x + this.state.dx, this.props.y + this.state.dy, this.props.s, this.props.s);
+    this.context.ctx.fillRect(this.props.x + this.state.dx, this.props.y + this.state.dy, this.props.s, this.props.s);
   }
 
   didIterate () {
@@ -30,7 +28,7 @@ class Coube extends Component {
 }
 
 class Root extends Component {
-  size = 10;
+  size = 12;
   rows = layers.$canvas.width / this.size | 0;
 
   constructor (...args) {
@@ -43,7 +41,7 @@ class Root extends Component {
   render () {
     const ctx = this.context.ctx;
 
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = 'black';
     ctx.clearRect(0, 0, layers.$canvas.width, layers.$canvas.height);
   }
 
@@ -67,4 +65,3 @@ class Root extends Component {
 }
 
 Component.mount(Root);
-
