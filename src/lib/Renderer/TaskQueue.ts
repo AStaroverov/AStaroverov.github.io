@@ -1,5 +1,4 @@
 import { TaskQueue } from "../Scheduler/TaskQueue";
-import { Task } from "../Scheduler";
 
 export class RootTaskQueue extends TaskQueue {
 	private sheduled: boolean = false;

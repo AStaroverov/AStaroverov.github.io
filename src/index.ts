@@ -1,7 +1,10 @@
-import { scheduler } from './lib/Scheduler';
+import { scheduler, TaskQueue, Task } from './lib/Scheduler';
 import { Component } from './lib/Renderer/Component';
 import { layers } from './service/layers';
 
+const queue = new TaskQueue();
+
+scheduler.add(queue);
 scheduler.start();
 
 layers.appendTo(document.getElementById('root'));
@@ -12,18 +15,29 @@ class Coube extends Component {
   props: { x: number, y: number, s: number};
   state: { dx: number, dy: number } = { dx: 0, dy: 0 };
 
-  render () {
-    this.context.ctx.fillRect(this.props.x + this.state.dx, this.props.y + this.state.dy, this.props.s, this.props.s);
+  constructor(a, b) {
+    super(a, b);
+
+    queue.add(new Task(this.changeCoordinat, this));
   }
 
-  didIterate () {
-    super.didIterate();
+  render () {
+    this.canvas.begin();
+    this.canvas.fillRect(this.props.x + this.state.dx, this.props.y + this.state.dy, this.props.s, this.props.s);
+    this.canvas.end();
+  }
 
+  changeCoordinat() {
+    if (Math.random() > 0.1) {
+      return;
+    }
     this.delta += 0.01 * (Math.random() > 0.5 ? 1 : -1);
     this.count += this.delta;
 
     this.state.dx = Math.sin(this.count) * 10;
     this.state.dy = Math.cos(this.count) * 10;
+
+    this.performRender();
   }
 }
 
@@ -39,10 +53,10 @@ class Root extends Component {
   }
 
   render () {
-    const ctx = this.context.ctx;
-
-    ctx.fillStyle = 'black';
-    ctx.clearRect(0, 0, layers.$canvas.width, layers.$canvas.height);
+    this.canvas.begin();
+    this.canvas.fillStyle = 'black';
+    this.canvas.clearRect(0, 0, layers.$canvas.width, layers.$canvas.height);
+    this.canvas.end();
   }
 
   updateChildren () {
@@ -57,10 +71,6 @@ class Root extends Component {
     }
 
     return child;
-  }
-
-  didIterate () {
-    this.performRender();
   }
 }
 

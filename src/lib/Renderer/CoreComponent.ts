@@ -1,6 +1,7 @@
 import { Task, TaskQueue } from '../Scheduler';
 import { RootTaskQueue } from './TaskQueue';
 import { scheduler } from '../Scheduler';
+import { CanvasSnapshot } from '../Canvas';
 
 type TOptions = {
   readonly key?: string;
@@ -8,6 +9,7 @@ type TOptions = {
 };
 
 type TCompData = {
+  scheduled: boolean,
   parent: CoreComponent,
   schedule: VoidFunction,
   task: Task | TaskQueue,
@@ -24,12 +26,14 @@ export abstract class CoreComponent {
   public $: object = {};
   public context: any;
   public __comp: TCompData;
+  public canvas = new CanvasSnapshot;
 
   constructor (...args: any[])
   constructor (parent: TFakeParentData | CoreComponent) {
     this.context = parent.context;
 
     this.__comp = {
+      scheduled: false,
       parent: parent instanceof CoreComponent ? parent : void 0,
       schedule: parent.__comp.schedule,
       task: new Task(this.iterate, this),
@@ -187,9 +191,7 @@ export abstract class CoreComponent {
     }
 
     for (let i = 0; i < nextChildrenKeys.length; i += 1) {
-      if ((child = children[nextChildrenKeys[ i ]]) !== undefined) {
-        childQueue.add(child.__comp.task);
-      }
+      childQueue.add(children.get(nextChildrenKeys[ i ]).__comp.task);
     }
   }
 

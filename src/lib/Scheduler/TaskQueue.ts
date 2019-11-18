@@ -8,7 +8,6 @@ export class TaskQueue {
   public order: number;
   public items = [];
 
-  protected itemsUpdated = false;
   protected stopImmediately: boolean = false;
   protected requestClearItems: number | undefined;
 
@@ -18,7 +17,6 @@ export class TaskQueue {
 
   add (task: Task | TaskQueue) {
     this.items.push(task);
-    this.itemsUpdated = true;
   }
 
   remove (task: Task | TaskQueue) {
@@ -32,11 +30,6 @@ export class TaskQueue {
   run () {
     if (this.items.length === 0) { return; }
 
-    if (this.itemsUpdated) {
-      this.itemsUpdated = false;
-      this.sortItems();
-    }
-
     this.stopImmediately = false;
 
     for (var i = 0; i < this.items.length; i += 1) {
@@ -48,10 +41,6 @@ export class TaskQueue {
 
   stop () {
     this.stopImmediately = true;
-  }
-
-  sortItems () {
-    this.items = this.items.sort((a, b) => a.order - b.order);
   }
 
   filterItems () {

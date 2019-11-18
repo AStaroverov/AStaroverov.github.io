@@ -1,17 +1,14 @@
 import { CoreComponent } from './CoreComponent';
-import { TaskQueue } from '../Scheduler';
+import { taskQueue, Task } from "../Scheduler";
 
 export abstract class Component extends CoreComponent {
-  protected firstIterate: boolean = true;
   protected firstRender = true;
   protected firstUpdateChildren = true;
+  private __scheduled: boolean = false;
+  private __shouldRenderChildren: boolean;
 
-  protected shouldRender: boolean = true;
-  protected shouldUpdateChildren: boolean = true;
-  protected shouldRenderChildren: boolean = true;
-
-  public props: object;
-  public state: object;
+  public props: object = {};
+  public state: object = {};
   private __data = {
     nextProps: void 0,
     nextState: void 0,
@@ -21,8 +18,8 @@ export abstract class Component extends CoreComponent {
   constructor (parent, props?: object) {
     super(parent);
 
-    this.state = {};
-    this.props = props || {};
+    this.props = props || this.props;
+    this.lifeCycle();
   }
 
   public setProps (props?: object) {
@@ -32,10 +29,11 @@ export abstract class Component extends CoreComponent {
 
     if (data.nextProps === void 0) {
       data.nextProps = Object.assign(Object.assign({}, this.props), props);
-      this.performRender();
     } else {
       Object.assign(data.nextProps, props);
     }
+
+    this.performRender();
   }
 
   protected setState (state?: object) {
@@ -45,16 +43,66 @@ export abstract class Component extends CoreComponent {
 
     if (data.nextState === void 0) {
       data.nextState = Object.assign(Object.assign({}, this.state), state);
-      this.performRender();
     } else {
-      Object.assign(data.nextState, state);
+      Object.assign(data.nextState, state); 
+    }
+
+    this.performRender();
+  }
+
+  public performRender () {
+    if (!this.__scheduled) {
+      this.__scheduled = true;
+
+      super.performRender();
     }
   }
 
   protected propsChanged (nextProps: object): void {}
   protected stateChanged (nextState: object): void {}
+  protected shouldRender (): boolean {
+    return true;
+  }
 
-  protected checkData () {
+  protected willRender(): void {}
+  protected didRender(): void {}
+
+  protected shouldUpdateChildren(): boolean {
+    return true;
+  }
+  protected willUpdateChildren () {}
+  protected didUpdateChildren () {}
+
+  protected childrenLifeCycle () {
+    this.willUpdateChildren();
+    this.__updateChildren();
+    this.didUpdateChildren();
+
+    this.firstUpdateChildren = false;
+  }
+
+  protected willNotRender () {}
+
+  protected __setProps (props: object) {
+    this.setProps(props);
+  }
+
+  protected shouldRenderChildren(): boolean {
+    return true;
+  }
+
+  protected iterate () {
+    if (this.__scheduled) {
+      this.lifeCycle();
+    }
+
+    this.canvas.render(this.context.ctx);
+
+    return this.__shouldRenderChildren;
+  }
+
+  protected lifeCycle() {
+    this.__scheduled = false;
     const data = this.__data;
 
     if (data.nextProps !== void 0) {
@@ -68,58 +116,21 @@ export abstract class Component extends CoreComponent {
       Object.assign(this.state, data.nextState);
       data.nextState = void 0;
     }
-  }
 
-  protected willRender () {}
-  protected didRender () {}
+    if (this.shouldRender()) {
+      this.willRender();
+      this.render();
+      this.didRender();
 
-  protected renderLifeCycle () {
-    this.willRender();
-    this.render();
-    this.didRender();
-
-    this.firstRender = false;
-  }
-
-  protected willUpdateChildren () {}
-  protected didUpdateChildren () {}
-
-  protected childrenLifeCycle () {
-    this.willUpdateChildren();
-    this.__updateChildren();
-    this.didUpdateChildren();
-
-    this.firstUpdateChildren = false;
-  }
-
-  protected willIterate () {}
-  protected didIterate () {}
-
-  protected willNotRender () {}
-  protected __setProps (props: object) {
-    this.setProps(props);
-  }
-
-  protected iterate () {
-    this.checkData();
-
-    this.willIterate();
-
-    if (this.shouldRender) {
-      this.renderLifeCycle();
+      this.firstRender = false;
     } else {
       this.willNotRender();
     }
 
-    if (this.shouldUpdateChildren) {
-      this.shouldUpdateChildren = false;
+    if (this.shouldUpdateChildren()) {
       this.childrenLifeCycle()
     }
 
-    this.didIterate();
-
-    this.firstIterate = false;
-
-    return this.shouldRenderChildren;
+    this.__shouldRenderChildren = this.shouldRenderChildren();
   }
 }
