@@ -1,5 +1,5 @@
 import { Task, TaskQueue } from '../Scheduler';
-import { RootTaskQueue } from './TaskQueue';
+import { rootTaskQueue } from './TaskQueue';
 import { scheduler } from '../Scheduler';
 import { CanvasSnapshot } from '../Canvas';
 
@@ -239,8 +239,6 @@ type TFakeParentData = {
 }
 
 function getRootParentData (): TFakeParentData {
-  const rootTaskQueue: RootTaskQueue = new RootTaskQueue();
-
   return {
     context: {}, // public context
     __comp: {

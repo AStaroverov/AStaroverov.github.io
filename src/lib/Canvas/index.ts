@@ -52,7 +52,7 @@ export class CanvasSnapshot {
         i += 3;
       } else {
         argsCount = this.snapshot[i + 1] as number;
-        ctx[method].apply(ctx, this.snapshot.slice(i + 2, i + 2 + argsCount));
+        fastCall(ctx, method, this.snapshot, i + 2, argsCount)
         i += 2 + argsCount;
       }
     }
@@ -100,18 +100,15 @@ export class CanvasSnapshot {
     }
   });
 })
-/*
-const mapCommandToCode = new Map<string, number>();
-const mapCodeToCommand = new Map<number, string>();
-let index = 0;
-const getCodeByCommand = (command: string): number => {
-  if (!mapCommandToCode.has(command)) {
-    mapCommandToCode.set(command, index++);
-    mapCodeToCommand.set(index, command);
-  }
 
-  return index;
-};
-const getCommandByCode = (code: number) => {
-  return mapCodeToCommand.get(code);
-};*/
+function fastCall (ctx, method: string, arr: (number | string)[], startIndex: number, count: number) {
+  switch (count) {
+    case 0: return ctx[method]();
+    case 1: return ctx[method](arr[startIndex]);
+    case 2: return ctx[method](arr[startIndex], arr[startIndex + 1]);
+    case 3: return ctx[method](arr[startIndex], arr[startIndex + 1], arr[startIndex + 2]);
+    case 4: return ctx[method](arr[startIndex], arr[startIndex + 1], arr[startIndex + 2], arr[startIndex + 3]);
+    case 5: return ctx[method](arr[startIndex], arr[startIndex + 1], arr[startIndex + 2], arr[startIndex + 3], arr[startIndex + 4]);
+    case 6: return ctx[method](arr[startIndex], arr[startIndex + 1], arr[startIndex + 2], arr[startIndex + 3], arr[startIndex + 4], arr[startIndex + 5]);
+  }
+}

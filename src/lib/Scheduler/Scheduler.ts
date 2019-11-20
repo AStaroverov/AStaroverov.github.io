@@ -16,14 +16,6 @@ export class Scheduler extends TaskQueue {
 
   stop () {
     this.stopAfterEndFrame();
-
-    if (this.activeItem) {
-      this.stopImmediately = true;
-
-      if (this.activeItem instanceof TaskQueue) {
-        this.activeItem.stop();
-      }
-    }
   }
 
   protected frame = () => {

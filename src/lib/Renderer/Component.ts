@@ -1,5 +1,6 @@
 import { CoreComponent } from './CoreComponent';
-import { taskQueue, Task } from "../Scheduler";
+import { taskQueue, Task, TaskQueue } from "../Scheduler";
+import { rootTaskQueue } from './TaskQueue';
 
 export abstract class Component extends CoreComponent {
   protected firstRender = true;
@@ -53,9 +54,10 @@ export abstract class Component extends CoreComponent {
   public performRender () {
     if (!this.__scheduled) {
       this.__scheduled = true;
-
-      super.performRender();
+      rootTaskQueue.add(new Task(this.lifeCycle, this, { once: true }));
     }
+
+    super.performRender();
   }
 
   protected propsChanged (nextProps: object): void {}
@@ -92,10 +94,6 @@ export abstract class Component extends CoreComponent {
   }
 
   protected iterate () {
-    if (this.__scheduled) {
-      this.lifeCycle();
-    }
-
     this.canvas.render(this.context.ctx);
 
     return this.__shouldRenderChildren;

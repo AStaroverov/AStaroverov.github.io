@@ -5,7 +5,6 @@ export type OptionsTask = {
   order?: number,
   once?: true,
   context?: any,
-  passive?: boolean,
 }
 
 export class Task {
@@ -15,7 +14,6 @@ export class Task {
   context: object | void;
   once: boolean;
   order: number;
-  passive: boolean;
 
   constructor (fn: () => boolean | void, context: object, options?: OptionsTask) {
     this.fn = fn;
@@ -23,17 +21,16 @@ export class Task {
 
     this.once = options && options.once;
     this.order = (options && options.order) || 0;
-    this.passive = (options && options.passive) || false;
   }
 
-  run (queue: TaskQueue) {
-    if (this.fn.call(this.context) === false) {
-      queue.stop();
-    }
-    
+  run (queue: TaskQueue): boolean | void {
+    const result = this.fn.call(this.context);
+
     if (this.once) {
       this.run = noop;
-      queue.filterItems();
+      queue.sheduleFilterItems();
     }
+
+    return result;
   }
 }

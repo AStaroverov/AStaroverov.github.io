@@ -14,3 +14,5 @@ export class RootTaskQueue extends TaskQueue {
 		this.sheduled = true;
 	}
 }
+
+export const rootTaskQueue: RootTaskQueue = new RootTaskQueue();

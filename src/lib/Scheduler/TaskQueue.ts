@@ -9,7 +9,8 @@ export class TaskQueue {
   public items = [];
 
   protected stopImmediately: boolean = false;
-  protected requestClearItems: number | undefined;
+  protected sheduledFilterItems: boolean = false;
+  protected sheduledFilterItemsCount: number = 0;
 
   constructor (options?: OptionsItems) {
     this.order = (options && options.order) || 0;
@@ -28,28 +29,29 @@ export class TaskQueue {
   }
 
   run () {
-    if (this.items.length === 0) { return; }
+    const l = this.items.length;
+    let i = 0;
 
-    this.stopImmediately = false;
+    while (i < l) {
+      if (this.items[ i++ ].run(this) === false) {
+        break;
+      }
+    }
 
-    for (var i = 0; i < this.items.length; i += 1) {
-      if (this.stopImmediately) { return; }
-      
-      this.items[ i ].run(this);
+    if (this.sheduledFilterItems && this.sheduledFilterItemsCount > 10) {
+      this.filterItems();
     }
   }
 
-  stop () {
-    this.stopImmediately = true;
+  sheduleFilterItems () {
+    this.sheduledFilterItemsCount += 1;
+    this.sheduledFilterItems = true;
   }
 
   filterItems () {
-    if (this.requestClearItems !== undefined) { return; }
-    // @ts-ignore
-    this.requestClearItems = window.requestIdleCallback(() => {
-      this.requestClearItems = undefined;
-      this.items = this.items.filter((task) => task.run !== noop);
-    });
+    this.sheduledFilterItemsCount = 0;
+    this.sheduledFilterItems = false;
+    this.items = this.items.filter((task) => task.run !== noop);
   }
 
   clearItems () {

@@ -4,7 +4,6 @@ import { layers } from './service/layers';
 
 const queue = new TaskQueue();
 
-scheduler.add(queue);
 scheduler.start();
 
 layers.appendTo(document.getElementById('root'));
@@ -27,8 +26,12 @@ class Coube extends Component {
     this.canvas.end();
   }
 
+  shouldUpdateChildren() {
+    return false;
+  }
+
   changeCoordinat() {
-    if (Math.random() > 0.1) {
+    if (Math.random() > 0.03) {
       return;
     }
     this.delta += 0.01 * (Math.random() > 0.5 ? 1 : -1);
@@ -42,7 +45,7 @@ class Coube extends Component {
 }
 
 class Root extends Component {
-  size = 12;
+  size = 10;
   rows = layers.$canvas.width / this.size | 0;
 
   constructor (...args) {
@@ -75,3 +78,4 @@ class Root extends Component {
 }
 
 Component.mount(Root);
+scheduler.add(queue);
