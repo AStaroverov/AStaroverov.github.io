@@ -1,59 +1,57 @@
-const stopNumber = 2147483647;
-
 export interface CanvasSnapshot extends CanvasFillStrokeStyles, CanvasRect, CanvasDrawPath, CanvasText, CanvasTextDrawingStyles, CanvasPath {}
 
+enum EAction {
+  method,
+  property,
+}
+
+const strings = ["fillRect", "clearRect", "fillStyle"];
+
 export class CanvasSnapshot {
-  private snapshot: (string | number)[] = [stopNumber];
+  private snapshot: Uint32Array = new Uint32Array(100);
 
   private writeIndex = 0;
-  private stopIndex = 0;
+  private argsIndex = 0;
 
-  private fields = Object.create(null);
+  mapArgs = new Map<number, unknown | unknown[]>();
+  mapProp = new Map<number, unknown>();
 
   private doMethod(method: string, args: (string | number)[]): void {
-    this.snapshot[this.writeIndex++] = method;
+    this.snapshot[this.writeIndex++] = EAction.method;
+    this.snapshot[this.writeIndex++] = strings.indexOf(method);
     this.snapshot[this.writeIndex++] = args.length;
 
-    for (let i = 0; i < args.length; i++) {
-      this.snapshot[this.writeIndex++] = args[i];
-    }
+    this.mapArgs.set(this.argsIndex++, args);
   }
 
   private doSetter(prop: string, value: (string | number)): void {
-    this.snapshot[this.writeIndex++] = "setter";
-    this.snapshot[this.writeIndex++] = prop;
-    this.snapshot[this.writeIndex++] = value;
+    this.snapshot[this.writeIndex++] = EAction.property;
+    this.snapshot[this.writeIndex++] = strings.indexOf(prop);
+
+    this.mapArgs.set(this.argsIndex++, value);
   }
 
   public begin() {
-    this.stopIndex = 0;
     this.writeIndex = 0;   
+    this.argsIndex = 0;   
   }
 
-  public end() {
-    this.stopIndex = this.writeIndex;
-  }
+  public end() {}
 
   public render(ctx: CanvasRenderingContext2D) {
-    const l = this.snapshot.length
     let i = 0;
-    let method: string;
-    let argsCount: number;
+    let j = 0;
+    let actionIndex: number;
+    let methodIndex: number;
 
-    while (i < l) {
-      if (i === this.stopIndex) {
-        break;
-      }
-
-      method = this.snapshot[i] as string;
+    while (i !== this.writeIndex) {
+      actionIndex = this.snapshot[i++];
+      methodIndex = this.snapshot[i++];
       
-      if (method === "setter") {
-        ctx[this.snapshot[i + 1]] = this.snapshot[i + 2];
-        i += 3;
+      if (actionIndex === EAction.property) {
+        ctx[strings[methodIndex]] = this.mapArgs.get(j++);
       } else {
-        argsCount = this.snapshot[i + 1] as number;
-        fastCall(ctx, method, this.snapshot, i + 2, argsCount)
-        i += 2 + argsCount;
+        fastCall(ctx, strings[methodIndex], this.snapshot[i++], this.mapArgs.get(j++) as unknown[]);
       }
     }
   }
@@ -77,8 +75,8 @@ export class CanvasSnapshot {
   "createPattern", 
   "createRadialGradient", 
 ].forEach((method) => {
-  CanvasSnapshot.prototype[method] = function(...args: unknown[]) {
-    this.doMethod(method, args);
+  CanvasSnapshot.prototype[method] = function() {
+    this.doMethod(method, arguments);
   }
 });
 
@@ -93,22 +91,23 @@ export class CanvasSnapshot {
   Object.defineProperty(CanvasSnapshot.prototype, prop, {
     set(value) {
       this.doSetter(prop, value);
-      this.fields[prop] = value;
+      this.mapProp.set(prop, value);
     },
     get() {
-      return this.fields[prop];
+      return this.mapProp.get(prop);
     }
   });
 })
 
-function fastCall (ctx, method: string, arr: (number | string)[], startIndex: number, count: number) {
-  switch (count) {
+function fastCall (ctx, method: string, length: number, arr: unknown[]) {
+  switch (length) {
     case 0: return ctx[method]();
-    case 1: return ctx[method](arr[startIndex]);
-    case 2: return ctx[method](arr[startIndex], arr[startIndex + 1]);
-    case 3: return ctx[method](arr[startIndex], arr[startIndex + 1], arr[startIndex + 2]);
-    case 4: return ctx[method](arr[startIndex], arr[startIndex + 1], arr[startIndex + 2], arr[startIndex + 3]);
-    case 5: return ctx[method](arr[startIndex], arr[startIndex + 1], arr[startIndex + 2], arr[startIndex + 3], arr[startIndex + 4]);
-    case 6: return ctx[method](arr[startIndex], arr[startIndex + 1], arr[startIndex + 2], arr[startIndex + 3], arr[startIndex + 4], arr[startIndex + 5]);
+    case 1: return ctx[method](arr[0]);
+    case 2: return ctx[method](arr[0], arr[1]);
+    case 3: return ctx[method](arr[0], arr[1], arr[2]);
+    case 4: return ctx[method](arr[0], arr[1], arr[2], arr[3]);
+    case 5: return ctx[method](arr[0], arr[1], arr[2], arr[3], arr[4]);
+    case 6: return ctx[method](arr[0], arr[1], arr[2], arr[3], arr[4], arr[5]);
   }
 }
+

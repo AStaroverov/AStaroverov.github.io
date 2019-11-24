@@ -31,21 +31,20 @@ class Coube extends Component {
   }
 
   changeCoordinat() {
-    if (Math.random() > 0.03) {
-      return;
+    if (Math.random() > 0.9) {
+      this.delta += 0.1;
+      this.count += this.delta;
+
+      this.state.dx = Math.sin(this.count) * 10;
+      this.state.dy = Math.cos(this.count) * 10;
+
+      this.performRender();
     }
-    this.delta += 0.01 * (Math.random() > 0.5 ? 1 : -1);
-    this.count += this.delta;
-
-    this.state.dx = Math.sin(this.count) * 10;
-    this.state.dy = Math.cos(this.count) * 10;
-
-    this.performRender();
   }
 }
 
 class Root extends Component {
-  size = 10;
+  size = 6;
   rows = layers.$canvas.width / this.size | 0;
 
   constructor (...args) {

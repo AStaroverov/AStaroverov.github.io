@@ -1,5 +1,5 @@
 import { CoreComponent } from './CoreComponent';
-import { taskQueue, Task, TaskQueue } from "../Scheduler";
+import { Task } from "../Scheduler";
 import { rootTaskQueue } from './TaskQueue';
 
 export abstract class Component extends CoreComponent {
@@ -7,6 +7,7 @@ export abstract class Component extends CoreComponent {
   protected firstUpdateChildren = true;
   private __scheduled: boolean = false;
   private __shouldRenderChildren: boolean;
+  private __taskForUpdate = new Task(this.lifeCycle, this, true);
 
   public props: object = {};
   public state: object = {};
@@ -20,7 +21,7 @@ export abstract class Component extends CoreComponent {
     super(parent);
 
     this.props = props || this.props;
-    this.lifeCycle();
+    this.performRender();
   }
 
   public setProps (props?: object) {
@@ -54,7 +55,7 @@ export abstract class Component extends CoreComponent {
   public performRender () {
     if (!this.__scheduled) {
       this.__scheduled = true;
-      rootTaskQueue.add(new Task(this.lifeCycle, this, { once: true }));
+      rootTaskQueue.add(this.__taskForUpdate);
     }
 
     super.performRender();

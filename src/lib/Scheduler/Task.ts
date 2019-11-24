@@ -1,36 +1,26 @@
 import { TaskQueue } from './TaskQueue';
-import { noop } from './utils';
 
-export type OptionsTask = {
-  order?: number,
-  once?: true,
-  context?: any,
-}
+let id = 0;
 
 export class Task {
   static PASSIVE_EDGE = 15;
 
+  id = id++;
   fn: (frameTime?: number) => void;
   context: object | void;
   once: boolean;
-  order: number;
 
-  constructor (fn: () => boolean | void, context: object, options?: OptionsTask) {
+  constructor (fn: () => boolean | void, context: object, once: boolean = false) {
     this.fn = fn;
     this.context = context;
-
-    this.once = options && options.once;
-    this.order = (options && options.order) || 0;
+    this.once = once;
   }
 
   run (queue: TaskQueue): boolean | void {
-    const result = this.fn.call(this.context);
-
     if (this.once) {
-      this.run = noop;
-      queue.sheduleFilterItems();
+      queue.remove(this);
     }
 
-    return result;
+    return this.fn.call(this.context);
   }
 }

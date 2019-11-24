@@ -26,7 +26,7 @@ export abstract class CoreComponent {
   public $: object = {};
   public context: any;
   public __comp: TCompData;
-  public canvas = new CanvasSnapshot;
+  public canvas = new CanvasSnapshot();
 
   constructor (...args: any[])
   constructor (parent: TFakeParentData | CoreComponent) {
