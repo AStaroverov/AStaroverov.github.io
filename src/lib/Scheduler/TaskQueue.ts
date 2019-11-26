@@ -1,80 +1,85 @@
 import { Task } from './Task';
 
 let id = 1;
+
 export class TaskQueue {
   public id = id++;
+  public once: boolean;
+  public writeIndex: number = 0;
+  public itemIds: Int32Array = new Int32Array(100);
+  public mapIdToItem = new Map<number, Task | TaskQueue>();
 
-  protected items: Int32Array = new Int32Array(100);
-
-  private writeIndex: number = 0;
-
-  protected stopImmediately: boolean = false;
   protected sheduledFilterItems: boolean = false;
   protected sheduledFilterItemsCount: number = 0;
   
-  private mapIndexToTask = new Map<number, Task | TaskQueue>();
+  constructor(once: boolean = false) {
+    this.once = once;
+  }
 
   add (task: Task | TaskQueue) {
-    this.items[this.writeIndex++] = task.id;
-    this.mapIndexToTask.set(task.id, task);
+    this.itemIds[this.writeIndex++] = task.id;
+    this.mapIdToItem.set(task.id, task);
 
-    if (this.writeIndex === this.items.length) {
-      const tmp = this.items;
+    if (this.writeIndex === this.itemIds.length) {
+      const tmp = this.itemIds;
 
-      this.items = new Int32Array(this.items.length * 10);
-      this.items.set(tmp)
+      this.itemIds = new Int32Array(this.itemIds.length * 10);
+      this.itemIds.set(tmp)
     }
   }
 
   remove (task: Task | TaskQueue) {
-    const i = this.items.indexOf(task.id);
+    const i = this.itemIds.indexOf(task.id);
 
     if (i > -1) {
-      this.items[i] = 0;
-      this.mapIndexToTask.delete(task.id)
+      this.itemIds[i] = 0;
+      this.mapIdToItem.delete(task.id)
       this.sheduledFilterItemsCount += 1;
       this.sheduledFilterItems = true;
     }
   }
 
-  run () {
+  run (parent: TaskQueue) {
     let i = 0;
     let id;
 
     while (i < this.writeIndex) {
-      id = this.items[i++];
+      id = this.itemIds[i++];
 
       if (id === 0) {
         continue;
       }
 
-      if (this.mapIndexToTask.get(id).run(this) === false) {
-        break;
-      }
+      this.mapIdToItem.get(id).run(this);
+    }
+
+    if (this.once) {
+      parent.remove(this);
+      return;
     }
 
     if (this.sheduledFilterItems && this.sheduledFilterItemsCount > 10) {
-      this.filterItems();
+      this.removeZeros();
     }
   }
 
-  filterItems () {
+  clear () {
+    this.writeIndex = 0;
+    this.mapIdToItem.clear();
+  }
+
+  private removeZeros () {
     this.sheduledFilterItemsCount = 0;
     this.sheduledFilterItems = false;
 
     let writeIndex = 0;
 
     for (let i = 0; i < this.writeIndex; i++) {
-      if (this.items[i] !== 0) {
-        this.items[writeIndex++] = this.items[i];
+      if (this.itemIds[i] !== 0) {
+        this.itemIds[writeIndex++] = this.itemIds[i];
       }
     }
 
     this.writeIndex = writeIndex;
-  }
-
-  clearItems () {
-    this.writeIndex = 0;
-    this.mapIndexToTask.clear();
   }
 }

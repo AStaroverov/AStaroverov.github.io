@@ -1,16 +1,15 @@
 import { CoreComponent } from './CoreComponent';
-import { Task } from "../Scheduler";
-import { rootTaskQueue } from './TaskQueue';
 
-export abstract class Component extends CoreComponent {
-  protected firstRender = true;
-  protected firstUpdateChildren = true;
-  private __scheduled: boolean = false;
-  private __shouldRenderChildren: boolean;
-  private __taskForUpdate = new Task(this.lifeCycle, this, true);
+export class Component extends CoreComponent {
+  public firstRender = true;
+  public firstUpdateChildren = true;
+  public shouldRender: boolean = true;
 
   public props: object = {};
   public state: object = {};
+
+  private protoIterator = this.iterate;
+
   private __data = {
     nextProps: void 0,
     nextState: void 0,
@@ -21,7 +20,7 @@ export abstract class Component extends CoreComponent {
     super(parent);
 
     this.props = props || this.props;
-    this.performRender();
+    this.iterate = this.lifeCycle;
   }
 
   public setProps (props?: object) {
@@ -35,7 +34,7 @@ export abstract class Component extends CoreComponent {
       Object.assign(data.nextProps, props);
     }
 
-    this.performRender();
+    this.iterate = this.lifeCycle;
   }
 
   protected setState (state?: object) {
@@ -49,37 +48,26 @@ export abstract class Component extends CoreComponent {
       Object.assign(data.nextState, state); 
     }
 
-    this.performRender();
-  }
-
-  public performRender () {
-    if (!this.__scheduled) {
-      this.__scheduled = true;
-      rootTaskQueue.add(this.__taskForUpdate);
-    }
-
-    super.performRender();
+    this.iterate = this.lifeCycle;
   }
 
   protected propsChanged (nextProps: object): void {}
   protected stateChanged (nextState: object): void {}
-  protected shouldRender (): boolean {
-    return true;
-  }
 
   protected willRender(): void {}
   protected didRender(): void {}
 
-  protected shouldUpdateChildren(): boolean {
-    return true;
-  }
   protected willUpdateChildren () {}
   protected didUpdateChildren () {}
 
   protected childrenLifeCycle () {
     this.willUpdateChildren();
-    this.__updateChildren();
-    this.didUpdateChildren();
+
+    if (this.shouldUpdateChildren) {
+      this.shouldUpdateChildren = false;
+      this.__updateChildren();
+      this.didUpdateChildren();
+    }
 
     this.firstUpdateChildren = false;
   }
@@ -90,18 +78,8 @@ export abstract class Component extends CoreComponent {
     this.setProps(props);
   }
 
-  protected shouldRenderChildren(): boolean {
-    return true;
-  }
-
-  protected iterate () {
-    this.canvas.render(this.context.ctx);
-
-    return this.__shouldRenderChildren;
-  }
-
   protected lifeCycle() {
-    this.__scheduled = false;
+    this.iterate = this.protoIterator;
     const data = this.__data;
 
     if (data.nextProps !== void 0) {
@@ -116,8 +94,8 @@ export abstract class Component extends CoreComponent {
       data.nextState = void 0;
     }
 
-    if (this.shouldRender()) {
-      this.willRender();
+    this.willRender();
+    if (this.shouldRender) {
       this.render();
       this.didRender();
 
@@ -126,10 +104,8 @@ export abstract class Component extends CoreComponent {
       this.willNotRender();
     }
 
-    if (this.shouldUpdateChildren()) {
-      this.childrenLifeCycle()
-    }
+    this.childrenLifeCycle()
 
-    this.__shouldRenderChildren = this.shouldRenderChildren();
+    return this.shouldRenderChildren;
   }
 }

@@ -1,56 +1,57 @@
-import { Task, TaskQueue } from '../Scheduler';
-import { rootTaskQueue } from './TaskQueue';
-import { scheduler } from '../Scheduler';
-import { CanvasSnapshot } from '../Canvas';
+import { TaskQueue, scheduler } from '../Scheduler';
+import { ComponentQueue, RootComponentQueue } from './TaskQueue';
 
 type TOptions = {
   readonly key?: string;
   readonly ref?: ((inst: any) => void) | string;
 };
 
-type TCompData = {
-  scheduled: boolean,
-  parent: CoreComponent,
-  schedule: VoidFunction,
-  task: Task | TaskQueue,
-  childQueue: TaskQueue,
-  children: Map<string, CoreComponent>,
-  childrenKeys: string[],
-  prevChildrenArr: CoreComponent[],
-  updated: boolean,
-};
+type TCoreComponentObject = {
+  props: object,
+  klass: typeof CoreComponent,
+  options: TOptions,
+}
 
 const fakeEmptyOptions: TOptions = {};
 
-export abstract class CoreComponent {
+export class CoreComponent {
   public $: object = {};
+  public key: string;
   public context: any;
-  public __comp: TCompData;
-  public canvas = new CanvasSnapshot();
+  public parent: CoreComponent;
+
+  public shouldUpdateChildren: boolean = true;
+  public shouldRenderChildren: boolean = true;
+
+  private __schedule: VoidFunction
+  private __compQueue: TaskQueue;
+  private __mapKeyToChildren: Map<string, CoreComponent>
 
   constructor (...args: any[])
-  constructor (parent: TFakeParentData | CoreComponent) {
-    this.context = parent.context;
+  constructor (parent: CoreComponent | void) {
+    if (parent) {
+      this.context = parent.context;
+      this.parent = parent;
 
-    this.__comp = {
-      scheduled: false,
-      parent: parent instanceof CoreComponent ? parent : void 0,
-      schedule: parent.__comp.schedule,
-      task: new Task(this.iterate, this),
-      childQueue: new TaskQueue(),
-      children: undefined,
-      childrenKeys: undefined,
-      prevChildrenArr: undefined,
-      updated: false,
-    };
+      this.__compQueue = new ComponentQueue(this);
+      this.__schedule = parent.__schedule;
+    } else {
+      this.context = {};
+      this.parent = undefined;
+
+      this.__compQueue = new RootComponentQueue(this);
+      this.__schedule = (this.__compQueue as RootComponentQueue).schedule.bind(this.__compQueue);
+    }
+
+    this.performRender();
   }
 
   public performRender () {
-    this.__comp.schedule();
+    this.__schedule();
   }
 
   public getParent (): CoreComponent | void {
-    return this.__comp.parent;
+    return this.parent;
   }
 
   public setContext (context: object) {
@@ -58,11 +59,11 @@ export abstract class CoreComponent {
     this.performRender();
   }
 
-  protected unmount () {}
-  protected abstract render ()
-  protected updateChildren (): void | CoreComponent[] {}
+  public setProps (props: object) {}
 
-  protected setProps (props: object) {}
+  protected unmount () {}
+  protected render () {}
+  protected updateChildren (): void | TCoreComponentObject[] {}
 
   private __unmount () {
     this.__unmountChildren();
@@ -70,180 +71,142 @@ export abstract class CoreComponent {
     this.performRender();
   }
 
-  protected abstract iterate ()
+  public iterate () {
+    this.render();
+
+    return this.shouldRenderChildren;
+  }
 
   protected __updateChildren () {
-    let nextChildrenArr = this.updateChildren();
+    let nextChildren = this.updateChildren();
 
-    if (typeof nextChildrenArr === "undefined") {
-      nextChildrenArr = [];
+    if (typeof nextChildren === "undefined") {
+      nextChildren = [];
     }
 
-    const __comp = this.__comp;
-    const childQueue = __comp.childQueue;
-    const children = __comp.children || new Map();
-    const childrenKeys = __comp.childrenKeys || [];
-    const nextChildrenKeys = __comp.childrenKeys = [];
+    this.performRender();
 
-    if (nextChildrenArr === __comp.prevChildrenArr) return;
+    const compQueue = this.__compQueue;
+    const mapKeyToChild = this.__mapKeyToChildren || (this.__mapKeyToChildren = new Map());
 
-    let key;
-    let ref;
-    let child;
-    let instance;
-    let currentChild;
+    let key: string | undefined;
+    let ref: string | ((comp: CoreComponent) => void);
+    let child: CoreComponent;
+    let childObject: TCoreComponentObject;
 
-    __comp.prevChildrenArr = nextChildrenArr;
-
-    childQueue.clearItems();
-
-    if (nextChildrenArr.length === 0) {
-      if (childrenKeys.length > 0) {
-        for (let i= 0; i < childrenKeys.length; i += 1) {
-          key = childrenKeys[i];
-          child = children.get(key);
-
-          child.__unmount();
-          children.delete(key);
+    if (nextChildren.length === 0) {
+      if (compQueue.writeIndex > 0) {
+        for (let i= 0; i < compQueue.writeIndex; i += 1) {
+          (compQueue.mapIdToItem.get(compQueue.itemIds[i]) as ComponentQueue)
+            .component.__unmount();
         }
       }
 
+      compQueue.clear();
+      mapKeyToChild.clear();
       return;
     }
 
-    if (childrenKeys.length === 0) {
-      if (nextChildrenArr.length > 0) {
-        for (let i= 0; i < nextChildrenArr.length; i += 1) {
-          child = nextChildrenArr[i];
-          key = child.options.hasOwnProperty('key')
-            ? child.options.key
-            : `${child.klass.name}|${i}|defaultKey`;
-          ref = child.options.ref;
-          children.set(key, instance = new child.klass(this, child.props));
+    if (compQueue.writeIndex === 0) {
+      if (nextChildren.length > 0) {
+        for (let i= 0; i < nextChildren.length; i += 1) {
+          childObject = nextChildren[i];
+          key = childObject.options.hasOwnProperty('key')
+            ? childObject.options.key
+            : `${childObject.klass.name}|${i}|defaultKey`;
+          ref = childObject.options.ref;
+          child = new childObject.klass(this, childObject.props);
+          child.key = key;
 
           if (typeof ref === 'function') {
-            ref(instance);
+            ref(child);
           } else if (typeof ref === 'string') {
-            this.$[ref] = instance;
+            this.$[ref] = child;
           }
 
-          nextChildrenKeys.push(key);
-          childQueue.add(instance.__comp.task);
+          compQueue.add(child.__compQueue);
+          mapKeyToChild.set(key, child);
         }
       }
-
       return;
     }
 
-    const childForMount = [];
-    const keyForMount = [];
+    const prevLength = compQueue.writeIndex;
+    const prevItemIds = compQueue.itemIds.slice(0, compQueue.writeIndex);
+    const existItemIds = new Uint32Array(compQueue.writeIndex);
+    
+    compQueue.writeIndex = 0;
 
-    for (let i = 0; i < nextChildrenArr.length; i += 1) {
-      child = nextChildrenArr[i];
-      key = child.options.hasOwnProperty('key')
-        ? child.options.key
-        : `${child.klass.name}|${i}|defaultKey`;
-      currentChild = children.get(key);
+    for (let i = 0, j = 0; i < nextChildren.length; i += 1) {
+      childObject = nextChildren[i];
+      key = childObject.options.hasOwnProperty('key')
+        ? childObject.options.key
+        : `${childObject.klass.name}|${i}|defaultKey`;
 
-      nextChildrenKeys.push(key);
+      child = mapKeyToChild.get(key);
 
-      if (
-        currentChild !== undefined
-        && currentChild instanceof child.klass
-        && currentChild.constructor === child.klass
-      ) {
-        currentChild.__setProps(child.props);
-        currentChild.__comp.updated = true;
+      if (child) {
+        existItemIds[j++] = compQueue.itemIds[i] = child.__compQueue.id;
+        child.setProps(childObject.props);
       } else {
-        childForMount.push(child);
-        keyForMount.push(key);
+        child = new childObject.klass(this, childObject.props);
+        child.key = key;
+
+        if (typeof ref === 'function') {
+          ref(child);
+        } else if (typeof ref === 'string') {
+          this.$[ref] = child;
+        }
+
+        compQueue.add(child.__compQueue);
+        mapKeyToChild.set(key, child);
       }
     }
 
-    for (let i = 0; i < childrenKeys.length; i += 1) {
-      key = childrenKeys[i];
+    let length = 0;
 
-      if (!children.has(key)) {
-        continue;
-      }
-
-      child = children.get(key);
-
-      if (child.__comp.updated === true) {
-        child.__comp.updated = false;
+    for (let i = 0, j = 0; i < prevLength; i++) {
+      if (prevItemIds[i] === existItemIds[j]) {
+        j++;
       } else {
-        child.__unmount();
-        children.delete(key);
+        length++;
+        prevItemIds[i - j] = prevItemIds[i];
       }
     }
-
-    for (let i = 0; i < childForMount.length; i += 1) {
-      child = childForMount[i];
-      key = keyForMount[i];
-      ref = child.options.ref;
-      children.set(key, instance = new child.klass(this, child.props));
-
-      if (typeof ref === 'function') {
-        ref(instance);
-      } else if (typeof ref === 'string') {
-        this.$[ref] = instance;
-      }
-    }
-
-    for (let i = 0; i < nextChildrenKeys.length; i += 1) {
-      childQueue.add(children.get(nextChildrenKeys[ i ]).__comp.task);
+    
+    for (let i = 0; i < length; i++) {
+      child = (compQueue.mapIdToItem.get(prevItemIds[i]) as ComponentQueue).component;
+      child.__unmount();
+      compQueue.mapIdToItem.delete(prevItemIds[i]);
+      mapKeyToChild.delete(child.key);
     }
   }
 
   private __unmountChildren () {
-    if (this.__comp.childQueue) {
-      const children = this.__comp.children;
-      const childrenKeys = this.__comp.childrenKeys;
+    if (this.__compQueue) {
+      const length = this.__compQueue.writeIndex;
 
-      for (let i= 0; i < childrenKeys.length; i += 1) {
-        children.get(childrenKeys[i]).__unmount();
+      for (let i= 0; i < length; i += 1) {
+        (this.__compQueue.mapIdToItem.get(
+          this.__compQueue.itemIds[i]
+        ) as ComponentQueue).component.__unmount();
       }
     }
   }
 
-  static create (props?: object, options: TOptions = fakeEmptyOptions) {
+  static create (props?: object, options: TOptions = fakeEmptyOptions): TCoreComponentObject {
     return { props, options, klass: this };
   }
 
   static mount (Component: typeof CoreComponent, ...args: unknown[]) {
-    const parentData = getRootParentData();
-    // @ts-ignore
-    const root = new Component(parentData, ...args);
+    const root = new Component(undefined, ...args);
     
-    parentData.__comp.childQueue.add(root.__comp.task);
-    parentData.__comp.childQueue.add(root.__comp.childQueue);
-
-    scheduler.add(parentData.__comp.childQueue);
-
-    root.performRender();
+    scheduler.add(root.__compQueue);
 
     return root;
   }
 
   static unmount (instance) {
     instance.__unmount();
-  }
-}
-
-type TFakeParentData = {
-  context: any, // public context
-  __comp: {
-    schedule: VoidFunction,
-    childQueue: TaskQueue,
-  },
-}
-
-function getRootParentData (): TFakeParentData {
-  return {
-    context: {}, // public context
-    __comp: {
-      schedule: rootTaskQueue.schedule.bind(rootTaskQueue),
-      childQueue: rootTaskQueue,
-    }
   }
 }

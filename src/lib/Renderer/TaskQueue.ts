@@ -1,12 +1,29 @@
 import { TaskQueue } from "../Scheduler/TaskQueue";
+import { CoreComponent } from "./CoreComponent";
 
-export class RootTaskQueue extends TaskQueue {
+export class ComponentQueue extends TaskQueue {
+	public component: CoreComponent;
+
+	public constructor(component: CoreComponent) {
+		super();
+
+		this.component = component;
+	}
+
+	public run (parent) {
+		if (this.component.iterate()) {
+			super.run(parent);
+		}
+	}
+}
+
+export class RootComponentQueue extends ComponentQueue {
 	private sheduled: boolean = false;
 
-	public run () {
+	public run (parent) {
 		if (this.sheduled) {
 			this.sheduled = false;
-			super.run();
+			super.run(parent);
 		}
 	}
 
@@ -14,5 +31,3 @@ export class RootTaskQueue extends TaskQueue {
 		this.sheduled = true;
 	}
 }
-
-export const rootTaskQueue: RootTaskQueue = new RootTaskQueue();
