@@ -19,12 +19,8 @@ class Coube extends Component {
     this.shouldUpdateChildren = false;
   }
 
-  iterate () {
-    this.update();
-    return super.iterate();
-  }
-
   render () {
+    this.update();
     this.context.ctx.fillRect(this.props.x + this.state.dx, this.props.y + this.state.dy, this.props.s, this.props.s);
   }
 
@@ -36,7 +32,7 @@ class Coube extends Component {
 }
 
 class Root extends Component {
-  size = 6;
+  size = 1;
   rows = layers.$canvas.width / this.size | 0;
 
   constructor (...args) {
@@ -60,7 +56,7 @@ class Root extends Component {
   updateChildren () {
     const child = [];
 
-    for (var i = 0; i < 8000; i += 1) {
+    for (var i = 0; i < 100000; i += 1) {
       child.push(Coube.create({
         x: (i % this.rows) * this.size,
         y: (i / this.rows | 0) * this.size,

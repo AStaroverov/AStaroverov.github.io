@@ -1,82 +1,64 @@
 import { Task } from './Task';
+import { noop } from './utils';
 
-let id = 1;
+const emptyTask = new Task(noop, undefined);
 
 export class TaskQueue {
-  public id = id++;
   public once: boolean;
   public writeIndex: number = 0;
-  public itemIds: Int32Array = new Int32Array(100);
-  public mapIdToItem = new Map<number, Task | TaskQueue>();
+  public items: (Task | TaskQueue)[] = new Array(100);
 
   protected sheduledFilterItems: boolean = false;
   protected sheduledFilterItemsCount: number = 0;
-  
+
   constructor(once: boolean = false) {
     this.once = once;
   }
 
   add (task: Task | TaskQueue) {
-    this.itemIds[this.writeIndex++] = task.id;
-    this.mapIdToItem.set(task.id, task);
+    this.items[this.writeIndex++] = task;
 
-    if (this.writeIndex === this.itemIds.length) {
-      const tmp = this.itemIds;
-
-      this.itemIds = new Int32Array(this.itemIds.length * 10);
-      this.itemIds.set(tmp)
+    if (this.writeIndex === this.items.length) {
+      this.items.length = this.items.length * 10;
     }
   }
 
   remove (task: Task | TaskQueue) {
-    const i = this.itemIds.indexOf(task.id);
+    const i = this.items.indexOf(task);
 
-    if (i > -1) {
-      this.itemIds[i] = 0;
-      this.mapIdToItem.delete(task.id)
+    if (i !== -1) {
+      this.items[i] = emptyTask;
       this.sheduledFilterItemsCount += 1;
       this.sheduledFilterItems = true;
     }
   }
 
   run (parent: TaskQueue) {
-    let i = 0;
-    let id;
-
-    while (i < this.writeIndex) {
-      id = this.itemIds[i++];
-
-      if (id === 0) {
-        continue;
-      }
-
-      this.mapIdToItem.get(id).run(this);
+    for (let i = 0; i < this.writeIndex; i++) {
+      this.items[i].run(this);
     }
 
     if (this.once) {
       parent.remove(this);
-      return;
-    }
-
-    if (this.sheduledFilterItems && this.sheduledFilterItemsCount > 10) {
-      this.removeZeros();
+    } else if (this.sheduledFilterItems && this.sheduledFilterItemsCount > 10) {
+      this.removeEmptyItems()
     }
   }
 
   clear () {
     this.writeIndex = 0;
-    this.mapIdToItem.clear();
+    this.items.length = 0;
   }
 
-  private removeZeros () {
+  private removeEmptyItems () {
     this.sheduledFilterItemsCount = 0;
     this.sheduledFilterItems = false;
 
     let writeIndex = 0;
 
     for (let i = 0; i < this.writeIndex; i++) {
-      if (this.itemIds[i] !== 0) {
-        this.itemIds[writeIndex++] = this.itemIds[i];
+      if (this.items[i] !== emptyTask) {
+        this.items[writeIndex++] = this.items[i];
       }
     }
 

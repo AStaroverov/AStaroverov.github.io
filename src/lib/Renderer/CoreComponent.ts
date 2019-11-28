@@ -97,8 +97,7 @@ export class CoreComponent {
     if (nextChildren.length === 0) {
       if (compQueue.writeIndex > 0) {
         for (let i= 0; i < compQueue.writeIndex; i += 1) {
-          (compQueue.mapIdToItem.get(compQueue.itemIds[i]) as ComponentQueue)
-            .component.__unmount();
+          (compQueue.items[i] as ComponentQueue).component.__unmount();
         }
       }
 
@@ -132,9 +131,9 @@ export class CoreComponent {
     }
 
     const prevLength = compQueue.writeIndex;
-    const prevItemIds = compQueue.itemIds.slice(0, compQueue.writeIndex);
-    const existItemIds = new Uint32Array(compQueue.writeIndex);
-    
+    const prevItems = compQueue.items.slice(0, compQueue.writeIndex);
+    const existItems = [];
+
     compQueue.writeIndex = 0;
 
     for (let i = 0, j = 0; i < nextChildren.length; i += 1) {
@@ -146,7 +145,8 @@ export class CoreComponent {
       child = mapKeyToChild.get(key);
 
       if (child) {
-        existItemIds[j++] = compQueue.itemIds[i] = child.__compQueue.id;
+        compQueue.writeIndex += 1;
+        existItems[j++] = compQueue.items[i] = child.__compQueue;
         child.setProps(childObject.props);
       } else {
         child = new childObject.klass(this, childObject.props);
@@ -163,21 +163,21 @@ export class CoreComponent {
       }
     }
 
-    let length = 0;
+    let index = 0;
+    const removeItems = [];
 
-    for (let i = 0, j = 0; i < prevLength; i++) {
-      if (prevItemIds[i] === existItemIds[j]) {
-        j++;
-      } else {
-        length++;
-        prevItemIds[i - j] = prevItemIds[i];
+    firstLoop: for (let i = 0; i < prevLength; i++) {
+      for (let j = 0; j < existItems.length; j++) {
+        if (prevItems[i] === existItems[j]) {
+          continue firstLoop;
+        }
       }
+      removeItems[index++] = prevItems[i];
     }
-    
-    for (let i = 0; i < length; i++) {
-      child = (compQueue.mapIdToItem.get(prevItemIds[i]) as ComponentQueue).component;
+
+    for (let i = 0; i < index; i++) {
+      child = removeItems[i];
       child.__unmount();
-      compQueue.mapIdToItem.delete(prevItemIds[i]);
       mapKeyToChild.delete(child.key);
     }
   }
@@ -187,9 +187,7 @@ export class CoreComponent {
       const length = this.__compQueue.writeIndex;
 
       for (let i= 0; i < length; i += 1) {
-        (this.__compQueue.mapIdToItem.get(
-          this.__compQueue.itemIds[i]
-        ) as ComponentQueue).component.__unmount();
+        (this.__compQueue.items[i] as ComponentQueue).component.__unmount();
       }
     }
   }
@@ -200,7 +198,7 @@ export class CoreComponent {
 
   static mount (Component: typeof CoreComponent, ...args: unknown[]) {
     const root = new Component(undefined, ...args);
-    
+
     scheduler.add(root.__compQueue);
 
     return root;

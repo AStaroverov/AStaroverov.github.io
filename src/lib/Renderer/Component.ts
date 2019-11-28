@@ -8,7 +8,7 @@ export class Component extends CoreComponent {
   public props: object = {};
   public state: object = {};
 
-  private protoIterator = this.iterate;
+  private __scheduled: boolean = true;
 
   private __data = {
     nextProps: void 0,
@@ -20,7 +20,6 @@ export class Component extends CoreComponent {
     super(parent);
 
     this.props = props || this.props;
-    this.iterate = this.lifeCycle;
   }
 
   public setProps (props?: object) {
@@ -34,7 +33,8 @@ export class Component extends CoreComponent {
       Object.assign(data.nextProps, props);
     }
 
-    this.iterate = this.lifeCycle;
+    this.__scheduled = true;
+
   }
 
   protected setState (state?: object) {
@@ -45,10 +45,10 @@ export class Component extends CoreComponent {
     if (data.nextState === void 0) {
       data.nextState = Object.assign(Object.assign({}, this.state), state);
     } else {
-      Object.assign(data.nextState, state); 
+      Object.assign(data.nextState, state);
     }
 
-    this.iterate = this.lifeCycle;
+    this.__scheduled = true;
   }
 
   protected propsChanged (nextProps: object): void {}
@@ -78,8 +78,12 @@ export class Component extends CoreComponent {
     this.setProps(props);
   }
 
+  public iterate (): boolean {
+    return this.__scheduled ? this.lifeCycle() : super.iterate();
+  }
+
   protected lifeCycle() {
-    this.iterate = this.protoIterator;
+    this.__scheduled = false;
     const data = this.__data;
 
     if (data.nextProps !== void 0) {
