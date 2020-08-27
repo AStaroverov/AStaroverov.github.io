@@ -1,7 +1,6 @@
 import { Task, TaskQueue } from '../Scheduler';
-import { rootTaskQueue } from './TaskQueue';
-import { scheduler } from '../Scheduler';
-import { CanvasSnapshot } from '../Canvas';
+import {Layer} from "../Layers/Layer";
+import {Layers} from "../Layers/Layers";
 
 type TOptions = {
   readonly key?: string;
@@ -24,13 +23,15 @@ const fakeEmptyOptions: TOptions = {};
 
 export abstract class CoreComponent {
   public $: object = {};
+  public layers: Layers;
+  public layer: Layer;
   public context: any;
   public __comp: TCompData;
-  public canvas = new CanvasSnapshot;
 
   constructor (...args: any[])
-  constructor (parent: TFakeParentData | CoreComponent) {
+  constructor (parent: CoreComponent) {
     this.context = parent.context;
+    this.layers = parent.layers;
 
     this.__comp = {
       scheduled: false,
@@ -45,7 +46,24 @@ export abstract class CoreComponent {
     };
   }
 
+  public attachToLayer(l: Layer) {
+    if (l === this.layer) {
+      return;
+    }
+
+    if (this.layer) {
+      this.layer.willDirty = true;
+    }
+
+    this.layer = l;
+    this.layer.willDirty = true;
+  }
+
   public performRender () {
+    if (this.layer) {
+      this.layer.willDirty = true;
+    }
+
     this.__comp.schedule();
   }
 
@@ -70,7 +88,13 @@ export abstract class CoreComponent {
     this.performRender();
   }
 
-  protected abstract iterate ()
+  protected iterate () {
+    if (this.layer !== undefined ? this.layer.isDirty : true) {
+      this.render();
+    }
+
+    return true;
+  }
 
   protected __updateChildren () {
     let nextChildrenArr = this.updateChildren();
@@ -208,42 +232,5 @@ export abstract class CoreComponent {
 
   static create (props?: object, options: TOptions = fakeEmptyOptions) {
     return { props, options, klass: this };
-  }
-
-  static mount (Component: typeof CoreComponent, ...args: unknown[]) {
-    const parentData = getRootParentData();
-    // @ts-ignore
-    const root = new Component(parentData, ...args);
-    
-    parentData.__comp.childQueue.add(root.__comp.task);
-    parentData.__comp.childQueue.add(root.__comp.childQueue);
-
-    scheduler.add(parentData.__comp.childQueue);
-
-    root.performRender();
-
-    return root;
-  }
-
-  static unmount (instance) {
-    instance.__unmount();
-  }
-}
-
-type TFakeParentData = {
-  context: any, // public context
-  __comp: {
-    schedule: VoidFunction,
-    childQueue: TaskQueue,
-  },
-}
-
-function getRootParentData (): TFakeParentData {
-  return {
-    context: {}, // public context
-    __comp: {
-      schedule: rootTaskQueue.schedule.bind(rootTaskQueue),
-      childQueue: rootTaskQueue,
-    }
   }
 }

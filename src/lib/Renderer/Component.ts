@@ -1,5 +1,5 @@
 import { CoreComponent } from './CoreComponent';
-import { taskQueue, Task, TaskQueue } from "../Scheduler";
+import { Task } from "../Scheduler";
 import { rootTaskQueue } from './TaskQueue';
 
 export abstract class Component extends CoreComponent {
@@ -20,7 +20,6 @@ export abstract class Component extends CoreComponent {
     super(parent);
 
     this.props = props || this.props;
-    this.lifeCycle();
   }
 
   public setProps (props?: object) {
@@ -51,15 +50,6 @@ export abstract class Component extends CoreComponent {
     this.performRender();
   }
 
-  public performRender () {
-    if (!this.__scheduled) {
-      this.__scheduled = true;
-      rootTaskQueue.add(new Task(this.lifeCycle, this, { once: true }));
-    }
-
-    super.performRender();
-  }
-
   protected propsChanged (nextProps: object): void {}
   protected stateChanged (nextState: object): void {}
   protected shouldRender (): boolean {
@@ -83,8 +73,6 @@ export abstract class Component extends CoreComponent {
     this.firstUpdateChildren = false;
   }
 
-  protected willNotRender () {}
-
   protected __setProps (props: object) {
     this.setProps(props);
   }
@@ -94,7 +82,9 @@ export abstract class Component extends CoreComponent {
   }
 
   protected iterate () {
-    this.canvas.render(this.context.ctx);
+    if (this.layer !== undefined ? this.layer.isDirty : true) {
+      this.lifeCycle();
+    }
 
     return this.__shouldRenderChildren;
   }
@@ -121,8 +111,6 @@ export abstract class Component extends CoreComponent {
       this.didRender();
 
       this.firstRender = false;
-    } else {
-      this.willNotRender();
     }
 
     if (this.shouldUpdateChildren()) {
