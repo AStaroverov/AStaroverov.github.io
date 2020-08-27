@@ -9,6 +9,11 @@ const rect = container.getBoundingClientRect();
 
 scheduler.add(queue);
 
+(function tick() {
+  scheduler.run();
+  window.requestAnimationFrame(tick);
+})();
+
 class Coube extends Component {
   v = Math.random();
   r = 0;
