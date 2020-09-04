@@ -4,12 +4,10 @@ import { noop } from './utils';
 export type OptionsTask = {
   order?: number,
   once?: true,
-  context?: any,
+  context?: object,
 }
 
 export class Task {
-  static PASSIVE_EDGE = 15;
-
   fn: (frameTime?: number) => void;
   context: object | void;
   once: boolean;

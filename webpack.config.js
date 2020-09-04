@@ -2,11 +2,14 @@ const path = require('path');
 
 module.exports = {
   mode: "development",
-  entry: [path.join(__dirname, './src/index.ts')],
+  entry: {
+    app: path.join(__dirname, './src/index.ts'),
+    worker: path.join(__dirname, './src/worker.ts'),
+  },
   output: {
     path: path.join(__dirname, './dist'),
     publicPath: '/dist/',
-    filename: 'app.js',
+    filename: '[name].js',
   },
   resolve: {
     extensions: ['.ts', '.js'],

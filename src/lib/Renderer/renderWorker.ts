@@ -4,14 +4,11 @@ import {rootTaskQueue} from "./TaskQueue";
 import {workerMessages} from "./workerMessages";
 import {Canvases} from "../Layers/Canvases";
 
-const offscreenCanvasesSupported = HTMLCanvasElement.prototype.transferControlToOffscreen !== undefined;
-
-export function render(
+export function renderWorker(
   container: HTMLElement,
   layersProps: TLayerProps[],
-  pathToScript: string,
-): Worker {
-  const WorkerConstructor = offscreenCanvasesSupported ? Worker : require('../Worker').Worker;
+  worker: Worker,
+): void {
   const layers = new Canvases(
     container,
     layersProps,
@@ -19,10 +16,7 @@ export function render(
 
   scheduler.add(rootTaskQueue);
 
-  const worker = new WorkerConstructor(pathToScript);
-  const offscreenCanvases = offscreenCanvasesSupported
-    ? layers.list.map(canvas => canvas.transferControlToOffscreen())
-    : layers.list;
+  const offscreenCanvases = layers.list.map(canvas => canvas.transferControlToOffscreen());
 
   worker.postMessage({
     type: workerMessages.INIT,
@@ -31,6 +25,4 @@ export function render(
       canvases: offscreenCanvases,
     }
   }, offscreenCanvases);
-
-  return worker;
 }

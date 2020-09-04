@@ -13,7 +13,7 @@ export class TaskQueue {
   protected sheduledFilterItemsCount: number = 0;
 
   constructor (options?: OptionsItems) {
-    this.order = (options && options.order) || 0;
+    this.order = options?.order || 0;
   }
 
   add (task: Task | TaskQueue) {
