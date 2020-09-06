@@ -1,12 +1,12 @@
 import { Task } from './Task';
-import { noop } from './utils';
+import { noop } from '../utils';
 
-export type OptionsItems = {
-  order?: number,
+export interface OptionsItems {
+  order?: number
 }
 export class TaskQueue {
   public order: number;
-  public items = [];
+  public items: Array<Task | TaskQueue> = [];
 
   protected stopImmediately: boolean = false;
   protected sheduledFilterItems: boolean = false;
@@ -16,11 +16,11 @@ export class TaskQueue {
     this.order = options?.order || 0;
   }
 
-  add (task: Task | TaskQueue) {
+  public add (task: Task | TaskQueue): void {
     this.items.push(task);
   }
 
-  remove (task: Task | TaskQueue) {
+  public remove (task: Task | TaskQueue): void {
     const i = this.items.indexOf(task);
 
     if (i > -1) {
@@ -28,12 +28,12 @@ export class TaskQueue {
     }
   }
 
-  run () {
+  public run (): void {
     const l = this.items.length;
     let i = 0;
 
     while (i < l) {
-      if (this.items[ i++ ].run(this) === false) {
+      if (this.items[i++].run(this) === false) {
         break;
       }
     }
@@ -43,18 +43,18 @@ export class TaskQueue {
     }
   }
 
-  sheduleFilterItems () {
+  public scheduleFilterItems (): void {
     this.sheduledFilterItemsCount += 1;
     this.sheduledFilterItems = true;
   }
 
-  filterItems () {
+  public clearItems (): void {
+    this.items = [];
+  }
+
+  protected filterItems (): void {
     this.sheduledFilterItemsCount = 0;
     this.sheduledFilterItems = false;
     this.items = this.items.filter((task) => task.run !== noop);
-  }
-
-  clearItems () {
-    this.items = [];
   }
 }

@@ -1,17 +1,17 @@
 import { TaskQueue } from './TaskQueue';
 
 export class Scheduler extends TaskQueue {
-  private cAF: number;
+  private readonly cAF: number;
 
-  start () {
+  public start (): void {
     this.stopImmediately = false;
   }
 
-  stopAfterEndFrame () {
+  public stopAfterEndFrame (): void {
     window.cancelAnimationFrame(this.cAF);
   }
 
-  stop () {
+  public stop (): void {
     this.stopAfterEndFrame();
   }
 }

@@ -1,6 +1,4 @@
 import { CoreComponent } from './CoreComponent';
-import { Task } from "../Scheduler";
-import { rootTaskQueue } from './TaskQueue';
 
 export abstract class Component extends CoreComponent {
   protected firstRender = true;
@@ -10,9 +8,12 @@ export abstract class Component extends CoreComponent {
 
   public props: object = {};
   public state: object = {};
-  private __data = {
-    nextProps: void 0,
-    nextState: void 0,
+  private readonly __data: {
+    nextProps: object | undefined
+    nextState: object | undefined
+  } = {
+    nextProps: undefined,
+    nextState: undefined
   };
 
   constructor (...args: any[])
@@ -22,12 +23,12 @@ export abstract class Component extends CoreComponent {
     this.props = props || this.props;
   }
 
-  public setProps (props?: object) {
+  public setProps (props?: object): void {
     if (props === undefined) return;
 
     const data = this.__data;
 
-    if (data.nextProps === void 0) {
+    if (data.nextProps === undefined) {
       data.nextProps = Object.assign(Object.assign({}, this.props), props);
     } else {
       Object.assign(data.nextProps, props);
@@ -36,15 +37,15 @@ export abstract class Component extends CoreComponent {
     this.performRender();
   }
 
-  protected setState (state?: object) {
+  protected setState (state?: object): void {
     if (state === undefined) return;
 
     const data = this.__data;
 
-    if (data.nextState === void 0) {
+    if (data.nextState === undefined) {
       data.nextState = Object.assign(Object.assign({}, this.state), state);
     } else {
-      Object.assign(data.nextState, state); 
+      Object.assign(data.nextState, state);
     }
 
     this.performRender();
@@ -56,16 +57,17 @@ export abstract class Component extends CoreComponent {
     return true;
   }
 
-  protected willRender(): void {}
-  protected didRender(): void {}
+  protected willRender (): void {}
+  protected didRender (): void {}
 
-  protected shouldUpdateChildren(): boolean {
+  protected shouldUpdateChildren (): boolean {
     return true;
   }
-  protected willUpdateChildren () {}
-  protected didUpdateChildren () {}
 
-  protected childrenLifeCycle () {
+  protected willUpdateChildren (): void{}
+  protected didUpdateChildren (): void{}
+
+  protected childrenLifeCycle (): void {
     this.willUpdateChildren();
     this.__updateChildren();
     this.didUpdateChildren();
@@ -73,15 +75,15 @@ export abstract class Component extends CoreComponent {
     this.firstUpdateChildren = false;
   }
 
-  protected __setProps (props: object) {
+  protected __setProps (props: object): void {
     this.setProps(props);
   }
 
-  protected shouldRenderChildren(): boolean {
+  protected shouldRenderChildren (): boolean {
     return true;
   }
 
-  protected iterate () {
+  protected iterate (): boolean {
     if (this.layer !== undefined ? this.layer.isDirty : true) {
       this.lifeCycle();
     }
@@ -89,7 +91,7 @@ export abstract class Component extends CoreComponent {
     return this.__shouldRenderChildren;
   }
 
-  protected lifeCycle() {
+  protected lifeCycle (): void {
     this.__scheduled = false;
     const data = this.__data;
 
@@ -114,7 +116,7 @@ export abstract class Component extends CoreComponent {
     }
 
     if (this.shouldUpdateChildren()) {
-      this.childrenLifeCycle()
+      this.childrenLifeCycle();
     }
 
     this.__shouldRenderChildren = this.shouldRenderChildren();

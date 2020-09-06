@@ -1,36 +1,60 @@
-import {TLayerProps} from "../Layers/Layer";
-import {scheduler} from "../Scheduler";
-import {rootTaskQueue} from "./TaskQueue";
-import {workerMessages} from "./workerMessages";
-import {Canvases} from "../Layers/Canvases";
+import { Layer } from '../Layers/Layer';
+import { scheduler, Task } from '../Scheduler';
+import { rootTaskQueue } from './TaskQueue';
+import { MessageType, typedListenMessage, typedPostMessage } from '../Worker/messageType';
+import { getRootParentData } from './getRootParentData';
+import { Layers } from '../Layers/Layers';
+import { getPropsFromLayers } from './utils';
+import { TComponentData } from './types';
+import { CoreComponent } from './CoreComponent';
 
-const offscreenCanvasesSupported = HTMLCanvasElement.prototype.transferControlToOffscreen !== undefined;
+export async function render (
+  rootData: TComponentData
+): Promise<DedicatedWorkerGlobalScope> {
+  return await new Promise((resolve, reject) => {
+    const self: DedicatedWorkerGlobalScope = globalThis.document === undefined
+      ? globalThis
+      : globalThis.__workerContext__;
 
-export function render(
-  container: HTMLElement,
-  layersProps: TLayerProps[],
-  pathToScript: string,
-): Worker {
-  const WorkerConstructor = offscreenCanvasesSupported ? Worker : require('../Worker').Worker;
-  const layers = new Canvases(
-    container,
-    layersProps,
-  );
+    typedListenMessage(self, MessageType.INIT, ({ data }) => {
+      // @ts-expect-error
+      const layers: Layer[] = data.payload.canvases.map(
+        (canvas, index) => {
+          return new Layer(
+            data.payload.layersProps[index], canvas
+          );
+        }
+      );
+      const layersManager = new Layers(layers, {
+        onSortLayers: (layers: Layer[]) => {
+          typedPostMessage(
+            self,
+            MessageType.SORT_LAYERS,
+            getPropsFromLayers(layers)
+          );
+        }
+      });
 
-  scheduler.add(rootTaskQueue);
+      const parentData = getRootParentData(rootTaskQueue, layersManager);
+      // eslint-disable-next-line new-cap
+      const root = new rootData.type(parentData as CoreComponent, rootData.props);
 
-  const worker = new WorkerConstructor(pathToScript);
-  const offscreenCanvases = offscreenCanvasesSupported
-    ? layers.list.map(canvas => canvas.transferControlToOffscreen())
-    : layers.list;
+      rootTaskQueue.add(new Task(() => {
+        layers.forEach(l => {
+          l.isDirty = l.willDirty;
+          l.willDirty = false;
+        });
+      }, null));
 
-  worker.postMessage({
-    type: workerMessages.INIT,
-    payload: {
-      layersProps,
-      canvases: offscreenCanvases,
-    }
-  }, offscreenCanvases);
+      rootTaskQueue.add(root.__comp.task);
+      rootTaskQueue.add(root.__comp.childQueue);
 
-  return worker;
+      scheduler.add(rootTaskQueue);
+      scheduler.start();
+
+      root.performRender();
+
+      resolve(self);
+    });
+  });
 }

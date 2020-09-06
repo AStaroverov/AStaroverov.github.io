@@ -1,1 +1,1 @@
-export const PIXEL_RATIO = 1;
+export const PIXEL_RATIO = 1

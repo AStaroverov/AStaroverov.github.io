@@ -1,121 +1,94 @@
-/*
-	Create a fake worker thread of IE and other browsers
-	Remember: Only pass in primitives, and there is none of the native security happening
-	Only Supports Dedicated Web Workers
-*/
+import EventEmitter from 'eventemitter3';
 
-const isFunction = (f: () => any) => {
-  return typeof f === 'function';
-};
+export class PseudoWorker extends EventEmitter {
+  onmessage: any;
+  onerror: any;
 
-// @ts-ignore
-export function Worker (scriptFile: any) {
-  let self = this;
-  let __timer: number = null;
-  let __text: any = null;
-  let __fileContent: any = null;
+  self: EventEmitter & {
+    onmessage: any
+    onerror: any
+    terminate: any
+    postMessage: any
+    addEventListener: any
 
-  self.location = globalThis.location;
-  self.requestAnimationFrame = globalThis.requestAnimationFrame;
-  self.cancelAnimationFrame = globalThis.cancelAnimationFrame;
-
-  // External methods (worker.METHOD)
-  self.onmessage = null;
-  self.onerror = null;
-
-  // Child methods
-  let onmessage;
-  let onerror;
-
-  // Child runs this itself and calls for it's parent to be notified
-  const postMessage = function (data: any) {
-    if ( isFunction(self.onmessage) ) {
-      return self.onmessage({ data });
-    }
-    return false;
+    location: any
+    requestAnimationFrame: any
+    cancelAnimationFrame: any
   };
 
-  // Method that starts the threading
-  self.postMessage = function (text: any) {
-    __text = text;
-    __iterate();
-    return true;
-  };
+  constructor (scriptFile: string) {
+    super();
 
-  // Child can call this method instead of assigning methods directly
-  const addEventListener = function (type, callback) {
-    switch(type) {
-      case 'message':
-        onmessage = callback;
-        break;
-      case 'error':
-        onerror = callback;
-        break;
-    }
-  };
+    let timer: number | null = null;
 
-  // Parent can call this method instead of assigning methods directly
-  self.addEventListener = function (type, callback) {
-    switch(type) {
-      case 'message':
-        self.onmessage = callback;
-        break;
-      case 'error':
-        self.onerror = callback;
-        break;
-    }
-  };
+    this.self = new EventEmitter() as PseudoWorker['self'];
+    this.self.location = globalThis.location;
+    this.self.requestAnimationFrame = globalThis.requestAnimationFrame;
+    this.self.cancelAnimationFrame = globalThis.cancelAnimationFrame;
+    this.self.onmessage = null;
+    this.self.onerror = null;
 
-  const __iterate = function () {
-    // Execute on a timer so we don't block (well as good as we can get in a single thread)
-    __timer = window.setTimeout(__onIterate, 1);
-    return true;
-  };
+    // Method that starts the threading
+    this.self.postMessage = function (data: any) {
+      timer = globalThis.setTimeout(() => {
+        this.emit('message', { data });
+      });
 
-  const __onIterate = function () {
-    try {
-      if ( isFunction(onmessage) ) {
-        onmessage({ data: __text });
-      }
       return true;
-    } catch (e) {
-      if ( isFunction(onerror) ) {
-        return onerror(e);
+    };
+
+    // Parent can call this method instead of assigning methods directly
+    this.self.addEventListener = function (type, callback) {
+      this.on(type, callback);
+    };
+
+    this.self.terminate = function () {
+      if (typeof timer === 'number') {
+        clearTimeout(timer);
+        timer = null;
       }
-    }
-    return false;
-  };
 
-  self.terminate = function () {
-    clearTimeout(__timer);
-    return true;
-  };
+      return true;
+    };
 
-  const importScripts = function () {
-    // Turn arguments from pseudo-array in to array in order to iterate it
-    const params = Array.prototype.slice.call(arguments);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const importScripts = function importScripts (): void{
+      // Turn arguments from pseudo-array in to array in order to iterate it
+      const params = Array.prototype.slice.call(arguments);
 
-    for (let i = 0, j = params.length; i < j; i++) {
-      const script = document.createElement('script');
-      script.src = params[i];
-      script.setAttribute('type', 'text/javascript');
-      document.getElementsByTagName('head')[0].appendChild(script)
-    }
-  };
+      for (let i = 0, j = params.length; i < j; i++) {
+        const script = document.createElement('script');
+        script.src = params[i];
+        script.setAttribute('type', 'text/javascript');
+        document.getElementsByTagName('head')[0].appendChild(script);
+      }
+    };
 
-  const http = new XMLHttpRequest();
-  http.open("GET", scriptFile, false);
-  http.send(null);
+    const http = new XMLHttpRequest();
+    http.open('GET', scriptFile, false);
+    http.send(null);
 
-  if (http.readyState == 4) {
-    const strResponse = http.responseText;
+    if (http.readyState == 4) {
+      const strResponse = http.responseText;
 
-    if (http.status !== 404 && http.status !== 500) {
-      __fileContent = strResponse;
-      // IE functions will become delagates of the instance of Worker
-      eval(__fileContent);
+      if (http.status !== 404 && http.status !== 500) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        globalThis.__workerContext__ = this.self;
+        // eslint-disable-next-line no-eval
+        eval(strResponse);
+      }
     }
   }
 
-  return true;
+  public postMessage (data: any): void {
+    this.self.emit('message', { data });
+  }
+
+  public addEventListener (type: string, callback): void {
+    this.self.on(type, callback);
+  }
+
+  public removeEventListener (type: string, callback?): void {
+    this.self.off(type, callback);
+  }
 }

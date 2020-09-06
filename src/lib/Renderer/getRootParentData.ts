@@ -1,20 +1,20 @@
-import {RootTaskQueue} from "./TaskQueue";
-import {Layers} from "../Layers/Layers";
+import { RootTaskQueue } from './TaskQueue';
+import { Layers } from '../Layers/Layers';
 
-type TFakeParentData = {
-  layers: Layers,
-  context: any, // public context
+interface TFakeParentData {
+  layers: Layers
+  context: any // public context
   __comp: {
-    schedule: VoidFunction,
-  },
+    schedule: VoidFunction
+  }
 }
 
-export function getRootParentData (layers: Layers, rootTaskQueue: RootTaskQueue): TFakeParentData {
+export function getRootParentData (rootTaskQueue: RootTaskQueue, layers: Layers): TFakeParentData {
   return {
     layers,
     context: {}, // public context
     __comp: {
-      schedule: rootTaskQueue.schedule.bind(rootTaskQueue),
+      schedule: rootTaskQueue.schedule.bind(rootTaskQueue)
     }
-  }
+  };
 }

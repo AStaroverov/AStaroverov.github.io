@@ -1,23 +1,26 @@
 import { scheduler, TaskQueue, Task } from './lib/Scheduler';
 import { Component } from './lib/Renderer/Component';
-import {renderFromWorker} from "./lib/Renderer/renderFromWorker";
+import { render } from './lib/Renderer/render';
+import { createElement } from './lib/Renderer/createElement';
+import { TComponentData } from './lib/Renderer/types';
 
 const queue = new TaskQueue();
 
-(function tick() {
+(function tick () {
   scheduler.run();
   requestAnimationFrame(tick);
 })();
 
 class Coube extends Component {
-  v = Math.random();
-  r = 0;
-  count = 0;
-  delta = 0;
-  props: { x: number, y: number, s: number};
-  state: { dx: number, dy: number } = { dx: 0, dy: 0 };
+  public props: { x: number, y: number, s: number};
+  public state: { dx: number, dy: number } = { dx: 0, dy: 0 };
 
-  constructor(a, b) {
+  protected v = Math.random();
+  protected r = 0;
+  protected count = 0;
+  protected delta = 0;
+
+  constructor (a, b) {
     super(a, b);
 
     if (this.v > 0.5) {
@@ -28,15 +31,15 @@ class Coube extends Component {
     }
   }
 
-  render () {
-    this.layer.ctx.fillRect(this.props.x + this.state.dx, this.props.y + this.state.dy, this.props.s, this.props.s);
+  protected render (): void {
+    this.layer!.ctx.fillRect(this.props.x + this.state.dx, this.props.y + this.state.dy, this.props.s, this.props.s);
   }
 
-  shouldUpdateChildren() {
+  protected shouldUpdateChildren (): boolean {
     return false;
   }
 
-  changeCoordinat() {
+  protected changeCoordinat (): void {
     this.v = Math.random() - 1;
 
     this.r = Math.random();
@@ -54,27 +57,27 @@ class Root extends Component {
   size = 50;
   rows = this.layers.list[0].canvas.width / this.size | 0;
 
-  render () {
+  protected render (): void {
     this.layers.list.forEach(l => {
       if (l.isDirty) {
         l.ctx.fillStyle = 'black';
         l.ctx.clearRect(0, 0, l.canvas.width, l.canvas.height);
       }
-    })
+    });
   }
 
-  shouldUpdateChildren () {
+  protected shouldUpdateChildren (): boolean {
     return this.firstUpdateChildren || false;
   }
 
-  updateChildren () {
-    const child = [];
+  protected updateChildren (): TComponentData[] {
+    const child: TComponentData[] = [];
 
     for (var i = 0; i < 1000; i += 1) {
-      child.push(Coube.create({
+      child.push(createElement(Coube, {
         x: (i % this.rows) * this.size,
         y: (i / this.rows | 0) * this.size,
-        s: this.size,
+        s: this.size
       }));
     }
 
@@ -82,11 +85,13 @@ class Root extends Component {
   }
 }
 
-(async function() {
-  await renderFromWorker(
-    Root.create()
+async function main (): Promise<void> {
+  await render(
+    createElement(Root)
   );
 
   scheduler.add(queue);
-})();
+}
 
+// eslint-disable-next-line
+main();

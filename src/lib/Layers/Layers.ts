@@ -1,11 +1,17 @@
-import {Layer} from "./Layer";
+import { Layer } from './Layer';
+
+export interface TLayersCallbacks {
+  onSortLayers?: (layers: Layer[]) => void
+}
 
 export class Layers {
   public list: Layer[];
   public map: Record<string, Layer> = {};
+  protected callbacks?: TLayersCallbacks;
 
-  public constructor(layers: Layer[]) {
+  public constructor (layers: Layer[], callbacks?: TLayersCallbacks) {
     this.list = [...layers];
+    this.callbacks = callbacks;
 
     layers.forEach((layer) => {
       this.map[layer.name] = layer;
@@ -14,14 +20,15 @@ export class Layers {
     this.sortLayers();
   }
 
-  public setLayerIndex(name: string, index: number) {
+  public setLayerIndex (name: string, index: number): void {
     this.list[name].index = index;
     this.list[name].canvas.style.zIndex = index;
 
     this.sortLayers();
   }
 
-  protected sortLayers() {
+  protected sortLayers (): void {
     this.list.sort((a, b) => a.index - b.index);
+    this.callbacks?.onSortLayers?.call(null, this.list);
   }
 }

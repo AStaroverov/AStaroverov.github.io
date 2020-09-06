@@ -1,3 +1,3 @@
-function unmount(instance): void {
-  instance.__unmount();
+function unmount (instance): void {
+  instance.__unmount()
 }

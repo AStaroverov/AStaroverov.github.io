@@ -1,18 +1,18 @@
-import { TaskQueue } from "../Scheduler/TaskQueue";
+import { TaskQueue } from '../Scheduler/TaskQueue';
 
 export class RootTaskQueue extends TaskQueue {
-	private sheduled: boolean = false;
+  private sheduled: boolean = false;
 
-	public run () {
-		if (this.sheduled) {
-			this.sheduled = false;
-			super.run();
-		}
-	}
+  public run (): void {
+    if (this.sheduled) {
+      this.sheduled = false;
+      super.run();
+    }
+  }
 
-	schedule () {
-		this.sheduled = true;
-	}
+  public schedule (): void {
+    this.sheduled = true;
+  }
 }
 
 export const rootTaskQueue: RootTaskQueue = new RootTaskQueue();

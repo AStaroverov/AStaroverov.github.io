@@ -1,32 +1,29 @@
 import { Task, TaskQueue } from '../Scheduler';
-import {Layer} from "../Layers/Layer";
-import {Layers} from "../Layers/Layers";
+import { Layer } from '../Layers/Layer';
+import { Layers } from '../Layers/Layers';
+import { TComponentData, TKey, TRef } from './types';
 
-type TOptions = {
-  readonly key?: string;
-  readonly ref?: ((inst: any) => void) | string;
-};
-
-type TCompData = {
-  scheduled: boolean,
-  parent: CoreComponent,
-  schedule: VoidFunction,
-  task: Task | TaskQueue,
-  childQueue: TaskQueue,
-  children: Map<string, CoreComponent>,
-  childrenKeys: string[],
-  prevChildrenArr: CoreComponent[],
-  updated: boolean,
-};
-
-const fakeEmptyOptions: TOptions = {};
+interface TCompData<Comp extends CoreComponent> {
+  scheduled: boolean
+  parent: Comp | undefined
+  schedule: VoidFunction
+  task: Task | TaskQueue
+  childQueue: TaskQueue
+  children?: Map<TKey, Comp>
+  childrenKeys?: TKey[]
+  componentsDatas?: TComponentData[]
+  updated: boolean
+}
 
 export abstract class CoreComponent {
+  // Every class has name field
+  public name: string;
+
   public $: object = {};
   public layers: Layers;
-  public layer: Layer;
+  public layer: Layer | undefined;
   public context: any;
-  public __comp: TCompData;
+  public __comp: TCompData<CoreComponent>;
 
   constructor (...args: any[])
   constructor (parent: CoreComponent) {
@@ -35,23 +32,23 @@ export abstract class CoreComponent {
 
     this.__comp = {
       scheduled: false,
-      parent: parent instanceof CoreComponent ? parent : void 0,
+      parent: parent instanceof CoreComponent ? parent : undefined,
       schedule: parent.__comp.schedule,
       task: new Task(this.iterate, this),
       childQueue: new TaskQueue(),
       children: undefined,
       childrenKeys: undefined,
-      prevChildrenArr: undefined,
-      updated: false,
+      componentsDatas: undefined,
+      updated: false
     };
   }
 
-  public attachToLayer(l: Layer) {
+  public attachToLayer (l: Layer): void {
     if (l === this.layer) {
       return;
     }
 
-    if (this.layer) {
+    if (this.layer !== undefined) {
       this.layer.willDirty = true;
     }
 
@@ -59,8 +56,8 @@ export abstract class CoreComponent {
     this.layer.willDirty = true;
   }
 
-  public performRender () {
-    if (this.layer) {
+  public performRender (): void {
+    if (this.layer !== undefined) {
       this.layer.willDirty = true;
     }
 
@@ -71,24 +68,24 @@ export abstract class CoreComponent {
     return this.__comp.parent;
   }
 
-  public setContext (context: object) {
+  public setContext (context: object): void {
     Object.assign(this.context, context);
     this.performRender();
   }
 
-  protected unmount () {}
-  protected abstract render ()
-  protected updateChildren (): void | CoreComponent[] {}
+  protected unmount (): void {}
+  protected abstract render ();
+  protected updateChildren (): void | TComponentData[] {}
 
-  protected setProps (props: object) {}
+  protected setProps (props: object): void {}
 
-  private __unmount () {
+  private __unmount (): void {
     this.__unmountChildren();
     this.unmount();
     this.performRender();
   }
 
-  protected iterate () {
+  protected iterate (): boolean {
     if (this.layer !== undefined ? this.layer.isDirty : true) {
       this.render();
     }
@@ -96,38 +93,32 @@ export abstract class CoreComponent {
     return true;
   }
 
-  protected __updateChildren () {
-    let nextChildrenArr = this.updateChildren();
+  protected __updateChildren (): void {
+    const nextComponentsDatas: TComponentData[] = this.updateChildren() || [];
+    const comp = this.__comp;
+    const childQueue = comp.childQueue;
+    const children = comp.children || new Map<TKey, CoreComponent>();
+    const prevChildrenKeys: TKey[] = comp.childrenKeys || [];
+    const nextChildrenKeys: TKey[] = comp.childrenKeys = [];
 
-    if (typeof nextChildrenArr === "undefined") {
-      nextChildrenArr = [];
-    }
+    if (nextComponentsDatas === comp.componentsDatas) return;
 
-    const __comp = this.__comp;
-    const childQueue = __comp.childQueue;
-    const children = __comp.children || new Map();
-    const childrenKeys = __comp.childrenKeys || [];
-    const nextChildrenKeys = __comp.childrenKeys = [];
+    let key: TKey | undefined;
+    let ref: TRef | undefined;
+    let instance: CoreComponent;
+    let componentData: TComponentData;
 
-    if (nextChildrenArr === __comp.prevChildrenArr) return;
-
-    let key;
-    let ref;
-    let child;
-    let instance;
-    let currentChild;
-
-    __comp.prevChildrenArr = nextChildrenArr;
+    comp.componentsDatas = nextComponentsDatas;
 
     childQueue.clearItems();
 
-    if (nextChildrenArr.length === 0) {
-      if (childrenKeys.length > 0) {
-        for (let i= 0; i < childrenKeys.length; i += 1) {
-          key = childrenKeys[i];
-          child = children.get(key);
+    if (nextComponentsDatas.length === 0) {
+      if (prevChildrenKeys.length > 0) {
+        for (let i = 0; i < prevChildrenKeys.length; i += 1) {
+          key = prevChildrenKeys[i];
+          instance = children.get(key)!;
 
-          child.__unmount();
+          instance.__unmount();
           children.delete(key);
         }
       }
@@ -135,19 +126,20 @@ export abstract class CoreComponent {
       return;
     }
 
-    if (childrenKeys.length === 0) {
-      if (nextChildrenArr.length > 0) {
-        for (let i= 0; i < nextChildrenArr.length; i += 1) {
-          child = nextChildrenArr[i];
-          key = child.options.hasOwnProperty('key')
-            ? child.options.key
-            : `${child.klass.name}|${i}|defaultKey`;
-          ref = child.options.ref;
-          children.set(key, instance = new child.klass(this, child.props));
+    if (prevChildrenKeys.length === 0) {
+      if (nextComponentsDatas.length > 0) {
+        for (let i = 0; i < nextComponentsDatas.length; i += 1) {
+          componentData = nextComponentsDatas[i];
+          key = componentData.props?.key || createDefaultKey(componentData.type.name, i);
+          ref = componentData.props.ref;
+          // eslint-disable-next-line new-cap
+          children.set(key, instance = new componentData.type(this, componentData.props));
 
           if (typeof ref === 'function') {
             ref(instance);
-          } else if (typeof ref === 'string') {
+          }
+
+          if (typeof ref === 'string') {
             this.$[ref] = instance;
           }
 
@@ -159,78 +151,80 @@ export abstract class CoreComponent {
       return;
     }
 
-    const childForMount = [];
-    const keyForMount = [];
+    const componentsDatasForMount: TComponentData[] = [];
+    const keyForMount: TKey[] = [];
+    let currentInstance;
 
-    for (let i = 0; i < nextChildrenArr.length; i += 1) {
-      child = nextChildrenArr[i];
-      key = child.options.hasOwnProperty('key')
-        ? child.options.key
-        : `${child.klass.name}|${i}|defaultKey`;
-      currentChild = children.get(key);
+    for (let i = 0; i < nextComponentsDatas.length; i += 1) {
+      componentData = nextComponentsDatas[i];
+      key = componentData.props?.key || createDefaultKey(componentData.type.name, i);
+      currentInstance = children.get(key);
 
       nextChildrenKeys.push(key);
 
       if (
-        currentChild !== undefined
-        && currentChild instanceof child.klass
-        && currentChild.constructor === child.klass
+        currentInstance !== undefined &&
+        currentInstance instanceof componentData.type &&
+        currentInstance.constructor === componentData.type
       ) {
-        currentChild.__setProps(child.props);
-        currentChild.__comp.updated = true;
+        currentInstance.setProps(componentData.props);
+        currentInstance.__comp.updated = true;
       } else {
-        childForMount.push(child);
+        componentsDatasForMount.push(componentData);
         keyForMount.push(key);
       }
     }
 
-    for (let i = 0; i < childrenKeys.length; i += 1) {
-      key = childrenKeys[i];
+    for (let i = 0; i < prevChildrenKeys.length; i += 1) {
+      key = prevChildrenKeys[i];
 
       if (!children.has(key)) {
         continue;
       }
 
-      child = children.get(key);
+      instance = children.get(key)!;
 
-      if (child.__comp.updated === true) {
-        child.__comp.updated = false;
+      if (instance.__comp.updated) {
+        instance.__comp.updated = false;
       } else {
-        child.__unmount();
+        instance.__unmount();
         children.delete(key);
       }
     }
 
-    for (let i = 0; i < childForMount.length; i += 1) {
-      child = childForMount[i];
+    for (let i = 0; i < componentsDatasForMount.length; i += 1) {
+      componentData = componentsDatasForMount[i];
       key = keyForMount[i];
-      ref = child.options.ref;
-      children.set(key, instance = new child.klass(this, child.props));
+      ref = componentData.props.ref;
+      // eslint-disable-next-line new-cap
+      children.set(key, instance = new componentData.type(this, componentData.props));
 
       if (typeof ref === 'function') {
         ref(instance);
-      } else if (typeof ref === 'string') {
+      }
+
+      if (typeof ref === 'string') {
         this.$[ref] = instance;
       }
     }
 
     for (let i = 0; i < nextChildrenKeys.length; i += 1) {
-      childQueue.add(children.get(nextChildrenKeys[ i ]).__comp.task);
+      childQueue.add(children.get(nextChildrenKeys[i])!.__comp.task);
     }
   }
 
-  private __unmountChildren () {
+  private __unmountChildren (): void {
     if (this.__comp.childQueue) {
-      const children = this.__comp.children;
-      const childrenKeys = this.__comp.childrenKeys;
+      const children = this.__comp.children!;
+      const childrenKeys = this.__comp.childrenKeys!;
 
-      for (let i= 0; i < childrenKeys.length; i += 1) {
-        children.get(childrenKeys[i]).__unmount();
+      for (let i = 0; i < childrenKeys.length; i += 1) {
+        children.get(childrenKeys[i])!.__unmount();
       }
     }
   }
+}
 
-  static create (props?: object, options: TOptions = fakeEmptyOptions) {
-    return { props, options, klass: this };
-  }
+function createDefaultKey (name: string, index: number): string {
+  return `${name}-${index}--defaultKey`;
 }

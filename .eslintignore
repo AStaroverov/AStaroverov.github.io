@@ -5,3 +5,5 @@ node_modules
 dist
 # don't lint nyc coverage output
 coverage
+
+eslint-plugin-standard eslint-plugin-promise eslint-plugin-import eslint-plugin-node @typescript-eslint/eslint-plugin eslint-config-standard-with-typescript
