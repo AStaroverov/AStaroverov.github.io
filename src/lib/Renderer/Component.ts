@@ -75,10 +75,6 @@ export abstract class Component extends CoreComponent {
     this.firstUpdateChildren = false;
   }
 
-  protected __setProps (props: object): void {
-    this.setProps(props);
-  }
-
   protected shouldRenderChildren (): boolean {
     return true;
   }
@@ -95,16 +91,16 @@ export abstract class Component extends CoreComponent {
     this.__scheduled = false;
     const data = this.__data;
 
-    if (data.nextProps !== void 0) {
+    if (data.nextProps !== undefined) {
       this.propsChanged(data.nextProps);
       Object.assign(this.props, data.nextProps);
-      data.nextProps = void 0;
+      data.nextProps = undefined;
     }
 
-    if (data.nextState !== void 0) {
+    if (data.nextState !== undefined) {
       this.stateChanged(data.nextState);
       Object.assign(this.state, data.nextState);
-      data.nextState = void 0;
+      data.nextState = undefined;
     }
 
     if (this.shouldRender()) {
