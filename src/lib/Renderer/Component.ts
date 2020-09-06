@@ -1,13 +1,14 @@
 import { CoreComponent } from './CoreComponent';
 
 export abstract class Component extends CoreComponent {
-  protected firstRender = true;
-  protected firstUpdateChildren = true;
-  private __scheduled: boolean = false;
-  private __shouldRenderChildren: boolean;
-
   public props: object = {};
   public state: object = {};
+
+  protected firstRender = true;
+  protected firstUpdateChildren = true;
+
+  private __scheduled: boolean = false;
+  private __shouldRenderChildren: boolean;
   private readonly __data: {
     nextProps: object | undefined
     nextState: object | undefined
