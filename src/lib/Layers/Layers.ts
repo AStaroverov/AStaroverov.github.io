@@ -27,6 +27,10 @@ export class Layers {
     this.sortLayers();
   }
 
+  public update (): void {
+    this.list.forEach(l => l.update());
+  }
+
   protected sortLayers (): void {
     this.list.sort((a, b) => a.index - b.index);
     this.callbacks?.onSortLayers?.call(null, this.list);

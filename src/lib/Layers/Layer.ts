@@ -24,7 +24,7 @@ export class Layer<Ctx extends CanvasRenderingContext2D | WebGL2RenderingContext
     this.ctx = this.canvas.getContext(ctxName) as Ctx;
   }
 
-  public updated (): void {
+  public update (): void {
     this.willDirty = true;
   }
 }

@@ -143,10 +143,9 @@ class Root extends Component {
     };
 
     queue.add(new Task(() => {
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
       this.context.angle = this.context.angle + 0.01;
-      this.layers.list.forEach(l => {
-        l.updated();
-      });
+      this.layers.update();
       this.performRender();
     }));
   }
