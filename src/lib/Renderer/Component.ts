@@ -1,6 +1,6 @@
 import { CoreComponent } from './CoreComponent';
 
-export abstract class Component extends CoreComponent {
+export abstract class Component<Props extends object = object, State extends object = object> extends CoreComponent {
   public props: object = {};
   public state: object = {};
 
@@ -8,81 +8,70 @@ export abstract class Component extends CoreComponent {
   protected firstUpdateChildren = true;
 
   private __scheduled: boolean = false;
+  private __shouldRender: boolean;
+  private __shouldUpdateChildren: boolean;
   private __shouldRenderChildren: boolean;
-  private readonly __data: {
-    nextProps: object | undefined
-    nextState: object | undefined
-  } = {
-    nextProps: undefined,
-    nextState: undefined
-  };
+  private __nextProps: Props | undefined = undefined;
+  private __nextState: State | undefined = undefined;
 
   constructor (...args: any[])
-  constructor (parent, props?: object) {
+  constructor (parent, props: Partial<Props>) {
     super(parent);
 
-    this.props = props || this.props;
+    this.setProps(props);
   }
 
-  public setProps (props?: object): void {
+  public setProps (props?: Partial<Props>): void {
     if (props === undefined) return;
 
-    const data = this.__data;
-
-    if (data.nextProps === undefined) {
-      data.nextProps = Object.assign(Object.assign({}, this.props), props);
+    if (this.__nextProps === undefined) {
+      this.__nextProps = Object.assign({}, this.props, props) as Props;
     } else {
-      Object.assign(data.nextProps, props);
+      Object.assign(this.__nextProps, props);
     }
 
     this.performRender();
   }
 
-  protected setState (state?: object): void {
+  protected setState (state?: Partial<State>): void {
     if (state === undefined) return;
 
-    const data = this.__data;
-
-    if (data.nextState === undefined) {
-      data.nextState = Object.assign(Object.assign({}, this.state), state);
+    if (this.__nextState === undefined) {
+      this.__nextState = Object.assign({}, this.state, state) as State;
     } else {
-      Object.assign(data.nextState, state);
+      Object.assign(this.__nextState, state);
     }
 
     this.performRender();
   }
 
-  protected propsChanged (nextProps: object): void {}
-  protected stateChanged (nextState: object): void {}
-  protected shouldRender (): boolean {
+  protected willReceiveProperties (nextProps: Partial<Props>): void {}
+
+  protected shouldRender (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
+    return true;
+  }
+
+  protected shouldUpdateChildren (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
+    return true;
+  }
+
+  protected shouldRenderChildren (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
     return true;
   }
 
   protected willRender (): void {}
   protected didRender (): void {}
 
-  protected shouldUpdateChildren (): boolean {
-    return true;
-  }
-
   protected willUpdateChildren (): void{}
   protected didUpdateChildren (): void{}
 
-  protected childrenLifeCycle (): void {
-    this.willUpdateChildren();
-    this.__updateChildren();
-    this.didUpdateChildren();
-
-    this.firstUpdateChildren = false;
-  }
-
-  protected shouldRenderChildren (): boolean {
-    return true;
-  }
-
   protected iterate (): boolean {
     if (this.layer !== undefined ? this.layer.isDirty : true) {
-      this.lifeCycle();
+      if (this.__nextProps === undefined && this.__nextState === undefined) {
+        this.renderLifeCycle();
+      } else {
+        this.lifeCycle();
+      }
     }
 
     return this.__shouldRenderChildren;
@@ -90,32 +79,47 @@ export abstract class Component extends CoreComponent {
 
   protected lifeCycle (): void {
     this.__scheduled = false;
-    const data = this.__data;
 
-    if (data.nextProps !== undefined) {
-      this.propsChanged(data.nextProps);
-      Object.assign(this.props, data.nextProps);
-      data.nextProps = undefined;
+    if (this.__nextProps !== undefined) {
+      this.willReceiveProperties(this.__nextProps);
     }
 
-    if (data.nextState !== undefined) {
-      this.stateChanged(data.nextState);
-      Object.assign(this.state, data.nextState);
-      data.nextState = undefined;
+    this.__shouldRender = this.shouldRender(this.__nextProps, this.__nextState);
+    this.__shouldUpdateChildren = this.shouldUpdateChildren(this.__nextProps, this.__nextState);
+    this.__shouldRenderChildren = this.shouldRenderChildren(this.__nextProps, this.__nextState);
+
+    if (this.__nextProps !== undefined) {
+      Object.assign(this.props, this.__nextProps);
+      this.__nextProps = undefined;
     }
 
-    if (this.shouldRender()) {
-      this.willRender();
-      this.render();
-      this.didRender();
-
-      this.firstRender = false;
+    if (this.__nextState !== undefined) {
+      Object.assign(this.props, this.__nextState);
+      this.__nextState = undefined;
     }
 
-    if (this.shouldUpdateChildren()) {
+    if (this.__shouldRender) {
+      this.renderLifeCycle();
+    }
+
+    if (this.__shouldUpdateChildren) {
       this.childrenLifeCycle();
     }
+  }
 
-    this.__shouldRenderChildren = this.shouldRenderChildren();
+  protected renderLifeCycle (): void {
+    this.willRender();
+    this.render();
+    this.didRender();
+
+    this.firstRender = false;
+  }
+
+  protected childrenLifeCycle (): void {
+    this.willUpdateChildren();
+    this.__updateChildren();
+    this.didUpdateChildren();
+
+    this.firstUpdateChildren = false;
   }
 }

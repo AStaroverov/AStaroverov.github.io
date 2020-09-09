@@ -4,11 +4,11 @@ import { Layers } from '../Layers/Layers';
 import { TComponentData, TKey, TRef } from './types';
 
 interface TCompData<Comp extends CoreComponent> {
+  task: Task | TaskQueue
+  childQueue: TaskQueue
   scheduled: boolean
   parent: Comp | undefined
   schedule: VoidFunction
-  task: Task | TaskQueue
-  childQueue: TaskQueue
   children?: Map<TKey, Comp>
   childrenKeys?: TKey[]
   componentsDatas?: TComponentData[]
@@ -30,12 +30,20 @@ export abstract class CoreComponent {
     this.context = parent.context;
     this.layers = parent.layers;
 
+    const task = new TaskQueue();
+    const childQueue = new TaskQueue();
+
+    task.add(
+      new Task(this.iterate, this),
+      childQueue
+    );
+
     this.__comp = {
+      task,
+      childQueue,
       scheduled: false,
       parent: parent instanceof CoreComponent ? parent : undefined,
       schedule: parent.__comp.schedule,
-      task: new Task(this.iterate, this),
-      childQueue: new TaskQueue(),
       children: undefined,
       childrenKeys: undefined,
       componentsDatas: undefined,
@@ -74,7 +82,7 @@ export abstract class CoreComponent {
   }
 
   protected unmount (): void {}
-  protected abstract render ();
+  protected render (): void {}
   protected updateChildren (): void | TComponentData[] {}
 
   protected setProps (props: object): void {}

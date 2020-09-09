@@ -20,7 +20,8 @@
     "removeComments": false
   },
   "include": [
-    "./src/**/*"
+    "./src/**/*",
+    "./examples/**/*"
   ],
   "exclude": [
     "**/*.spec.ts",

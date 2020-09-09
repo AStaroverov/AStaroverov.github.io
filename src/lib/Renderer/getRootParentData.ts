@@ -1,4 +1,4 @@
-import { RootTaskQueue } from './TaskQueue';
+import { RootTaskQueue } from './createRootTaskQueue';
 import { Layers } from '../Layers/Layers';
 
 interface TFakeParentData {

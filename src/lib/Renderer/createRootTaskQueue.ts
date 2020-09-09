@@ -15,4 +15,6 @@ export class RootTaskQueue extends TaskQueue {
   }
 }
 
-export const rootTaskQueue: RootTaskQueue = new RootTaskQueue();
+export function createRootTaskQueue (): RootTaskQueue {
+  return new RootTaskQueue();
+}

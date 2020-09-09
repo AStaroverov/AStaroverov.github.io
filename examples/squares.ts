@@ -1,8 +1,8 @@
-import { scheduler, TaskQueue, Task } from './lib/Scheduler';
-import { Component } from './lib/Renderer/Component';
-import { render } from './lib/Renderer/render';
-import { createElement } from './lib/Renderer/createElement';
-import { TComponentData } from './lib/Renderer/types';
+import { scheduler, TaskQueue, Task } from '../src/lib/Scheduler';
+import { Component } from '../src/lib/Renderer/Component';
+import { render } from '../src/lib/Renderer/render';
+import { createElement } from '../src/lib/Renderer/createElement';
+import { TComponentData } from '../src/lib/Renderer/types';
 
 const queue = new TaskQueue();
 
@@ -40,8 +40,6 @@ class Coube extends Component {
   }
 
   protected changeCoordinat (): void {
-    this.v = Math.random() - 1;
-
     this.r = Math.random();
     this.delta += 0.01 * (this.r > 0.5 ? 1 : -1);
     this.count += this.delta;
@@ -73,7 +71,7 @@ class Root extends Component {
   protected updateChildren (): TComponentData[] {
     const child: TComponentData[] = [];
 
-    for (var i = 0; i < 1000; i += 1) {
+    for (let i = 0; i < 1000; i += 1) {
       child.push(createElement(Coube, {
         x: (i % this.rows) * this.size,
         y: (i / this.rows | 0) * this.size,

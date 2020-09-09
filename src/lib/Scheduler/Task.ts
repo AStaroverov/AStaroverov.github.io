@@ -13,7 +13,7 @@ export class Task {
   once: boolean;
   order: number;
 
-  constructor (fn: () => (boolean | void), context: object | null, options?: OptionsTask) {
+  constructor (fn: () => (boolean | void), context: object | null = null, options?: OptionsTask) {
     this.fn = fn;
     this.context = context;
 

@@ -1,11 +1,9 @@
 import { TLayerProps } from '../Layers/Layer';
-import { scheduler } from '../Scheduler';
-import { rootTaskQueue } from './TaskQueue';
 import { MessageType, typedListenMessage, typedPostMessage } from '../Worker/messageType';
 import { Canvases } from '../Layers/Canvases';
 import { PseudoWorker } from '../Worker';
 
-const offscreenCanvasesSupported = HTMLCanvasElement.prototype.transferControlToOffscreen == undefined;
+const offscreenCanvasesSupported = HTMLCanvasElement.prototype.transferControlToOffscreen !== undefined;
 
 export function initRenderScript (
   container: HTMLElement,
@@ -17,8 +15,6 @@ export function initRenderScript (
     container,
     layersProps
   );
-
-  scheduler.add(rootTaskQueue);
 
   const worker = (new WorkerConstructor(pathToScript)) as Worker;
 

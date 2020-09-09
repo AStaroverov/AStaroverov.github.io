@@ -1,6 +1,6 @@
 import { Layer } from '../Layers/Layer';
 import { scheduler, Task } from '../Scheduler';
-import { rootTaskQueue } from './TaskQueue';
+import { createRootTaskQueue } from './createRootTaskQueue';
 import { MessageType, typedListenMessage, typedPostMessage } from '../Worker/messageType';
 import { getRootParentData } from './getRootParentData';
 import { Layers } from '../Layers/Layers';
@@ -35,6 +35,7 @@ export async function render (
         }
       });
 
+      const rootTaskQueue = createRootTaskQueue();
       const parentData = getRootParentData(rootTaskQueue, layersManager);
       // eslint-disable-next-line new-cap
       const root = new rootData.type(parentData as CoreComponent, rootData.props);

@@ -16,8 +16,8 @@ export class TaskQueue {
     this.order = options?.order || 0;
   }
 
-  public add (task: Task | TaskQueue): void {
-    this.items.push(task);
+  public add (...tasks: Array<Task | TaskQueue>): void {
+    this.items.push(...tasks);
   }
 
   public remove (task: Task | TaskQueue): void {
