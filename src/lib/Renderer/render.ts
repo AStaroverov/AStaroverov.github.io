@@ -47,8 +47,8 @@ export async function render (
         });
       }, null));
 
-      rootTaskQueue.add(root.__comp.task);
-      rootTaskQueue.add(root.__comp.childQueue);
+      rootTaskQueue.add(root.__data.task);
+      rootTaskQueue.add(root.__data.childQueue);
 
       scheduler.add(rootTaskQueue);
       scheduler.start();

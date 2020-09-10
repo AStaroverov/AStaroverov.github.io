@@ -4,6 +4,7 @@ import { Layers } from '../Layers/Layers';
 import { TComponentData, TKey, TRef } from './types';
 
 interface TCompData<Comp extends CoreComponent> {
+  updated: boolean
   task: Task | TaskQueue
   childQueue: TaskQueue
   scheduled: boolean
@@ -12,20 +13,20 @@ interface TCompData<Comp extends CoreComponent> {
   children?: Map<TKey, Comp>
   childrenKeys?: TKey[]
   componentsDatas?: TComponentData[]
-  updated: boolean
 }
+
+const DATA = Symbol('Component private data');
 
 export abstract class CoreComponent {
   // Every class has name field
   public name: string;
 
   public $: object = {};
-  public layers: Layers;
   public layer: Layer | undefined;
+  public layers: Layers;
   public context: any;
-  public __comp: TCompData<CoreComponent>;
+  public [DATA]: TCompData<CoreComponent>;
 
-  constructor (...args: any[])
   constructor (parent: CoreComponent) {
     this.context = parent.context;
     this.layers = parent.layers;
@@ -38,12 +39,12 @@ export abstract class CoreComponent {
       childQueue
     );
 
-    this.__comp = {
+    this[DATA] = {
       task,
       childQueue,
       scheduled: false,
       parent: parent instanceof CoreComponent ? parent : undefined,
-      schedule: parent.__comp.schedule,
+      schedule: parent[DATA].schedule,
       children: undefined,
       childrenKeys: undefined,
       componentsDatas: undefined,
@@ -69,11 +70,11 @@ export abstract class CoreComponent {
       this.layer.willDirty = true;
     }
 
-    this.__comp.schedule();
+    this[DATA].schedule();
   }
 
   public getParent (): CoreComponent | void {
-    return this.__comp.parent;
+    return this[DATA].parent;
   }
 
   public setContext (context: object): void {
@@ -103,7 +104,7 @@ export abstract class CoreComponent {
 
   protected __updateChildren (): void {
     const nextComponentsDatas: TComponentData[] = this.updateChildren() || [];
-    const comp = this.__comp;
+    const comp = this[DATA];
     const childQueue = comp.childQueue;
     const children = comp.children || new Map<TKey, CoreComponent>();
     const prevChildrenKeys: TKey[] = comp.childrenKeys || [];
@@ -152,7 +153,7 @@ export abstract class CoreComponent {
           }
 
           nextChildrenKeys.push(key);
-          childQueue.add(instance.__comp.task);
+          childQueue.add(instance[DATA].task);
         }
       }
 
@@ -176,7 +177,7 @@ export abstract class CoreComponent {
         currentInstance.constructor === componentData.type
       ) {
         currentInstance.setProps(componentData.props);
-        currentInstance.__comp.updated = true;
+        currentInstance[DATA].updated = true;
       } else {
         componentsDatasForMount.push(componentData);
         keyForMount.push(key);
@@ -192,8 +193,8 @@ export abstract class CoreComponent {
 
       instance = children.get(key)!;
 
-      if (instance.__comp.updated) {
-        instance.__comp.updated = false;
+      if (instance[DATA].updated) {
+        instance[DATA].updated = false;
       } else {
         instance.__unmount();
         children.delete(key);
@@ -217,14 +218,14 @@ export abstract class CoreComponent {
     }
 
     for (let i = 0; i < nextChildrenKeys.length; i += 1) {
-      childQueue.add(children.get(nextChildrenKeys[i])!.__comp.task);
+      childQueue.add(children.get(nextChildrenKeys[i])![DATA].task);
     }
   }
 
   private __unmountChildren (): void {
-    if (this.__comp.childQueue) {
-      const children = this.__comp.children!;
-      const childrenKeys = this.__comp.childrenKeys!;
+    if (this[DATA].childQueue) {
+      const children = this[DATA].children!;
+      const childrenKeys = this[DATA].childrenKeys!;
 
       for (let i = 0; i < childrenKeys.length; i += 1) {
         children.get(childrenKeys[i])!.__unmount();
