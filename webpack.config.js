@@ -5,7 +5,8 @@ module.exports = {
   entry: {
     app: path.join(__dirname, './examples/index.ts'),
     squares: path.join(__dirname, './examples/squares.ts'),
-    triangles: path.join(__dirname, './examples/triangles.ts')
+    triangles: path.join(__dirname, './examples/triangles.ts'),
+    withEvents: path.join(__dirname, './examples/withEvents.ts')
   },
   output: {
     path: path.join(__dirname, './dist'),

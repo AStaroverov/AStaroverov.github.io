@@ -6,5 +6,5 @@ initRenderScript(
     { name: '1', index: 1 },
     { name: '2', index: 2 }
   ],
-  '/dist/triangles.js'
+  '/dist/withEvents.js'
 );

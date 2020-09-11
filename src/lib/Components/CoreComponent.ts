@@ -1,11 +1,14 @@
 import { Task, TaskQueue } from '../Scheduler';
 import { Layer } from '../Layers/Layer';
 import { Layers } from '../Layers/Layers';
-import { TComponentData, TKey, TRef } from './types';
+import { TComponentData, TKey, TRef } from '../types';
+import { getRenderIndex } from '../Renderer/renderIndex';
+import { getRenderId } from '../Renderer/renderId';
+import { HitBox } from '../BaseClasses/HitBox';
 
 interface TCompData<Comp extends CoreComponent> {
   updated: boolean
-  task: Task | TaskQueue
+  taskQueue: TaskQueue
   childQueue: TaskQueue
   scheduled: boolean
   parent: Comp | undefined
@@ -15,32 +18,40 @@ interface TCompData<Comp extends CoreComponent> {
   componentsDatas?: TComponentData[]
 }
 
-const DATA = Symbol('Component private data');
+export const DATA = Symbol('Component private data');
 
-export abstract class CoreComponent {
+export abstract class CoreComponent<Props extends object = object> extends HitBox {
   // Every class has name field
   public name: string;
 
-  public $: object = {};
+  public $: object;
   public layer: Layer | undefined;
   public layers: Layers;
   public context: any;
+  public renderIndex = 0;
+  public renderId = 0;
+
+  public props: Partial<Props>;
+
   public [DATA]: TCompData<CoreComponent>;
 
-  constructor (parent: CoreComponent) {
+  constructor (parent: CoreComponent, props?: Partial<Props>) {
+    super();
+
+    this.props = props || {};
     this.context = parent.context;
     this.layers = parent.layers;
 
-    const task = new TaskQueue();
+    const taskQueue = new TaskQueue();
     const childQueue = new TaskQueue();
 
-    task.add(
+    taskQueue.add(
       new Task(this.iterate, this),
       childQueue
     );
 
     this[DATA] = {
-      task,
+      taskQueue,
       childQueue,
       scheduled: false,
       parent: parent instanceof CoreComponent ? parent : undefined,
@@ -58,32 +69,45 @@ export abstract class CoreComponent {
     }
 
     if (this.layer !== undefined) {
-      this.layer.willDirty = true;
+      this.layer.update();
     }
 
     this.layer = l;
-    this.layer.willDirty = true;
+    this.layer.update();
   }
 
   public performRender (): void {
     if (this.layer !== undefined) {
-      this.layer.willDirty = true;
+      this.layer.update();
     }
 
     this[DATA].schedule();
   }
 
-  public getParent (): CoreComponent | void {
-    return this[DATA].parent;
+  public getParent<Comp extends CoreComponent> (): Comp | undefined {
+    return this[DATA].parent as Comp | undefined;
   }
 
   public setContext (context: object): void {
     Object.assign(this.context, context);
+    this.layers.update();
     this.performRender();
   }
 
+  public isRendered (): boolean {
+    return this.renderId === getRenderId();
+  }
+
   protected unmount (): void {}
+
+  protected willRender (): void {
+    this.renderId = getRenderId();
+    this.renderIndex = getRenderIndex();
+  }
+
   protected render (): void {}
+  protected didRender (): void {}
+
   protected updateChildren (): void | TComponentData[] {}
 
   protected setProps (props: object): void {}
@@ -96,7 +120,9 @@ export abstract class CoreComponent {
 
   protected iterate (): boolean {
     if (this.layer !== undefined ? this.layer.isDirty : true) {
+      this.willRender();
       this.render();
+      this.didRender();
     }
 
     return true;
@@ -135,6 +161,10 @@ export abstract class CoreComponent {
       return;
     }
 
+    if (this.$ === undefined) {
+      this.$ = {};
+    }
+
     if (prevChildrenKeys.length === 0) {
       if (nextComponentsDatas.length > 0) {
         for (let i = 0; i < nextComponentsDatas.length; i += 1) {
@@ -153,7 +183,7 @@ export abstract class CoreComponent {
           }
 
           nextChildrenKeys.push(key);
-          childQueue.add(instance[DATA].task);
+          childQueue.add(instance[DATA].taskQueue);
         }
       }
 
@@ -218,7 +248,7 @@ export abstract class CoreComponent {
     }
 
     for (let i = 0; i < nextChildrenKeys.length; i += 1) {
-      childQueue.add(children.get(nextChildrenKeys[i])![DATA].task);
+      childQueue.add(children.get(nextChildrenKeys[i])![DATA].taskQueue);
     }
   }
 

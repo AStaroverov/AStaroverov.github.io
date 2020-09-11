@@ -1,10 +1,11 @@
 import { RootTaskQueue } from './createRootTaskQueue';
 import { Layers } from '../Layers/Layers';
+import { DATA } from '../Components/CoreComponent';
 
 interface TFakeParentData {
   layers: Layers
   context: any // public context
-  __comp: {
+  [DATA]: {
     schedule: VoidFunction
   }
 }
@@ -13,7 +14,7 @@ export function getRootParentData (rootTaskQueue: RootTaskQueue, layers: Layers)
   return {
     layers,
     context: {}, // public context
-    __comp: {
+    [DATA]: {
       schedule: rootTaskQueue.schedule.bind(rootTaskQueue)
     }
   };

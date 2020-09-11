@@ -1,8 +1,7 @@
 import { CoreComponent } from './CoreComponent';
 
-export abstract class Component<Props extends object = object, State extends object = object> extends CoreComponent {
-  public props: object = {};
-  public state: object = {};
+export class Component<Props extends object = object, State extends object = object> extends CoreComponent<Props> {
+  public state: Partial<State> = {};
 
   protected firstRender = true;
   protected firstUpdateChildren = true;
@@ -14,9 +13,8 @@ export abstract class Component<Props extends object = object, State extends obj
   private __nextProps: Props | undefined = undefined;
   private __nextState: State | undefined = undefined;
 
-  constructor (...args: any[])
   constructor (parent, props: Partial<Props>) {
-    super(parent);
+    super(parent, undefined);
 
     this.setProps(props);
   }
@@ -58,9 +56,6 @@ export abstract class Component<Props extends object = object, State extends obj
   protected shouldRenderChildren (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
     return true;
   }
-
-  protected willRender (): void {}
-  protected didRender (): void {}
 
   protected willUpdateChildren (): void{}
   protected didUpdateChildren (): void{}

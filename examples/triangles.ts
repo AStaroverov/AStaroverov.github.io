@@ -1,9 +1,9 @@
 import { scheduler, TaskQueue, Task } from '../src/lib/Scheduler';
-import { Component } from '../src/lib/Renderer/Component';
+import { Component } from '../src/lib/Components/Component';
 import { render } from '../src/lib/Renderer/render';
 import { createElement } from '../src/lib/Renderer/createElement';
-import { TComponentData } from '../src/lib/Renderer/types';
-import { CoreComponent } from '../src/lib/Renderer/CoreComponent';
+import { TComponentData } from '../src/lib/types';
+import { CoreComponent } from '../src/lib/Components/CoreComponent';
 
 const queue = new TaskQueue();
 
