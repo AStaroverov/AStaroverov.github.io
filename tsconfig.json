@@ -7,7 +7,6 @@
     "moduleResolution": "node",
     "module": "esnext",
     "target": "es2017",
-    "allowJs": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "lib": [
@@ -18,13 +17,5 @@
     ],
     "skipLibCheck": true,
     "removeComments": false
-  },
-  "include": [
-    "./src/**/*",
-    "./examples/**/*"
-  ],
-  "exclude": [
-    "**/*.spec.ts",
-    "**/*_test.ts"
-  ]
+  }
 }

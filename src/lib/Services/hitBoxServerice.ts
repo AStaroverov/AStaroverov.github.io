@@ -1,50 +1,57 @@
-import rbush from 'rbush';
-import { CoreComponent } from '../Components/CoreComponent';
-import { HitBox, THitBoxData } from '../BaseClasses/HitBox';
+import RBush, { BBox } from 'rbush';
+import { CanvasElement, THitBoxData } from '../BaseClasses/CanvasElement';
 
 type TOptionsHitTest = {
   noSort?: Boolean
 };
 
-export class HitBoxService<Component extends CoreComponent> {
-  private rbush = rbush(16);
+export class HitBoxService<Component extends CanvasElement> {
+  private rbush = new RBush<THitBoxData<Component>>(16);
+  private tmpBox: BBox = {
+    minX: 0,
+    minY: 0,
+    maxY: 0,
+    maxX: 0,
+  }
 
-  public add (item: HitBox): void{
+  public add (item: THitBoxData<Component>): void{
     // TODO: should try Bulk-Inserting Data tree.load([item1, item2, ...]);
     this.rbush.insert(item);
   }
 
-  public remove (item: HitBox): void {
+  public remove (item: THitBoxData<Component>): void {
     this.rbush.remove(item);
   }
 
   public testPoint (x: number, y: number, options?: TOptionsHitTest): Component[] {
-    return this.testHitBox({
-      minX: x - 1,
-      minY: y - 1,
-      maxX: x + 1,
-      maxY: y + 1
-    }, options);
+    this.tmpBox.minX = x - 1;
+    this.tmpBox.minY = y - 1;
+    this.tmpBox.maxX = x + 1;
+    this.tmpBox.maxY = y + 1;
+
+    return this.testHitBox(this.tmpBox, options);
   }
 
-  public testHitBox (data: THitBoxData, options?: TOptionsHitTest): Component[] {
-    const result = this.rbush.search(data);
-    let i = 0;
-    let j = 0;
-
-    for (; i < result.length; i += 1) {
-      if (result[i].item.onHitBox(data)) {
-        result[j++] = result[i].item;
+  public testHitBox (data: BBox, options?: TOptionsHitTest): Component[] {
+    const result: Component[] = [];
+    const searched: THitBoxData<Component>[] = this.rbush.search(data);
+    
+    for (let i = 0; i < searched.length; i += 1) {
+      if (searched[i].item?.onHitBox(data)) {
+        result.push(searched[i].item!);
       }
     }
-
-    result.length = j;
 
     if (options && options.noSort) {
       return result;
     }
 
     return result.sort((a, b) => {
+      // TODO: that z if we use layer???
+      if (a.zIndex !== 0 || b.zIndex !== 0) {
+        return b.zIndex - a.zIndex;
+      }
+
       return b.renderIndex - a.renderIndex;
     });
   }

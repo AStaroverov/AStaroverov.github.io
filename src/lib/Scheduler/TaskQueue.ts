@@ -1,12 +1,13 @@
-import { Task } from './Task';
 import { noop } from '../utils';
+import { ITask } from '../types';
 
 export interface OptionsItems {
   order?: number
 }
-export class TaskQueue {
+
+export class TaskQueue implements ITask {
   public order: number;
-  public items: Array<Task | TaskQueue> = [];
+  public items: Array<ITask> = [];
 
   protected stopImmediately: boolean = false;
   protected sheduledFilterItems: boolean = false;
@@ -16,11 +17,11 @@ export class TaskQueue {
     this.order = options?.order || 0;
   }
 
-  public add (...tasks: Array<Task | TaskQueue>): void {
+  public add (...tasks: Array<ITask>): void {
     this.items.push(...tasks);
   }
 
-  public remove (task: Task | TaskQueue): void {
+  public remove (task: ITask): void {
     const i = this.items.indexOf(task);
 
     if (i > -1) {
@@ -29,18 +30,13 @@ export class TaskQueue {
   }
 
   public run (): void {
-    const l = this.items.length;
-    let i = 0;
-
-    while (i < l) {
-      if (this.items[i++].run(this) === false) {
-        break;
-      }
-    }
-
     if (this.sheduledFilterItems && this.sheduledFilterItemsCount > 10) {
       this.filterItems();
     }
+  }
+
+  public next(): ITask[] | void {
+    return this.items;
   }
 
   public scheduleFilterItems (): void {

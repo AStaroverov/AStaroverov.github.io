@@ -1,30 +1,30 @@
-export interface TLayerProps {
-  name: string
-  index: number
-}
-
-export class Layer<Ctx extends CanvasRenderingContext2D | WebGL2RenderingContext = CanvasRenderingContext2D> {
-  public name: string;
-  public index: number;
-
-  public canvas: OffscreenCanvas | HTMLCanvasElement;
+export class Layer<
+  Canvas extends OffscreenCanvas | HTMLCanvasElement = OffscreenCanvas,
+  Ctx = Canvas extends OffscreenCanvas ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D
+> {
   public ctx: Ctx;
 
   public isDirty: boolean = true;
   public willDirty: boolean = true;
 
   constructor (
-    props: TLayerProps,
-    canvas: OffscreenCanvas | HTMLCanvasElement,
-    ctxName: OffscreenRenderingContextId = '2d'
+    public canvas: Canvas,
+    public zIndex: number,
+    createRenderContext?: (canas: Canvas) => Ctx
   ) {
-    this.name = props.name;
-    this.index = props.index;
-    this.canvas = canvas;
-    this.ctx = this.canvas.getContext(ctxName) as Ctx;
+    this.ctx = createRenderContext !== undefined
+      ? createRenderContext(this.canvas) as Ctx
+      : createDefaultRenderContext<Canvas, Ctx>(this.canvas);
   }
 
   public update (): void {
     this.willDirty = true;
   }
+}
+
+function createDefaultRenderContext<
+  Canvas extends OffscreenCanvas | HTMLCanvasElement,
+  Ctx = Canvas extends OffscreenCanvas ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D
+>(canvas: Canvas): Ctx {
+  return canvas.getContext('2d') as unknown as Ctx;
 }

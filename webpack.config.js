@@ -1,25 +1,40 @@
 const path = require('path');
 
-module.exports = {
-  mode: 'development',
+module.exports = [{
+  outputPath: 'squares',
   entry: {
-    app: path.join(__dirname, './examples/index.ts'),
-    squares: path.join(__dirname, './examples/squares.ts'),
-    triangles: path.join(__dirname, './examples/triangles.ts'),
-    withEvents: path.join(__dirname, './examples/withEvents.ts')
-  },
-  output: {
-    path: path.join(__dirname, './dist'),
-    publicPath: '/dist/',
-    filename: '[name].js'
-  },
-  resolve: {
-    extensions: ['.ts', '.js']
-  },
-  module: {
-    rules: [{
-      test: /\.ts$/,
-      loader: 'ts-loader'
-    }]
+    main: path.join(__dirname, './examples/squares/index.ts'),
+    worker: path.join(__dirname, './examples/squares/worker.ts'),
   }
-};
+},{
+  outputPath: 'triangles',
+  entry: {
+    main: path.join(__dirname, './examples/triangles/index.ts'),
+    worker: path.join(__dirname, './examples/triangles/worker.ts'),
+  }
+}].map(data => {
+  return {
+    mode: 'development',
+    entry: data.entry,
+    output: {
+      path: path.join(__dirname,  `/dist/${data.outputPath}/`),
+      publicPath: `/dist/${data.outputPath}/`,
+      filename: '[name].js'
+    },
+    resolve: {
+      extensions: ['.ts', '.js']
+    },
+    module: {
+      rules: [{
+        test: /\.ts$/,
+        loader: 'ts-loader'
+      }]
+    },
+    plugins: [
+      new (require('html-webpack-plugin'))({
+        template: './examples/index.html',
+        inject: false
+      })
+    ]
+  }
+});

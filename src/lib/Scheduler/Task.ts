@@ -1,5 +1,6 @@
 import { TaskQueue } from './TaskQueue';
 import { noop } from '../utils';
+import { ITask } from '../types';
 
 export interface OptionsTask {
   order?: number
@@ -7,7 +8,7 @@ export interface OptionsTask {
   context?: object
 }
 
-export class Task {
+export class Task implements ITask {
   fn: (frameTime?: number) => void;
   context: object | null;
   once: boolean;
@@ -21,14 +22,14 @@ export class Task {
     this.order = options?.order ?? 0;
   }
 
-  public run (queue: TaskQueue): boolean | void {
-    const result = this.fn.call(this.context);
+  public run (parentQueue: TaskQueue): void {
+    this.fn.call(this.context);
 
-    if (this.once) {
+    if (this.once === true) {
       this.run = noop;
-      queue.scheduleFilterItems();
+      parentQueue.scheduleFilterItems();
     }
-
-    return result;
   }
+
+  public next(): void {}
 }

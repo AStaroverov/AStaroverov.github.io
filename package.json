@@ -4,8 +4,8 @@
   "description": "my static portal",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
-    "build_min": "NODE_ENV=production webpack --config webpack.config.js",
+    "build": "webpack",
+    "build_min": "NODE_ENV=production webpack -p",
     "server": "webpack-dev-server --open --inline"
   },
   "repository": {
@@ -37,6 +37,7 @@
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1"
+    "eslint-plugin-standard": "^4.0.1",
+    "html-webpack-plugin": "^4.4.1"
   }
 }

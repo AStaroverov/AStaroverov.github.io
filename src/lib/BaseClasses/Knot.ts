@@ -1,14 +1,13 @@
-import { HitBox } from '../BaseClasses/HitBox';
+import { EvTarget } from './EvTarget';
 
-export class Knot extends HitBox { // Like Node from HTML
-  public children: Knot[];
+export class Knot extends EvTarget {
+  public isConnected = false;
+  protected children: Knot[];
 
-  protected parent: Knot | undefined;
+  protected parent?: Knot;
 
-  constructor (parent: Knot) {
+  constructor () {
     super();
-
-    this.parent = parent;
   }
 
   public getParent<Parent extends Knot> (): Parent | undefined {
@@ -16,7 +15,13 @@ export class Knot extends HitBox { // Like Node from HTML
   }
 
   public appendChild<Child extends Knot> (node: Child): void {
+    if (this.children === undefined) {
+      this.children = [];
+    }
+
     this.children.push(node);
+    node.setParent(this as any);
+    node.connected();
   }
 
   public removeChild<Child extends Knot> (node: Child): void {
@@ -24,10 +29,29 @@ export class Knot extends HitBox { // Like Node from HTML
 
     if (index !== -1) {
       this.children.splice(index, 1);
+      node.removeParent();
+      node.disconnected();
     }
   }
 
-  public containsChild<T extends Knot> (node: T): boolean {
+  public containsChild<Child extends Knot> (node: Child): boolean {
     return this.children.includes(node);
+  }
+
+  protected setParent<Parent extends this>(parent: Parent): void {
+    this.parent = parent;
+  }
+
+  protected removeParent(): void {
+    this.parent = undefined;
+  }
+
+  protected connected(): void {
+    this.isConnected = true;
+  }
+
+  protected disconnected() {
+    this.isConnected = false;
+    // todo: recursive disconnect
   }
 }

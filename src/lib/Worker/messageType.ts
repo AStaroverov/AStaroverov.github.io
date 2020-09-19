@@ -1,16 +1,11 @@
-import { TLayerProps } from '../Layers/Layer';
-
 export enum MessageType {
   INIT,
-  SORT_LAYERS,
 }
 
 export interface TMesageTypeToPayload {
   [MessageType.INIT]: {
-    layersProps: TLayerProps[]
     canvases: OffscreenCanvas[] | HTMLCanvasElement[]
   }
-  [MessageType.SORT_LAYERS]: TLayerProps[]
 }
 
 export function typedPostMessage<Type extends MessageType, Payload extends TMesageTypeToPayload[Type]> (

@@ -1,169 +1,173 @@
-import { KEY_CONTEXT, KEY_PARENT, KEY_PRIVATE_CONTEXT } from '../types';
-import { getRenderIndex } from '../Renderer/renderIndex';
-import { getRenderId } from '../Renderer/renderId';
-import { Knot } from './Knot';
+// import { getRenderIndex } from '../Renderer/renderIndex';
+// import { getRenderId } from '../Renderer/renderId';
+// import { CanvasElement } from './CanvasElement';
+// import { ITask } from '../types';
 
-type PrivateContext = {
-  scheduleUpdate: () => void
-};
+// type PrivateContext = {
+//   scheduleUpdate: () => void
+// };
 
-export class Component<
-  Props extends object = object,
-  State extends object = object,
-  Context extends object = object
-> extends Knot {
-  public context: any;
+// export class Component<
+//   Props extends object = object,
+//   State extends object = object,
+//   Context extends object = object
+// > extends CanvasElement implements ITask {
+//   public context?: Context;
 
-  public renderId: number = 0;
-  public renderIndex: number = 0;
+//   public props: Partial<Props> = {};
+//   public state: Partial<State> = {};
 
-  public props: Partial<Props> = {};
-  public state: Partial<State> = {};
+//   protected firstRender = true;
+//   protected firstUpdateChildren = true;
 
-  protected privateContext: PrivateContext;
+//   protected nextProps: Props | undefined = undefined;
+//   protected nextState: State | undefined = undefined;
 
-  protected firstRender = true;
-  protected firstUpdateChildren = true;
+//   protected __shouldRender: boolean;
+//   protected __shouldUpdateChildren: boolean;
+//   protected __shouldRenderChildren: boolean;
 
-  protected nextProps: Props | undefined = undefined;
-  protected nextState: State | undefined = undefined;
+//   private privateContext?: PrivateContext;
 
-  protected __shouldRender: boolean;
-  protected __shouldUpdateChildren: boolean;
-  protected __shouldRenderChildren: boolean;
+//   constructor (props: Props) {
+//     super();
 
-  constructor (props: Props) {
-    super(props[KEY_PARENT]);
+//     this.setProps(props);
+//   }
 
-    this.props = props || {};
-    this.context = props[KEY_CONTEXT];
-    this.privateContext = props[KEY_PRIVATE_CONTEXT];
-  }
+//   public setParent<Parent extends this>(parent: Parent): void {
+//     this.context = parent.context as Context;
+//     this.privateContext = parent.privateContext;
+//     this.willMount(this.nextProps, this.nextState);
+    
+//     super.setParent(parent);
+//   }
 
-  public performRender (): void {
-    this.privateContext.scheduleUpdate();
-  }
+//   public removeParent(): void {
+//     this.willUnmount();
+//     this.context = undefined;
+//     this.privateContext = undefined;
+    
+//     super.removeParent();
+//   }
 
-  public setContext (context: Context): void {
-    Object.assign(this.context, context);
-    this.performRender();
-  }
+//   public performRender (): void {
+//     this.privateContext!.scheduleUpdate();
+//   }
 
-  public isRendered (): boolean {
-    return this.renderId === getRenderId();
-  }
+//   public isRendered (): boolean {
+//     return this.renderId === getRenderId();
+//   }
 
-  public setProps (props?: Partial<Props>): void {
-    if (props === undefined) return;
+//   public setContext (context: Context): void {
+//     Object.assign(this.context, context);
+//     this.performRender();
+//   }
 
-    if (this.nextProps === undefined) {
-      this.nextProps = Object.assign({}, this.props, props) as Props;
-    } else {
-      Object.assign(this.nextProps, props);
-    }
+//   public setProps (props?: Partial<Props>): void {
+//     if (props === undefined) return;
 
-    this.performRender();
-  }
+//     if (this.nextProps === undefined) {
+//       this.nextProps = Object.assign({}, this.props, props) as Props;
+//     } else {
+//       Object.assign(this.nextProps, props);
+//     }
 
-  protected setState (state?: Partial<State>): void {
-    if (state === undefined) return;
+//     this.performRender();
+//   }
 
-    if (this.nextState === undefined) {
-      this.nextState = Object.assign({}, this.state, state) as State;
-    } else {
-      Object.assign(this.nextState, state);
-    }
+//   protected setState (state?: Partial<State>): void {
+//     if (state === undefined) return;
 
-    this.performRender();
-  }
+//     if (this.nextState === undefined) {
+//       this.nextState = Object.assign({}, this.state, state) as State;
+//     } else {
+//       Object.assign(this.nextState, state);
+//     }
 
-  protected willReceiveProperties (nextProps: Partial<Props>): void {}
+//     this.performRender();
+//   }
 
-  protected shouldRender (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
-    return true;
-  }
+//   protected willMount(nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): void {}
 
-  protected shouldUpdateChildren (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
-    return true;
-  }
+//   protected willReceiveProperties (nextProps: Partial<Props>): void {}
 
-  protected shouldRenderChildren (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
-    return true;
-  }
+//   protected shouldRender (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
+//     return true;
+//   }
 
-  protected willRender (): void {};
-  protected render (): void {};
-  protected didRender (): void {};
+//   protected shouldUpdateChildren (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
+//     return true;
+//   }
 
-  protected willUpdateChildren (): void{}
-  protected updateChildren (): void{}
-  protected didUpdateChildren (): void{}
+//   protected shouldRenderChildren (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): boolean {
+//     return true;
+//   }
 
-  protected iterate (): boolean {
-    if (this.nextProps === undefined && this.nextState === undefined) {
-      this.renderLifeCycle();
-    } else {
-      this.lifeCycle();
-    }
+//   protected willRender (): void {};
+//   protected render (): void {};
+//   protected didRender (): void {};
 
-    return this.__shouldRenderChildren;
-  }
+//   protected willUpdateChildren (): void{}
+//   protected updateChildren (): void{}
+//   protected didUpdateChildren (): void{}
+  
+//   protected willUnmount (): void{}
 
-  protected lifeCycle (): void {
-    if (this.nextProps !== undefined) {
-      this.willReceiveProperties(this.nextProps);
-    }
+//   public run (): this[] | void {
+//     if (this.nextProps === undefined && this.nextState === undefined) {
+//       this.renderLifeCycle();
+//     } else {
+//       this.lifeCycle();
+//     }
 
-    this.__shouldRender = this.shouldRender(this.nextProps, this.nextState);
-    this.__shouldUpdateChildren = this.shouldUpdateChildren(this.nextProps, this.nextState);
-    this.__shouldRenderChildren = this.shouldRenderChildren(this.nextProps, this.nextState);
+//     return this.__shouldRenderChildren ? this.children : undefined;
+//   }
 
-    if (this.nextProps !== undefined) {
-      Object.assign(this.props, this.nextProps);
-      this.nextProps = undefined;
-    }
+//   protected lifeCycle (): void {
+//     if (this.nextProps !== undefined) {
+//       this.willReceiveProperties(this.nextProps);
+//     }
 
-    if (this.nextState !== undefined) {
-      Object.assign(this.props, this.nextState);
-      this.nextState = undefined;
-    }
+//     this.__shouldRender = this.shouldRender(this.nextProps, this.nextState);
+//     this.__shouldUpdateChildren = this.shouldUpdateChildren(this.nextProps, this.nextState);
+//     this.__shouldRenderChildren = this.shouldRenderChildren(this.nextProps, this.nextState);
 
-    if (this.__shouldRender) {
-      this.renderLifeCycle();
-    }
+//     if (this.nextProps !== undefined) {
+//       Object.assign(this.props, this.nextProps);
+//       this.nextProps = undefined;
+//     }
 
-    if (this.__shouldUpdateChildren) {
-      this.childrenLifeCycle();
-    }
-  }
+//     if (this.nextState !== undefined) {
+//       Object.assign(this.props, this.nextState);
+//       this.nextState = undefined;
+//     }
 
-  protected renderLifeCycle (): void {
-    this.renderId = getRenderId();
-    this.renderIndex = getRenderIndex();
+//     if (this.__shouldRender) {
+//       this.renderLifeCycle();
+//     }
 
-    this.willRender();
-    this.render();
-    this.didRender();
+//     if (this.__shouldUpdateChildren) {
+//       this.childrenLifeCycle();
+//     }
+//   }
 
-    this.firstRender = false;
-  }
+//   protected renderLifeCycle (): void {
+//     this.renderId = getRenderId();
+//     this.renderIndex = getRenderIndex();
 
-  protected childrenLifeCycle (): void {
-    this.willUpdateChildren();
-    this.updateChildren();
-    this.didUpdateChildren();
+//     this.willRender();
+//     this.render();
+//     this.didRender();
 
-    this.firstUpdateChildren = false;
-  }
+//     this.firstRender = false;
+//   }
 
-  protected unmount (): void {
-    this.unmountChildren();
-    this.performRender();
-  }
+//   protected childrenLifeCycle (): void {
+//     this.willUpdateChildren();
+//     this.updateChildren();
+//     this.didUpdateChildren();
 
-  protected unmountChildren (): void {
-    this.children.forEach((child: Component) => {
-      child.unmount();
-    });
-  }
-}
+//     this.firstUpdateChildren = false;
+//   }
+// }
