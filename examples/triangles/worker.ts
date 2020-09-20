@@ -9,15 +9,15 @@ import { getWorkerScope } from '../../src/lib/Worker/getWorkerScope';
 main();
 
 type TContext = {
-  x: number,
-  y: number,
-  angle: number,
-}
+  x: number
+  y: number
+  angle: number
+};
 
-async function main() {
+async function main (): Promise<void> {
   const workerScope = await getWorkerScope();
   const canvases = await getOffscreenCanvases(workerScope);
-  const canvas = canvases[0]; 
+  const canvas = canvases[0];
   const ctx = canvas.getContext('2d')!;
 
   const queue = new TaskQueue();
@@ -32,7 +32,7 @@ async function main() {
   const targetSize = 24;
 
   class Dot extends BaseComponent<TContext> {
-    constructor(
+    constructor (
       protected props: {
         x: number
         y: number
@@ -73,7 +73,7 @@ async function main() {
   }
 
   class Triangle extends withDeclarativeSetChildren(BaseComponent) {
-    constructor(
+    constructor (
       protected props: {
         x: number
         y: number
@@ -83,12 +83,12 @@ async function main() {
       super();
     }
 
-    connected() {
+    protected connected (): void {
       super.connected();
       this.setChildren(this.updateChildren());
     }
 
-    updateChildren (): Array<TComponentData> {
+    updateChildren (): TComponentData[] {
       let { s, x, y } = this.props;
 
       if (s <= targetSize) {
@@ -150,9 +150,9 @@ async function main() {
       }));
     }
 
-    connected() {
+    protected connected (): void {
       super.connected();
-      
+
       this.context = {
         x: canvas.width / 2,
         y: canvas.height / 2,
@@ -187,20 +187,20 @@ async function main() {
 }
 
 function rotatePoint<T extends { x: number, y: number }> (point: T, pivotPoint: T, angle: number): T {
-    const s: number = Math.sin(angle);
-    const c: number = Math.cos(angle);
-  
-    // translate point back to origin:
-    point.x -= pivotPoint.x;
-    point.y -= pivotPoint.y;
-  
-    // rotate point
-    const newX: number = point.x * c - point.y * s;
-    const newY: number = point.x * s + point.y * c;
-  
-    // translate point back:
-    point.x = newX + pivotPoint.x;
-    point.y = newY + pivotPoint.y;
-  
-    return point;
-  }
+  const s: number = Math.sin(angle);
+  const c: number = Math.cos(angle);
+
+  // translate point back to origin:
+  point.x -= pivotPoint.x;
+  point.y -= pivotPoint.y;
+
+  // rotate point
+  const newX: number = point.x * c - point.y * s;
+  const newY: number = point.x * s + point.y * c;
+
+  // translate point back:
+  point.x = newX + pivotPoint.x;
+  point.y = newY + pivotPoint.y;
+
+  return point;
+}

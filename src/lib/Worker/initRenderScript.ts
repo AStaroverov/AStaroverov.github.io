@@ -35,7 +35,7 @@ export function initRenderScript (
   return worker;
 }
 
-function updateCanvasSize(canvas: HTMLCanvasElement): void {
+function updateCanvasSize (canvas: HTMLCanvasElement): void {
   const size = canvas.getBoundingClientRect();
 
   canvas.width = size.width * PIXEL_RATIO;

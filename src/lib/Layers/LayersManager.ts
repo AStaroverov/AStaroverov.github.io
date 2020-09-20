@@ -13,7 +13,7 @@ export class LayersManager<Map extends Record<string, Layer> = Record<string, La
     this.list.forEach(l => l.update());
   }
 
-  public prepareToFrame() {
+  public prepareToFrame (): void {
     this.list.forEach(l => {
       l.isDirty = l.willDirty;
       l.willDirty = false;

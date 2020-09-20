@@ -11,8 +11,8 @@ export class HitBoxService<Component extends CanvasElement> {
     minX: 0,
     minY: 0,
     maxY: 0,
-    maxX: 0,
-  }
+    maxX: 0
+  };
 
   public add (item: THitBoxData<Component>): void{
     // TODO: should try Bulk-Inserting Data tree.load([item1, item2, ...]);
@@ -34,11 +34,11 @@ export class HitBoxService<Component extends CanvasElement> {
 
   public testHitBox (data: BBox, options?: TOptionsHitTest): Component[] {
     const result: Component[] = [];
-    const searched: THitBoxData<Component>[] = this.rbush.search(data);
-    
+    const searched: Array<THitBoxData<Component>> = this.rbush.search(data);
+
     for (let i = 0; i < searched.length; i += 1) {
       if (searched[i].item?.onHitBox(data)) {
-        result.push(searched[i].item!);
+        result.push(searched[i].item);
       }
     }
 

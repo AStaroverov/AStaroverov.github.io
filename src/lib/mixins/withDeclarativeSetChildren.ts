@@ -1,6 +1,6 @@
-import { TComponentProps } from "./withReactDataFlow";
-import { BaseComponent } from "../BaseClasses/BaseComponent";
-import { TComponentConstructor, TComponentData, TConstructor, TKey, TRef } from "../types";
+import { TComponentProps } from './withReactDataFlow';
+import { BaseComponent } from '../BaseClasses/BaseComponent';
+import { TComponentConstructor, TComponentData, TConstructor, TKey, TRef } from '../types';
 
 const EMPTY_CHILDREN = Object.freeze([]) as unknown as any[];
 
@@ -15,13 +15,14 @@ export function createElement<
   return { type, args };
 }
 
-export function withDeclarativeSetChildren<Base extends TConstructor<BaseComponent>>(base: Base) {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+export function withDeclarativeSetChildren<Base extends TConstructor<BaseComponent>> (base: Base) {
   return class WithDeclarativeSetChildren extends base {
     private childrenKeys: TKey[];
     private mapKeyToChild: Map<TKey, BaseComponent>;
-    private componentsDatas: TComponentData<BaseComponent>[] | void;
+    private componentsDatas: Array<TComponentData<BaseComponent>> | void;
 
-    public setChildren(nextComponentsDatas: TComponentData<BaseComponent>[] = EMPTY_CHILDREN): void {
+    public setChildren (nextComponentsDatas: Array<TComponentData<BaseComponent>> = EMPTY_CHILDREN): void {
       if (this.mapKeyToChild === undefined) {
         this.mapKeyToChild = new Map<TKey, BaseComponent>();
       }
@@ -65,7 +66,7 @@ export function withDeclarativeSetChildren<Base extends TConstructor<BaseCompone
             ref = props?.ref;
             // eslint-disable-next-line new-cap
             mapKeyToChild.set(
-              key!,
+              key,
               instance = new componentData.type(...componentData.args)
             );
 
@@ -109,7 +110,7 @@ export function withDeclarativeSetChildren<Base extends TConstructor<BaseCompone
       for (let i = 0; i < prevChildrenKeys.length; i += 1) {
         key = prevChildrenKeys[i];
 
-        if (nextChildrenKeys.indexOf(key) === -1 && mapKeyToChild.has(key)) {
+        if (!nextChildrenKeys.includes(key) && mapKeyToChild.has(key)) {
           // @ts-expect-error
           mapKeyToChild.get(key)!.disconnected();
           mapKeyToChild.delete(key);
@@ -117,8 +118,8 @@ export function withDeclarativeSetChildren<Base extends TConstructor<BaseCompone
       }
     }
 
-    private createDefaultKey(...args: (string | number)[]): string {
-      return args.join('|') + '|DEFAULT_KEY'
+    private createDefaultKey (...args: Array<string | number>): string {
+      return args.join('|') + '|DEFAULT_KEY';
     }
-  }
+  };
 }

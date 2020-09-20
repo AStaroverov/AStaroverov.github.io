@@ -13,7 +13,7 @@ export class Layer<
     createRenderContext?: (canas: Canvas) => Ctx
   ) {
     this.ctx = createRenderContext !== undefined
-      ? createRenderContext(this.canvas) as Ctx
+      ? createRenderContext(this.canvas)
       : createDefaultRenderContext<Canvas, Ctx>(this.canvas);
   }
 
@@ -25,6 +25,6 @@ export class Layer<
 function createDefaultRenderContext<
   Canvas extends OffscreenCanvas | HTMLCanvasElement,
   Ctx = Canvas extends OffscreenCanvas ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D
->(canvas: Canvas): Ctx {
+> (canvas: Canvas): Ctx {
   return canvas.getContext('2d') as unknown as Ctx;
 }

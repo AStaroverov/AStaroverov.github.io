@@ -5,27 +5,29 @@ import { zeroizeRenderIndex } from './renderIndex';
 
 const EMPTY_ARRAY = Object.freeze([]) as unknown as any[];
 
-export function render<Component extends BaseComponent>(rootComponent: Component): void {
+export function render<Component extends BaseComponent> (rootComponent: Component): void {
   const onlyRoot = [rootComponent];
   let scheduled = true;
   // eslint-disable-next-line new-cap
   rootComponent.context = {};
-  // @ts-ignore
+  // @ts-expect-error
   rootComponent.privateContext = {
-    scheduleUpdate: () => scheduled = true
+    scheduleUpdate: (): void => {
+      scheduled = true;
+    }
   };
-  // @ts-ignore
+  // @ts-expect-error
   rootComponent.connected();
 
   scheduler.add({
-    run() {
+    run () {
       zeroizeRenderIndex();
       updateRenderId();
     },
-    next() {
+    next (): Component[] {
       if (scheduled) {
         scheduled = false;
-        
+
         return onlyRoot;
       }
 

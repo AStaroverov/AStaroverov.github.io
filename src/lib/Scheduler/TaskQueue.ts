@@ -7,9 +7,8 @@ export interface OptionsItems {
 
 export class TaskQueue implements ITask {
   public order: number;
-  public items: Array<ITask> = [];
+  public items: ITask[] = [];
 
-  protected stopImmediately: boolean = false;
   protected sheduledFilterItems: boolean = false;
   protected sheduledFilterItemsCount: number = 0;
 
@@ -17,7 +16,7 @@ export class TaskQueue implements ITask {
     this.order = options?.order || 0;
   }
 
-  public add (...tasks: Array<ITask>): void {
+  public add (...tasks: ITask[]): void {
     this.items.push(...tasks);
   }
 
@@ -35,7 +34,7 @@ export class TaskQueue implements ITask {
     }
   }
 
-  public next(): ITask[] | void {
+  public next (): ITask[] | void {
     return this.items;
   }
 

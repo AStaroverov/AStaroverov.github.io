@@ -19,7 +19,7 @@ export class CanvasElement extends Knot implements ITask {
     minY: 0,
     maxX: 0,
     maxY: 0,
-    item: this,
+    item: this
   };
 
   public isRendered (): boolean {
@@ -30,7 +30,7 @@ export class CanvasElement extends Knot implements ITask {
     minX: number,
     minY: number,
     maxX: number,
-    maxY: number,
+    maxY: number
   ): void {
     if (this.hitBoxData.minX !== undefined) {
       hitBoxService.remove(this.hitBoxData);
@@ -52,23 +52,23 @@ export class CanvasElement extends Knot implements ITask {
     return true;
   }
 
-  protected disconnected(): void {
+  protected disconnected (): void {
     super.disconnected();
     this.removeHitBox();
   }
 
-  public run(): void {
+  public run (): void {
     this.beforeEachRender();
     this.render();
   }
 
-  public next(): CanvasElement[] | void {
+  public next (): CanvasElement[] | void {
     return this.children;
   }
 
   protected render (): void {}
 
-  private beforeEachRender(): void {
+  private beforeEachRender (): void {
     this.renderId = getRenderId();
     this.renderIndex = getRenderIndex();
   }

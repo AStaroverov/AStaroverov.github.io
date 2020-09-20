@@ -25,11 +25,11 @@ export class Task implements ITask {
   public run (parentQueue: TaskQueue): void {
     this.fn.call(this.context);
 
-    if (this.once === true) {
+    if (this.once) {
       this.run = noop;
       parentQueue.scheduleFilterItems();
     }
   }
 
-  public next(): void {}
+  public next (): void {}
 }

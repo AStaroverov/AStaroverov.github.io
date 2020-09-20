@@ -1,9 +1,9 @@
-import { typedListenMessage, MessageType } from "./messageType";
+import { typedListenMessage, MessageType } from './messageType';
 
-export function getOffscreenCanvases (
+export async function getOffscreenCanvases (
   workerScope: DedicatedWorkerGlobalScope
 ): Promise<OffscreenCanvas[]> {
-  return new Promise(resolve => {
+  return await new Promise(resolve => {
     typedListenMessage(workerScope, MessageType.INIT, ({ data }) => {
       resolve(data.payload.canvases as OffscreenCanvas[]);
     });

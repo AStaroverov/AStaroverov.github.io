@@ -6,10 +6,6 @@ export class Knot extends EvTarget {
 
   protected parent?: Knot;
 
-  constructor () {
-    super();
-  }
-
   public getParent<Parent extends Knot> (): Parent | undefined {
     return this.parent as Parent | undefined;
   }
@@ -42,15 +38,15 @@ export class Knot extends EvTarget {
     this.parent = parent;
   }
 
-  protected removeParent(): void {
+  protected removeParent (): void {
     this.parent = undefined;
   }
 
-  protected connected(): void {
+  protected connected (): void {
     this.isConnected = true;
   }
 
-  protected disconnected() {
+  protected disconnected (): void {
     this.isConnected = false;
     // todo: recursive disconnect
   }

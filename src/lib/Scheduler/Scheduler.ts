@@ -1,7 +1,7 @@
 import { TaskQueue } from './TaskQueue';
 
 export class Scheduler extends TaskQueue {
-  public traverse() {
+  public traverse (): void {
     this.run();
 
     let next;
@@ -10,7 +10,7 @@ export class Scheduler extends TaskQueue {
     const tasks = [...(this.next() || [])];
     const indexStack: number[] = [-1];
     const indexStops: number[] = [tasks.length];
-    
+
     task = tasks[index];
 
     while (task !== undefined) {

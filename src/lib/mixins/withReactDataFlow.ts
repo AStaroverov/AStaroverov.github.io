@@ -1,6 +1,6 @@
-import { BaseComponent } from "../BaseClasses/BaseComponent";
-import { CanvasElement } from "../BaseClasses/CanvasElement";
-import { TConstructor, TKey, TRef } from "../types";
+import { BaseComponent } from '../BaseClasses/BaseComponent';
+import { CanvasElement } from '../BaseClasses/CanvasElement';
+import { TConstructor, TKey, TRef } from '../types';
 
 export interface TComponentProps {
   [key: string]: any
@@ -8,12 +8,13 @@ export interface TComponentProps {
   readonly ref?: TRef
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function withReactDataFlow<
   Props extends TComponentProps = object,
   State extends object = object,
   Context extends object = object,
-  Base extends TConstructor<BaseComponent<Context>> = TConstructor<BaseComponent<Context>>, 
->(base: Base) {
+  Base extends TConstructor<BaseComponent<Context>> = TConstructor<BaseComponent<Context>>,
+> (base: Base) {
   return class WithReactDataFlow extends base {
     public props: Partial<Props> = {};
     public state: Partial<State> = {};
@@ -35,12 +36,12 @@ export function withReactDataFlow<
       this.setProps(props);
     }
 
-    public connected(): void {
+    public connected (): void {
       super.connected();
       this.willMount(this.nextProps, this.nextState);
     }
 
-    public disconnected(): void {
+    public disconnected (): void {
       this.willUnmount();
       super.disconnected();
     }
@@ -74,7 +75,7 @@ export function withReactDataFlow<
       this.performRender();
     }
 
-    protected willMount(nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): void {}
+    protected willMount (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): void {}
 
     protected willReceiveProperties (nextProps: Partial<Props>): void {}
 
@@ -96,7 +97,7 @@ export function withReactDataFlow<
     protected willUpdateChildren (): void{}
     protected updateChildren (): void{}
     protected didUpdateChildren (): void{}
-    
+
     protected willUnmount (): void{}
 
     public run (): void {
@@ -107,7 +108,7 @@ export function withReactDataFlow<
       }
     }
 
-    public next(): CanvasElement[] | void {
+    public next (): CanvasElement[] | void {
       return this.__shouldRenderChildren ? super.next() : undefined;
     }
 
@@ -154,5 +155,5 @@ export function withReactDataFlow<
 
       this.firstUpdateChildren = false;
     }
-  }
+  };
 }

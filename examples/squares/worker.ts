@@ -9,21 +9,21 @@ import { withLayers } from '../../src/lib/mixins/withLayers';
 
 main();
 
-async function main() {
+async function main (): Promise<void> {
   const workerScope = await getWorkerScope();
   const canvases = await getOffscreenCanvases(workerScope);
   const layersManager = new LayersManager({
-    first:  new Layer(canvases[0], 0),
-    second: new Layer(canvases[1], 1),
+    first: new Layer(canvases[0], 0),
+    second: new Layer(canvases[1], 1)
   });
 
   const queue = new TaskQueue();
 
-  class Coube extends 
+  class Coube extends
     withLayers(layersManager)(BaseComponent) {
     public props: { x: number, y: number, s: number};
     public state: { dx: number, dy: number } = { dx: 0, dy: 0 };
-    
+
     protected layer: typeof layersManager.layers[keyof typeof layersManager.layers];
     protected r = 0;
     protected count = 0;
