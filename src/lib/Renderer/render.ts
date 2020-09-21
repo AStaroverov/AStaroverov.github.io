@@ -2,10 +2,16 @@ import { BaseComponent } from '../BaseClasses/BaseComponent';
 import { scheduler } from '../Scheduler';
 import { updateRenderId } from './renderId';
 import { zeroizeRenderIndex } from './renderIndex';
+import { workerEventRedispatcher } from '../utils/events/workerEventRedispatcher';
+import { hitBoxService } from '../Services/hitBoxServerice';
+import { CanvasElement } from '../BaseClasses/CanvasElement';
 
 const EMPTY_ARRAY = Object.freeze([]) as unknown as any[];
 
-export function render<Component extends BaseComponent> (rootComponent: Component): void {
+export function render<Component extends BaseComponent> (
+  workerScope: DedicatedWorkerGlobalScope,
+  rootComponent: Component
+): void {
   const onlyRoot = [rootComponent];
   let scheduled = true;
   // eslint-disable-next-line new-cap
@@ -16,6 +22,7 @@ export function render<Component extends BaseComponent> (rootComponent: Componen
       scheduled = true;
     }
   };
+  hitBoxService.setRoot(rootComponent as CanvasElement);
   // @ts-expect-error
   rootComponent.connected();
 
@@ -34,4 +41,6 @@ export function render<Component extends BaseComponent> (rootComponent: Componen
       return EMPTY_ARRAY;
     }
   });
+
+  workerEventRedispatcher(workerScope);
 }

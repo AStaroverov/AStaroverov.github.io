@@ -68,7 +68,7 @@ export class PseudoWorker extends EventEmitter {
     http.open('GET', scriptFile, false);
     http.send(null);
 
-    if (http.readyState == 4) {
+    if (http.readyState === 4) {
       const strResponse = http.responseText;
 
       if (http.status !== 404 && http.status !== 500) {

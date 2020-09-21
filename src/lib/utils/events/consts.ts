@@ -1,0 +1,47 @@
+import { TMutable } from '../../types';
+import { Knot } from '../../BaseClasses/Knot';
+
+export type CanvasEvent<E extends Event = Event> = TMutable<E> & { path: Knot[] };
+
+export const shouldStopImmediatePropagation = Symbol('shouldStopImmediatePropagation');
+export const shouldStopPropagation = Symbol('shouldStopPropagation');
+export const shouldPreventDefault = Symbol('shouldPreventDefault');
+
+export const FIELDS_FOR_COPY = [
+  'AT_TARGET',
+  'BUBBLING_PHASE',
+  'CAPTURING_PHASE',
+  'NONE',
+  'altKey',
+  'bubbles',
+  'button',
+  'buttons',
+  'cancelBubble',
+  'cancelable',
+  'clientX',
+  'clientY',
+  'composed',
+  'ctrlKey',
+  'defaultPrevented',
+  'detail',
+  'eventPhase',
+  'isTrusted',
+  'layerX',
+  'layerY',
+  'metaKey',
+  'movementX',
+  'movementY',
+  'offsetX',
+  'offsetY',
+  'pageX',
+  'pageY',
+  'returnValue',
+  'screenX',
+  'screenY',
+  'shiftKey',
+  'timeStamp',
+  'type',
+  'which',
+  'x',
+  'y'
+];

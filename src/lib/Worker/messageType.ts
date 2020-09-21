@@ -1,20 +1,29 @@
 export enum MessageType {
   INIT,
+  SEND_EVENT
 }
 
-export interface TMesageTypeToPayload {
+export interface TMessageTypeToPayload {
   [MessageType.INIT]: {
-    canvases: OffscreenCanvas[] | HTMLCanvasElement[]
+    devicePixelRatio: number
+    canvases: OffscreenCanvas[]
+  }
+  [MessageType.SEND_EVENT]: {
+    event: MouseEvent
   }
 }
 
-export function typedPostMessage<Type extends MessageType, Payload extends TMesageTypeToPayload[Type]> (
+export function typedPostMessage<Type extends MessageType, Payload extends TMessageTypeToPayload[Type]> (
   ctx: Worker | DedicatedWorkerGlobalScope, type: Type, payload: Payload, transfer: Transferable[] = []
 ): void {
-  ctx.postMessage({ type, payload }, transfer);
+  try {
+    ctx.postMessage({ type, payload }, transfer);
+  } catch (err: unknown) {
+    throw new Error(`Can't send message to worker - ${(err as Error).message}`);
+  }
 }
 
-export function typedListenMessage<Type extends MessageType, Payload extends TMesageTypeToPayload[Type]> (
+export function typedListenMessage<Type extends MessageType, Payload extends TMessageTypeToPayload[Type]> (
   ctx: Worker | DedicatedWorkerGlobalScope,
   type: Type,
   listener: (event: MessageEvent<{ type: Type, payload: Payload}>) => void

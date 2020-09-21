@@ -6,6 +6,7 @@ type TOptionsHitTest = {
 };
 
 export class HitBoxService<Component extends CanvasElement> {
+  public root: Component;
   private rbush = new RBush<THitBoxData<Component>>(16);
   private tmpBox: BBox = {
     minX: 0,
@@ -14,7 +15,11 @@ export class HitBoxService<Component extends CanvasElement> {
     maxX: 0
   };
 
-  public add (item: THitBoxData<Component>): void{
+  public setRoot (root: Component): void {
+    this.root = root;
+  }
+
+  public add (item: THitBoxData<Component>): void {
     // TODO: should try Bulk-Inserting Data tree.load([item1, item2, ...]);
     this.rbush.insert(item);
   }
@@ -47,7 +52,6 @@ export class HitBoxService<Component extends CanvasElement> {
     }
 
     return result.sort((a, b) => {
-      // TODO: that z if we use layer???
       if (a.zIndex !== 0 || b.zIndex !== 0) {
         return b.zIndex - a.zIndex;
       }

@@ -4,20 +4,27 @@ import { render } from '../../src/lib/Renderer/render';
 import { getWorkerScope } from '../../src/lib/Worker/getWorkerScope';
 import { Layer } from '../../src/lib/Layers/Layer';
 import { LayersManager } from '../../src/lib/Layers/LayersManager';
-import { getOffscreenCanvases } from '../../src/lib/Worker/getOffscreenCanvases';
+import { getInitData } from '../../src/lib/Worker/getInitData';
 import { withLayers } from '../../src/lib/mixins/withLayers';
 
 main();
 
 async function main (): Promise<void> {
   const workerScope = await getWorkerScope();
-  const canvases = await getOffscreenCanvases(workerScope);
+  const { canvases } = await getInitData(workerScope);
   const layersManager = new LayersManager({
     first: new Layer(canvases[0], 0),
     second: new Layer(canvases[1], 1)
   });
 
   const queue = new TaskQueue();
+
+  scheduler.add(queue);
+
+  (function tick () {
+    scheduler.run();
+    requestAnimationFrame(tick);
+  })();
 
   class Coube extends
     withLayers(layersManager)(BaseComponent) {
@@ -72,7 +79,7 @@ async function main (): Promise<void> {
       });
     }
 
-    protected connected () {
+    protected connected (): void {
       super.connected();
 
       for (let i = 0; i < 1000; i += 1) {
@@ -89,12 +96,5 @@ async function main (): Promise<void> {
     }
   }
 
-  render(new Root());
-
-  scheduler.add(queue);
-
-  (function tick () {
-    scheduler.run();
-    requestAnimationFrame(tick);
-  })();
+  render(workerScope, new Root());
 }

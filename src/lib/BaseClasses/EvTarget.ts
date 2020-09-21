@@ -1,5 +1,4 @@
-export const KEY_EVEN_TARGET = Symbol('EventEmitter field for save in component');
-export const KEY_STOP_PROPAGATION = Symbol('Key for save state in event');
+import { CanvasEvent, shouldPreventDefault, shouldStopImmediatePropagation } from '../utils/events/consts';
 
 type TEventType = string;
 
@@ -28,32 +27,13 @@ export class EvTarget implements EventTarget {
     }
   }
 
-  public dispatchEvent (event): boolean {
-    const bubbles = event.bubbles || false;
-
-    if (event[KEY_STOP_PROPAGATION] === undefined) {
-      event[KEY_STOP_PROPAGATION] = false;
-      event.stopPropagation = () => {
-        event[KEY_STOP_PROPAGATION] = true;
-      };
-    }
-
-    this.fireEvent(event);
-
-    if (bubbles && !event[KEY_STOP_PROPAGATION]) {
-      return dipping(this as any, event);
-    }
-
-    return false;
-  }
-
   public hasListener (type: TEventType): boolean {
     return this.eventsMap !== undefined && this.eventsMap[type] !== undefined;
   }
 
-  public fireEvent<Ev extends Event> (event: Ev): void {
+  public dispatchEvent<E extends CanvasEvent>(event: E): boolean {
     if (!this.hasListener(event.type)) {
-      return;
+      return event[shouldPreventDefault];
     }
 
     const listeners: EventListenerOrEventListenerObject[] = this.eventsMap[event.type];
@@ -66,31 +46,12 @@ export class EvTarget implements EventTarget {
       } else if (typeof listener === 'object' && typeof listener.handleEvent === 'function') {
         listener.handleEvent(event);
       }
+
+      if (event[shouldStopImmediatePropagation]) {
+        break;
+      }
     }
+
+    return event[shouldPreventDefault];
   }
-}
-
-function dipping<
-  Target extends EvTarget & { getParent: () => Target | undefined },
-  Ev extends Event
-> (target: Target, event: Ev): boolean {
-  const parent = target.getParent();
-
-  if (parent === undefined) {
-    return false;
-  }
-
-  const eventTarget: EvTarget = parent[KEY_EVEN_TARGET];
-
-  if (eventTarget === undefined) {
-    return dipping(parent, event);
-  }
-
-  parent.fireEvent(event);
-
-  if (event[KEY_STOP_PROPAGATION]) {
-    return false;
-  }
-
-  return dipping(parent, event);
 }

@@ -3,7 +3,7 @@ import { render } from '../../src/lib/Renderer/render';
 import { TComponentData } from '../../src/lib/types';
 import { BaseComponent } from '../../src/lib/BaseClasses/BaseComponent';
 import { createElement, withDeclarativeSetChildren } from '../../src/lib/mixins/withDeclarativeSetChildren';
-import { getOffscreenCanvases } from '../../src/lib/Worker/getOffscreenCanvases';
+import { getInitData } from '../../src/lib/Worker/getInitData';
 import { getWorkerScope } from '../../src/lib/Worker/getWorkerScope';
 
 main();
@@ -16,7 +16,7 @@ type TContext = {
 
 async function main (): Promise<void> {
   const workerScope = await getWorkerScope();
-  const canvases = await getOffscreenCanvases(workerScope);
+  const { canvases } = await getInitData(workerScope);
   const canvas = canvases[0];
   const ctx = canvas.getContext('2d')!;
 
@@ -183,7 +183,7 @@ async function main (): Promise<void> {
     }
   }
 
-  render(new Root());
+  render(workerScope, new Root());
 }
 
 function rotatePoint<T extends { x: number, y: number }> (point: T, pivotPoint: T, angle: number): T {

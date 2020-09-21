@@ -4,20 +4,26 @@ module.exports = [{
   outputPath: 'squares',
   entry: {
     main: path.join(__dirname, './examples/squares/index.ts'),
-    worker: path.join(__dirname, './examples/squares/worker.ts'),
+    worker: path.join(__dirname, './examples/squares/worker.ts')
   }
-},{
+}, {
   outputPath: 'triangles',
   entry: {
     main: path.join(__dirname, './examples/triangles/index.ts'),
-    worker: path.join(__dirname, './examples/triangles/worker.ts'),
+    worker: path.join(__dirname, './examples/triangles/worker.ts')
+  }
+}, {
+  outputPath: 'events',
+  entry: {
+    main: path.join(__dirname, './examples/events/index.ts'),
+    worker: path.join(__dirname, './examples/events/worker.ts')
   }
 }].map(data => {
   return {
     mode: 'development',
     entry: data.entry,
     output: {
-      path: path.join(__dirname,  `/dist/${data.outputPath}/`),
+      path: path.join(__dirname, `/dist/${data.outputPath}/`),
       publicPath: `/dist/${data.outputPath}/`,
       filename: '[name].js'
     },
@@ -36,5 +42,5 @@ module.exports = [{
         inject: false
       })
     ]
-  }
+  };
 });
