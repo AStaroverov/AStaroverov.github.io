@@ -10,9 +10,9 @@ export function withLayers<
     return class WithLayers extends base {
       protected currentLayer?: Map[keyof Map];
 
-      public run (): this[] | void {
+      public run (): void {
         if (this.currentLayer?.isDirty === true) {
-          return super.run();
+          super.run();
         }
       }
 
@@ -38,7 +38,7 @@ export function withLayers<
         return layer;
       }
 
-      public disconnected () {
+      public disconnected (): void {
         super.disconnected();
 
         this.currentLayer = undefined;
