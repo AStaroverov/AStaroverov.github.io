@@ -22,7 +22,7 @@ async function main (): Promise<void> {
   scheduler.add(queue);
 
   (function tick () {
-    scheduler.run();
+    scheduler.traverse();
     requestAnimationFrame(tick);
   })();
 
@@ -66,7 +66,7 @@ async function main (): Promise<void> {
   }
 
   class Root extends BaseComponent {
-    size = 50;
+    size = 10;
     rows = layersManager.list[0].canvas.width / this.size | 0;
 
     protected render (): void {
@@ -82,7 +82,7 @@ async function main (): Promise<void> {
     protected connected (): void {
       super.connected();
 
-      for (let i = 0; i < 1000; i += 1) {
+      for (let i = 0; i < 10000; i += 1) {
         this.appendChild(
           new Coube(
             {
