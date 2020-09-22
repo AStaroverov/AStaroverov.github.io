@@ -18,6 +18,12 @@ module.exports = [{
     main: path.join(__dirname, './examples/events/index.ts'),
     worker: path.join(__dirname, './examples/events/worker.ts')
   }
+}, {
+  outputPath: 'graph',
+  entry: {
+    main: path.join(__dirname, './examples/graph/index.ts'),
+    worker: path.join(__dirname, './examples/graph/worker.ts')
+  }
 }].map(data => {
   return {
     mode: 'development',
