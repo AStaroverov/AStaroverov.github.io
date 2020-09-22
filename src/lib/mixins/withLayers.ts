@@ -28,12 +28,9 @@ export function withLayers<
           return layer;
         }
 
-        if (this.currentLayer !== undefined) {
-          this.currentLayer.update();
-        }
-
+        this.currentLayer?.update();
         this.currentLayer = layer;
-        this.currentLayer.update();
+        this.performRender();
 
         return layer;
       }
