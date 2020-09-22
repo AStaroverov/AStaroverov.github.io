@@ -26,37 +26,36 @@ export function workerEventRedispatcher (workerScope: DedicatedWorkerGlobalScope
           event.screenY -= comp.hitBoxData.minY;
         }
 
-        const mouseover = { ...event, type: 'mouseover' };
-
+        event.type = 'mouseover';
         hoveredKnots.forEach((comp) => {
-          comp.dispatchEvent(mouseover);
+          comp.dispatchEvent(event);
         });
 
         if (comp !== lastHoveredKnot) {
-          if (!isChild(comp, lastHoveredKnot)) {
-            bubbling(
-              lastHoveredKnot,
-              { ...event, type: 'mouseleave' },
-              (target) => target !== comp
-            );
-          }
+          const commonParent = findCommonParent(comp, lastHoveredKnot);
 
-          if (!isChild(lastHoveredKnot, comp)) {
-            bubbling(
-              comp,
-              { ...event, type: 'mouseenter' },
-              (target) => target !== lastHoveredKnot
-            );
-          }
+          event.type = 'mouseleave';
+          bubbling(
+            lastHoveredKnot,
+            event,
+            (target) => target !== commonParent
+          );
+
+          event.type = 'mouseenter';
+          bubbling(
+            comp,
+            event,
+            (target) => target !== commonParent
+          );
         } else {
+          event.type = 'mousemove';
           bubbling(lastHoveredKnot, event);
         }
 
-        const mouseout = { ...event, type: 'mouseout' };
-
+        event.type = 'mouseout';
         lastHoveredKnots.forEach((comp) => {
           if (hoveredKnots.indexOf(comp) === -1) {
-            comp.dispatchEvent(mouseout);
+            comp.dispatchEvent(event);
           }
         });
 
@@ -121,6 +120,7 @@ function bubbling<
   event: Ev,
   whileFn: (target: Target) => boolean = () => true
 ): void {
+  event.path = [];
   event.target = target || null;
 
   while (target && whileFn(target)) {
@@ -137,14 +137,35 @@ function bubbling<
   }
 }
 
-function isChild (target: Knot | undefined, parent: Knot): boolean {
-  while (target) {
-    if (target === parent) {
-      return true;
+function findCommonParent (t1: Knot, t2: Knot): Knot {
+  const path1 = createPath(t1);
+  const path2 = createPath(t2);
+
+  let commonParent: Knot = path1[path1.length];
+  let i = path1.length - 1;
+  let j = path2.length - 1;
+
+  while (i >= 0 && j >= 0) {
+    if (path1[i] === path2[j]) {
+      commonParent = path1[i];
+    } else {
+      break;
     }
 
+    i -= 1;
+    j -= 1;
+  }
+
+  return commonParent;
+}
+
+function createPath (target: Knot | undefined): Knot[] {
+  const path: Knot[] = [];
+
+  while (target) {
+    path.push(target);
     target = target.getParent();
   }
 
-  return false;
+  return path;
 }
