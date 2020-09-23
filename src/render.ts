@@ -1,10 +1,10 @@
-import { BaseComponent } from '../BaseClasses/BaseComponent';
-import { scheduler } from '../Scheduler';
-import { updateRenderId } from './renderId';
-import { zeroizeRenderIndex } from './renderIndex';
-import { workerEventRedispatcher } from '../utils/events/workerEventRedispatcher';
-import { hitBoxService } from '../Services/hitBoxServerice';
-import { CanvasElement } from '../BaseClasses/CanvasElement';
+import { BaseComponent } from './BaseComponent';
+import { scheduler } from './lib/scheduler';
+import { updateRenderId } from './prototypes/helpers/renderId';
+import { zeroizeRenderIndex } from './prototypes/helpers/renderIndex';
+import { workerEventRedispatcher } from './worker/events/workerEventRedispatcher';
+import { hitBoxService } from './prototypes/helpers/hitBoxServerice';
+import { CanvasElement } from './prototypes/CanvasElement';
 
 const EMPTY_ARRAY = Object.freeze([]) as unknown as any[];
 

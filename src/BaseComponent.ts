@@ -1,4 +1,4 @@
-import { CanvasElement } from './CanvasElement';
+import { CanvasElement } from './prototypes/CanvasElement';
 
 type PrivateContext = {
   scheduleUpdate: () => void

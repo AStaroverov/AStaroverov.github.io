@@ -1,12 +1,12 @@
-import { scheduler, TaskQueue } from '../../src/lib/Scheduler';
-import { render } from '../../src/lib/Renderer/render';
-import { BaseComponent } from '../../src/lib/BaseClasses/BaseComponent';
-import { getInitData } from '../../src/lib/Worker/getInitData';
-import { getWorkerScope } from '../../src/lib/Worker/getWorkerScope';
-import { CanvasEvent } from '../../src/lib/utils/events/consts';
-import { LayersManager } from '../../src/lib/Layers/LayersManager';
-import { Layer } from '../../src/lib/Layers/Layer';
-import { withLayers } from '../../src/lib/mixins/withLayers';
+import { scheduler, TaskQueue } from '../../src/lib/scheduler';
+import { render } from '../../src/render';
+import { BaseComponent } from '../../src/BaseComponent';
+import { getInitData } from '../../src/worker/getInitData';
+import { getWorkerScope } from '../../src/worker/getWorkerScope';
+import { CanvasEvent } from '../../src/worker/events/consts';
+import { LayersManager } from '../../src/layers/LayersManager';
+import { Layer } from '../../src/layers/Layer';
+import { withLayers } from '../../src/mixins/withLayers';
 
 main();
 
@@ -173,7 +173,7 @@ async function main (): Promise<void> {
     }
 
     protected updateChildren (): void {
-      this.nodes.forEach((node, i) => {
+      this.nodes.forEach((node) => {
         this.appendChild(new Nod(node));
       });
 

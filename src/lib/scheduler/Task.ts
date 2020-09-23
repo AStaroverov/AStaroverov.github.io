@@ -1,6 +1,6 @@
 import { TaskQueue } from './TaskQueue';
-import { noop } from '../utils';
-import { ITask } from '../types';
+import { noop } from '../../utils';
+import { ITask } from '../../types';
 
 export interface OptionsTask {
   order?: number

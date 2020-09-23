@@ -1,7 +1,7 @@
-import { MessageType, typedPostMessage } from './messageType';
-import { PseudoWorker } from '.';
-import { PIXEL_RATIO } from '../utils';
-import { dispatcherEventToWorker } from '../utils/events/dispatcherEventToWorker';
+import { MessageType, typedPostMessage } from './worker/messageType';
+import { PseudoWorker } from './lib/PseudoWorker';
+import { PIXEL_RATIO } from './utils';
+import { dispatcherEventToWorker } from './worker/events/dispatcherEventToWorker';
 
 const offscreenCanvasesSupported = HTMLCanvasElement.prototype.transferControlToOffscreen !== undefined;
 

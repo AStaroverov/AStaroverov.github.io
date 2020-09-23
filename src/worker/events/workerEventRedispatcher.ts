@@ -1,8 +1,8 @@
-import { MessageType, typedListenMessage } from '../../Worker/messageType';
-import { hitBoxService } from '../../Services/hitBoxServerice';
-import { Knot } from '../../BaseClasses/Knot';
+import { MessageType, typedListenMessage } from '../messageType';
+import { hitBoxService } from '../../prototypes/helpers/hitBoxServerice';
+import { Knot } from '../../prototypes/Knot';
 import { CanvasEvent, shouldPreventDefault, shouldStopImmediatePropagation, shouldStopPropagation } from './consts';
-import { CanvasElement } from '../../BaseClasses/CanvasElement';
+import { CanvasElement } from '../../prototypes/CanvasElement';
 
 export function workerEventRedispatcher (workerScope: DedicatedWorkerGlobalScope): void {
   let lastHoveredKnot: CanvasElement;

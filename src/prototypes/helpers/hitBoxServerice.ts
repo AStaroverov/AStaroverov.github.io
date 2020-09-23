@@ -1,5 +1,5 @@
 import RBush, { BBox } from 'rbush';
-import { CanvasElement, THitBoxData } from '../BaseClasses/CanvasElement';
+import { CanvasElement, THitBoxData } from '../CanvasElement';
 
 type TOptionsHitTest = {
   noSort?: Boolean

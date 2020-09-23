@@ -1,11 +1,11 @@
-import { scheduler, TaskQueue, Task } from '../../src/lib/Scheduler';
-import { BaseComponent } from '../../src/lib/BaseClasses/BaseComponent';
-import { render } from '../../src/lib/Renderer/render';
-import { getWorkerScope } from '../../src/lib/Worker/getWorkerScope';
-import { Layer } from '../../src/lib/Layers/Layer';
-import { LayersManager } from '../../src/lib/Layers/LayersManager';
-import { getInitData } from '../../src/lib/Worker/getInitData';
-import { withLayers } from '../../src/lib/mixins/withLayers';
+import { scheduler, TaskQueue, Task } from '../../src/lib/scheduler';
+import { BaseComponent } from '../../src/BaseComponent';
+import { render } from '../../src/render';
+import { getWorkerScope } from '../../src/worker/getWorkerScope';
+import { Layer } from '../../src/layers/Layer';
+import { LayersManager } from '../../src/layers/LayersManager';
+import { getInitData } from '../../src/worker/getInitData';
+import { withLayers } from '../../src/mixins/withLayers';
 
 main();
 

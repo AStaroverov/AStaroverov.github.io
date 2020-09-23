@@ -1,6 +1,6 @@
-import { MessageType, typedPostMessage } from '../../Worker/messageType';
+import { MessageType, typedPostMessage } from '../messageType';
 import { CanvasEvent, FIELDS_FOR_COPY } from './consts';
-import { PIXEL_RATIO } from '../index';
+import { PIXEL_RATIO } from '../../utils';
 
 export function dispatcherEventToWorker (worker: Worker, root: Element): VoidFunction {
   const redispatch = (event: MouseEvent): void => {

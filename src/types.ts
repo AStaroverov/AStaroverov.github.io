@@ -1,4 +1,4 @@
-import { BaseComponent } from './BaseClasses/BaseComponent';
+import { BaseComponent } from './BaseComponent';
 
 export type TMutable<T> = {
   -readonly[P in keyof T]: T[P]

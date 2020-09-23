@@ -1,10 +1,10 @@
-import { scheduler, TaskQueue } from '../../src/lib/Scheduler';
-import { render } from '../../src/lib/Renderer/render';
-import { BaseComponent } from '../../src/lib/BaseClasses/BaseComponent';
-import { createElement, withDeclarativeSetChildren } from '../../src/lib/mixins/withDeclarativeSetChildren';
-import { getInitData } from '../../src/lib/Worker/getInitData';
-import { getWorkerScope } from '../../src/lib/Worker/getWorkerScope';
-import { CanvasEvent } from '../../src/lib/utils/events/consts';
+import { scheduler, TaskQueue } from '../../src/lib/scheduler';
+import { render } from '../../src/render';
+import { BaseComponent } from '../../src/BaseComponent';
+import { createElement, withDeclarativeSetChildren } from '../../src/mixins/withDeclarativeSetChildren';
+import { getInitData } from '../../src/worker/getInitData';
+import { getWorkerScope } from '../../src/worker/getWorkerScope';
+import { CanvasEvent } from '../../src/worker/events/consts';
 
 main();
 

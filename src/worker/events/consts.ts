@@ -1,5 +1,5 @@
 import { TMutable } from '../../types';
-import { Knot } from '../../BaseClasses/Knot';
+import { Knot } from '../../prototypes/Knot';
 
 export type CanvasEvent<E extends Event = Event> = TMutable<E> & { path: Knot[] };
 

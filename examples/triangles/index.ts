@@ -1,4 +1,4 @@
-import { initRenderScript } from '../../src/lib/Worker/initRenderScript';
+import { initRenderScript } from '../../src/initRenderScript';
 
 initRenderScript(
   document.getElementById('root')!,
