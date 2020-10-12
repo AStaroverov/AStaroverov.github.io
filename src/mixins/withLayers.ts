@@ -2,44 +2,54 @@ import { BaseComponent } from '../BaseComponent';
 import { LayersManager } from '../layers/LayersManager';
 import { TComponentConstructor } from '../types';
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function withLayers<
   LM extends LayersManager,
   Map extends LM['layers'],
-> (layersManger: LM) {
-  return function withLayersMixin<Base extends TComponentConstructor<BaseComponent>> (base: Base) {
-    return class WithLayers extends base {
-      protected currentLayer?: Map[keyof Map];
+  Base extends TComponentConstructor<BaseComponent>
+> (base: Base) {
+  return class WithLayers extends base {
+    public static getLayersManger (comp: BaseComponent<{ layersManager?: LM }>): LM | void {
+      return comp.context.layersManager;
+    }
 
-      public run (): void {
-        if (this.currentLayer?.isDirty === true) {
-          super.run();
-        }
+    protected currentLayer?: Map[keyof Map];
+
+    public run (): void {
+      if (this.currentLayer?.isDirty === true) {
+        super.run();
+      }
+    }
+
+    public performRender (): void {
+      super.performRender();
+      this.currentLayer?.update();
+    }
+
+    public attachToLayer<K extends keyof Map>(key: K): Map[K] {
+      const lm = (this.constructor as typeof WithLayers).getLayersManger(this);
+
+      if (lm === undefined) {
+        throw new Error('Incorrect function for extract layersManager');
       }
 
-      public performRender (): void {
-        super.performRender();
-        this.currentLayer?.update();
-      }
+      const layer = (lm.layers as Map)[key];
 
-      public attachToLayer<K extends keyof Map>(key: K): Map[K] {
-        const layer = (layersManger.layers as Map)[key];
-
-        if (layer === this.currentLayer) {
-          return layer;
-        }
-
-        this.currentLayer?.update();
-        this.currentLayer = layer;
-        this.performRender();
-
+      if (layer === this.currentLayer) {
         return layer;
       }
 
-      public disconnected (): void {
-        super.disconnected();
+      this.currentLayer?.update();
+      this.currentLayer = layer;
+      this.performRender();
 
-        this.currentLayer = undefined;
-      }
-    };
+      return layer;
+    }
+
+    public disconnected (): void {
+      super.disconnected();
+
+      this.currentLayer = undefined;
+    }
   };
 }

@@ -1,9 +1,9 @@
 import { getRenderIndex } from './helpers/renderIndex';
 import { getRenderId } from './helpers/renderId';
 import { Knot } from './Knot';
-import { hitBoxService } from './helpers/hitBoxServerice';
 import { BBox } from 'rbush';
 import { ITask } from '../types';
+import { PRIVATE_CONTEXT } from '../BaseComponent';
 
 export type THitBoxData<Item extends CanvasElement = CanvasElement> = BBox & {
   item: Item
@@ -33,7 +33,7 @@ export class CanvasElement extends Knot implements ITask {
     maxY: number
   ): void {
     if (this.hitBoxData.minX !== undefined) {
-      hitBoxService.remove(this.hitBoxData);
+      this[PRIVATE_CONTEXT].hitBoxService.remove(this.hitBoxData);
     }
 
     this.hitBoxData.minX = minX;
@@ -41,11 +41,11 @@ export class CanvasElement extends Knot implements ITask {
     this.hitBoxData.maxX = maxX;
     this.hitBoxData.maxY = maxY;
 
-    hitBoxService.add(this.hitBoxData);
+    this[PRIVATE_CONTEXT].hitBoxService.add(this.hitBoxData);
   }
 
   protected removeHitBox (): void {
-    hitBoxService.remove(this.hitBoxData);
+    this[PRIVATE_CONTEXT].hitBoxService.remove(this.hitBoxData);
   }
 
   public onHitBox (area: BBox): boolean {

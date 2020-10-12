@@ -9,6 +9,10 @@ import { withLayers } from '../../src/mixins/withLayers';
 
 main();
 
+type TContext = {
+  layersManager: LayersManager
+};
+
 async function main (): Promise<void> {
   const workerScope = await getWorkerScope();
   const { canvases } = await getInitData(workerScope);
@@ -26,9 +30,7 @@ async function main (): Promise<void> {
     requestAnimationFrame(tick);
   })();
 
-  class Coube extends
-    withLayers(layersManager)(BaseComponent) {
-    public props: { x: number, y: number, s: number};
+  class Coube extends withLayers(BaseComponent)<TContext> {
     public state: { dx: number, dy: number } = { dx: 0, dy: 0 };
 
     protected layer: typeof layersManager.layers[keyof typeof layersManager.layers];
@@ -36,10 +38,12 @@ async function main (): Promise<void> {
     protected count = 0;
     protected delta = 0;
 
-    constructor (props: Coube['props']) {
+    constructor (public props: { x: number, y: number, s: number}) {
       super();
+    }
 
-      this.props = props;
+    protected connected (): void {
+      super.connected();
 
       if (Math.random() > 0.5) {
         this.layer = this.attachToLayer('first');
@@ -65,22 +69,14 @@ async function main (): Promise<void> {
     }
   }
 
-  class Root extends BaseComponent {
+  class Root extends BaseComponent<TContext> {
     size = 10;
     rows = layersManager.list[0].canvas.width / this.size | 0;
 
-    protected render (): void {
-      layersManager.prepareToFrame();
-      layersManager.list.forEach(l => {
-        if (l.isDirty) {
-          l.ctx.fillStyle = 'black';
-          l.ctx.clearRect(0, 0, l.canvas.width, l.canvas.height);
-        }
-      });
-    }
-
     protected connected (): void {
       super.connected();
+
+      this.context.layersManager = layersManager;
 
       for (let i = 0; i < 10000; i += 1) {
         this.appendChild(
@@ -93,6 +89,16 @@ async function main (): Promise<void> {
           )
         );
       }
+    }
+
+    protected render (): void {
+      layersManager.prepareToFrame();
+      layersManager.list.forEach(l => {
+        if (l.isDirty) {
+          l.ctx.fillStyle = 'black';
+          l.ctx.clearRect(0, 0, l.canvas.width, l.canvas.height);
+        }
+      });
     }
   }
 

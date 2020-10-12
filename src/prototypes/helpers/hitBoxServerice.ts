@@ -1,12 +1,12 @@
 import RBush, { BBox } from 'rbush';
+import { vec2, mat4 } from 'gl-matrix';
 import { CanvasElement, THitBoxData } from '../CanvasElement';
 
 type TOptionsHitTest = {
   noSort?: Boolean
 };
 
-export class HitBoxService<Component extends CanvasElement> {
-  public root: Component;
+export class HitBoxService<Component extends CanvasElement = CanvasElement> {
   private rbush = new RBush<THitBoxData<Component>>(16);
   private tmpBox: BBox = {
     minX: 0,
@@ -14,10 +14,6 @@ export class HitBoxService<Component extends CanvasElement> {
     maxY: 0,
     maxX: 0
   };
-
-  public setRoot (root: Component): void {
-    this.root = root;
-  }
 
   public add (item: THitBoxData<Component>): void {
     // TODO: should try Bulk-Inserting Data tree.load([item1, item2, ...]);
@@ -29,6 +25,7 @@ export class HitBoxService<Component extends CanvasElement> {
   }
 
   public testPoint (x: number, y: number, options?: TOptionsHitTest): Component[] {
+    // const transformedPoint = vec2.transformMat4([0, 0], [x, y], this.transformMatrix);
     this.tmpBox.minX = x - 1;
     this.tmpBox.minY = y - 1;
     this.tmpBox.maxX = x + 1;
@@ -60,5 +57,3 @@ export class HitBoxService<Component extends CanvasElement> {
     });
   }
 }
-
-export const hitBoxService = new HitBoxService();

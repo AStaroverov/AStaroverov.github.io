@@ -43,5 +43,14 @@ export const FIELDS_FOR_COPY = [
   'type',
   'which',
   'x',
-  'y'
+  'y',
+  'wheelDelta',
+  'wheelDeltaX',
+  'wheelDeltaY',
+  'deltaMode',
+  'deltaX',
+  'deltaY',
+  'deltaZ',
+  'detail',
+  'eventPhase'
 ];

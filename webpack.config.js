@@ -24,6 +24,12 @@ module.exports = [{
     main: path.join(__dirname, './examples/graph/index.ts'),
     worker: path.join(__dirname, './examples/graph/worker.ts')
   }
+}, {
+  outputPath: 'camera',
+  entry: {
+    main: path.join(__dirname, './examples/camera/index.ts'),
+    worker: path.join(__dirname, './examples/camera/worker.ts')
+  }
 }].map(data => {
   return {
     mode: 'development',

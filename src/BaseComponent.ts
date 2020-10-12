@@ -1,13 +1,20 @@
 import { CanvasElement } from './prototypes/CanvasElement';
+import { mat4 } from 'gl-matrix';
+import { HitBoxService } from './prototypes/helpers/hitBoxServerice';
 
-type PrivateContext = {
+export type TPrivateContext = {
+  root: BaseComponent
+  hitBoxService: HitBoxService
+  globalTransformMatrix: mat4
   scheduleUpdate: () => void
 };
+
+export const PRIVATE_CONTEXT = Symbol('PRIVATE_CONTEXT');
 
 export class BaseComponent<Context extends object = object> extends CanvasElement {
   public context: Context;
 
-  private privateContext: PrivateContext;
+  protected [PRIVATE_CONTEXT]: TPrivateContext;
 
   public setProps (props: object): void {
     Object.assign(this, props);
@@ -15,7 +22,7 @@ export class BaseComponent<Context extends object = object> extends CanvasElemen
 
   public setParent<Parent extends this>(parent: Parent): void {
     this.context = parent.context;
-    this.privateContext = parent.privateContext;
+    this[PRIVATE_CONTEXT] = parent[PRIVATE_CONTEXT];
 
     super.setParent(parent);
   }
@@ -24,12 +31,16 @@ export class BaseComponent<Context extends object = object> extends CanvasElemen
     // @ts-expect-error
     this.context = undefined;
     // @ts-expect-error
-    this.privateContext = undefined;
+    this[PRIVATE_CONTEXT] = undefined;
 
     super.removeParent();
   }
 
   public performRender (): void {
-    this.privateContext.scheduleUpdate();
+    this[PRIVATE_CONTEXT].scheduleUpdate();
+  }
+
+  public setGlobalTransformMatrix (matrix: mat4): void {
+    mat4.copy(this[PRIVATE_CONTEXT].globalTransformMatrix, matrix);
   }
 }

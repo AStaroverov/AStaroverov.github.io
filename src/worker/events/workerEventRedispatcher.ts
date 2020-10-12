@@ -1,10 +1,14 @@
 import { MessageType, typedListenMessage } from '../messageType';
-import { hitBoxService } from '../../prototypes/helpers/hitBoxServerice';
 import { Knot } from '../../prototypes/Knot';
 import { CanvasEvent, shouldPreventDefault, shouldStopImmediatePropagation, shouldStopPropagation } from './consts';
 import { CanvasElement } from '../../prototypes/CanvasElement';
+import { TPrivateContext } from '../../BaseComponent';
+import { vec2, mat4 } from 'gl-matrix';
 
-export function workerEventRedispatcher (workerScope: DedicatedWorkerGlobalScope): void {
+export function workerEventRedispatcher (
+  workerScope: DedicatedWorkerGlobalScope,
+  privateContext: TPrivateContext
+): void {
   let lastHoveredKnot: CanvasElement;
   let lastHoveredKnots: CanvasElement[] = [];
   let mousedownKnot: CanvasElement;
@@ -12,18 +16,27 @@ export function workerEventRedispatcher (workerScope: DedicatedWorkerGlobalScope
   typedListenMessage(workerScope, MessageType.SEND_EVENT, ({ data }) => {
     const event = extendEvent(data.payload.event);
 
+    if (event.type.indexOf('mouse') > -1 || event.type.indexOf('touch') > -1) {
+      mutateTargetEvent(event as unknown as CanvasEvent<MouseEvent>, privateContext.globalTransformMatrix);
+    }
+
     switch (event.type) {
       case 'mousemove': {
-        const hoveredKnots = hitBoxService.testPoint(
-          event.clientX,
-          event.clientY
+        const mouseEvent = (event as unknown as CanvasEvent<MouseEvent>);
+        const hoveredKnots = privateContext.hitBoxService.testPoint(
+          mouseEvent.clientX,
+          mouseEvent.clientY
         );
+
+        if (hoveredKnots.length === 0) {
+          hoveredKnots[0] = privateContext.root as CanvasElement;
+        }
 
         const comp = hoveredKnots[0];
 
         if (comp !== undefined) {
-          event.screenX -= comp.hitBoxData.minX;
-          event.screenY -= comp.hitBoxData.minY;
+          mouseEvent.screenX -= comp.hitBoxData.minX;
+          mouseEvent.screenY -= comp.hitBoxData.minY;
         }
 
         event.type = 'mouseover';
@@ -80,9 +93,16 @@ export function workerEventRedispatcher (workerScope: DedicatedWorkerGlobalScope
         break;
       }
       case 'mouseleave':
-      case 'mouseenter': {
-        hitBoxService.root.dispatchEvent(event);
+      case 'mouseenter':
+      case 'keydown':
+      case 'keyup':
+      case 'keypress': {
+        privateContext.root.dispatchEvent(event);
 
+        break;
+      }
+      case 'wheel': {
+        bubbling(lastHoveredKnot, event);
         break;
       }
     }
@@ -168,4 +188,18 @@ function createPath (target: Knot | undefined): Knot[] {
   }
 
   return path;
+}
+
+const tmpPoint: vec2 = [0, 0];
+const tmp2Point: vec2 = [0, 0];
+function mutateTargetEvent (event: CanvasEvent<MouseEvent>, matrix: mat4): void {
+  tmp2Point[0] = event.clientX;
+  tmp2Point[1] = event.clientY;
+
+  vec2.transformMat4(tmpPoint, tmp2Point, matrix);
+
+  event.clientX = tmpPoint[0];
+  event.clientY = tmpPoint[1];
+  event.x = event.clientX;
+  event.y = event.clientY;
 }

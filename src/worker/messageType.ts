@@ -9,7 +9,7 @@ export interface TMessageTypeToPayload {
     canvases: OffscreenCanvas[]
   }
   [MessageType.SEND_EVENT]: {
-    event: MouseEvent
+    event: Event
   }
 }
 

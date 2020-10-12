@@ -25,3 +25,13 @@ export interface TComponentData<
   type: TComponentConstructor<Type>
   args: Args
 }
+
+export type TPoint = {
+  x: number
+  y: number
+};
+
+export type TRect = TPoint & {
+  width: number
+  height: number
+};

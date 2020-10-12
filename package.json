@@ -19,7 +19,9 @@
   },
   "homepage": "https://github.com/AStaroverov/AStaroverov.github.io#readme",
   "dependencies": {
+    "@types/gl-matrix": "^3.2.0",
     "eventemitter3": "^4.0.7",
+    "gl-matrix": "^3.3.0",
     "rbush": "^3.0.1",
     "ts-loader": "^5.3.3",
     "typescript": "^4.0.2",

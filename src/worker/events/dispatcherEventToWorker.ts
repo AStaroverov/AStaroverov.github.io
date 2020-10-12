@@ -3,18 +3,14 @@ import { CanvasEvent, FIELDS_FOR_COPY } from './consts';
 import { PIXEL_RATIO } from '../../utils';
 
 export function dispatcherEventToWorker (worker: Worker, root: Element): VoidFunction {
-  const redispatch = (event: MouseEvent): void => {
-    const rect = root.getBoundingClientRect();
-    const cloneEvent: CanvasEvent<MouseEvent> = createEventData(event);
+  const redispatch = <E extends Event>(event: E): void => {
+    const canvasEvent: CanvasEvent<E> = createEventData<E>(event);
 
-    cloneEvent.clientX = PIXEL_RATIO * (event.clientX - rect.left);
-    cloneEvent.clientY = PIXEL_RATIO * (event.clientY - rect.top);
-    cloneEvent.x = cloneEvent.clientX;
-    cloneEvent.y = cloneEvent.clientY;
-    cloneEvent.movementX = PIXEL_RATIO * cloneEvent.movementX;
-    cloneEvent.movementY = PIXEL_RATIO * cloneEvent.movementY;
+    if (event instanceof MouseEvent) {
+      mutateTargetEvent(canvasEvent as unknown as CanvasEvent<MouseEvent>, event, root.getBoundingClientRect());
+    }
 
-    typedPostMessage(worker, MessageType.SEND_EVENT, { event: cloneEvent });
+    typedPostMessage(worker, MessageType.SEND_EVENT, { event: canvasEvent });
   };
 
   root.addEventListener('click', redispatch);
@@ -24,6 +20,12 @@ export function dispatcherEventToWorker (worker: Worker, root: Element): VoidFun
   root.addEventListener('mouseenter', redispatch);
   root.addEventListener('mouseleave', redispatch);
 
+  root.addEventListener('wheel', redispatch, { passive: true });
+
+  root.addEventListener('keydown', redispatch);
+  root.addEventListener('keypress', redispatch);
+  root.addEventListener('keyup', redispatch);
+
   return () => {
     root.removeEventListener('click', redispatch);
     root.removeEventListener('mousemove', redispatch);
@@ -31,6 +33,12 @@ export function dispatcherEventToWorker (worker: Worker, root: Element): VoidFun
     root.removeEventListener('mouseup', redispatch);
     root.removeEventListener('mouseenter', redispatch);
     root.removeEventListener('mouseleave', redispatch);
+
+    root.removeEventListener('wheel', redispatch);
+
+    root.removeEventListener('keydown', redispatch);
+    root.removeEventListener('keypress', redispatch);
+    root.removeEventListener('keyup', redispatch);
   };
 }
 
@@ -38,8 +46,19 @@ function createEventData<E extends Event> (event: E): CanvasEvent<E> {
   const eventData: CanvasEvent<E> = {} as any;
 
   FIELDS_FOR_COPY.forEach(key => {
-    eventData[key] = event[key];
+    if (key in event) {
+      eventData[key] = event[key];
+    }
   });
 
   return eventData;
+}
+
+function mutateTargetEvent (canvasEvent: CanvasEvent<MouseEvent>, parentEvent: MouseEvent, rect: DOMRect): void {
+  canvasEvent.clientX = PIXEL_RATIO * (parentEvent.clientX - rect.left);
+  canvasEvent.clientY = PIXEL_RATIO * (parentEvent.clientY - rect.top);
+  canvasEvent.x = canvasEvent.clientX;
+  canvasEvent.y = canvasEvent.clientY;
+  canvasEvent.movementX = PIXEL_RATIO * parentEvent.movementX;
+  canvasEvent.movementY = PIXEL_RATIO * parentEvent.movementY;
 }
