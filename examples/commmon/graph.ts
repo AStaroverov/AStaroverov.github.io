@@ -134,16 +134,7 @@ export class Con extends withLayers(BaseComponent)<TContext> {
 }
 
 export class GraphRoot extends BaseComponent<TContext> {
-  private nodes = [...Array(100)].map((_, i) => {
-    return {
-      id: i,
-      x: Math.floor(Math.random() * 1800),
-      y: Math.floor(Math.random() * 1700),
-      size: 50 + Math.floor(Math.random() * 50),
-      color: colors[Math.floor(Math.random() * 5)]
-    };
-  });
-
+  private nodes;
   private canvas: OffscreenCanvas;
 
   constructor (
@@ -153,6 +144,15 @@ export class GraphRoot extends BaseComponent<TContext> {
     super();
 
     this.canvas = this.layersManager.layers.connections.canvas;
+    this.nodes = [...Array(200)].map((_, i) => {
+      return {
+        id: i,
+        x: Math.floor(Math.random() * this.canvas.width),
+        y: Math.floor(Math.random() * this.canvas.height),
+        size: 50 + Math.floor(Math.random() * 50),
+        color: colors[Math.floor(Math.random() * 5)]
+      };
+    });
   }
 
   protected connected (): void {
@@ -190,6 +190,15 @@ export class GraphRoot extends BaseComponent<TContext> {
   }
 
   protected createChildren (): BaseComponent[] {
+    // return [
+    //   new Nod({
+    //     id: 1,
+    //     x: 0,
+    //     y: 0,
+    //     size: 400,
+    //     color: colors[Math.floor(Math.random() * 5)]
+    //   })
+    // ];
     const children: BaseComponent[] = [];
 
     this.nodes.forEach((node) => {

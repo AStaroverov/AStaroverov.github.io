@@ -1,10 +1,9 @@
 import { BaseComponent, PRIVATE_CONTEXT } from '../../BaseComponent';
-import { CameraService } from './serviece';
+import { CameraService, TCameraServiceOptions } from './serviece';
 import { isMetaKeyEvent } from '../../utils';
 import { withdDrag } from '../../mixins/withdDrag';
 import { scheduler, Task } from '../../lib/scheduler';
-import { TRect } from '../../types';
-import { CanvasEvent } from '../../worker/events/consts';
+import { CanvasEvent, CanvasMouseEvent } from '../../worker/events/consts';
 
 export enum MANIPULATION_TYPE {
   TOUCH = 'touch',
@@ -12,7 +11,6 @@ export enum MANIPULATION_TYPE {
 }
 
 export class CameraComponent<Context extends object = object> extends withdDrag(BaseComponent)<Context> {
-  public usableRect: TRect;
   public camera: CameraService;
 
   public manipulationType: MANIPULATION_TYPE = MANIPULATION_TYPE.MOUSE;
@@ -24,18 +22,11 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
   private _cameraMoveStartData: number[] = [0, 0];
   private _cameraUpdateTask: Task;
 
-  constructor ({ usableRect, manipulationType }: { usableRect?: TRect, manipulationType?: MANIPULATION_TYPE } = {}) {
+  constructor ({ manipulationType, ...cameraParams }: TCameraServiceOptions & { manipulationType?: MANIPULATION_TYPE } = {}) {
     super();
 
-    this.usableRect = usableRect || this.usableRect;
     this.manipulationType = manipulationType || this.manipulationType;
-    this.camera = new CameraService({
-      ...usableRect,
-      scale: 0.5,
-      scaleRatio: 2,
-      scaleMin: 0.1,
-      scaleMax: 2
-    });
+    this.camera = new CameraService(cameraParams);
     this.camera.on('updated', this.onCameraUpdate);
   }
 
@@ -43,7 +34,7 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
     this.performRender();
   };
 
-  private _lastDragEvent: MouseEvent | undefined = undefined;
+  private _lastDragEvent: CanvasMouseEvent | undefined = undefined;
 
   protected connected (): void {
     super.connected();
@@ -119,7 +110,10 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
     }
 
     if (event.type.indexOf('mouse') > -1) {
-      this.camera.move(event.movementX, event.movementY);
+      this.camera.move(
+        event.original.x - this._lastDragEvent!.original.x,
+        event.original.y - this._lastDragEvent!.original.y
+      );
     }
   }
 
@@ -131,11 +125,11 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
     this.camera.zoom(e.x, e.y, e.deltaY);
   }
 
-  private _onDragStart (e: MouseEvent): void {
+  private _onDragStart (e: CanvasMouseEvent): void {
     this._lastDragEvent = e;
   }
 
-  private _onDragUpdate (e: MouseEvent): void {
+  private _onDragUpdate (e: CanvasMouseEvent): void {
     this._move(e);
     this._lastDragEvent = e;
   }

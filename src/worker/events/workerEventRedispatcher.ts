@@ -202,4 +202,6 @@ function mutateTargetEvent (event: CanvasEvent<MouseEvent>, matrix: mat4): void 
   event.clientY = tmpPoint[1];
   event.x = event.clientX;
   event.y = event.clientY;
+  event.movementX = event.movementX * matrix[0];
+  event.movementY = event.movementY * matrix[5];
 }

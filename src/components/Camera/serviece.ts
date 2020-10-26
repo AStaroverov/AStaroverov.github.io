@@ -1,6 +1,6 @@
 import EventEmitter from 'eventemitter3';
 
-type TCameraServiceOptions = {
+export type TCameraServiceOptions = {
   x?: number
   y?: number
   width?: number
@@ -27,13 +27,14 @@ type TMatrix = {
 
 export class CameraService extends EventEmitter {
   static SCALE_MIN: number = 0.001;
+  static SCALE_MAX: number = 100;
 
   public x: number = 0;
   public y: number = 0;
   public width: number = 0;
   public height: number = 0;
-  public scale: number = 0.5;
-  public scaleRatio: number = 1;
+  public scale: number = 1;
+  public scaleRatio: number = 2;
   public relativeX: number = 0;
   public relativeY: number = 0;
   public relativeWidth: number = 0;
@@ -65,7 +66,7 @@ export class CameraService extends EventEmitter {
   private savedMatrix: TMatrix[] = [];
 
   private scaleMin: number = CameraService.SCALE_MIN;
-  private scaleMax: number = 1;
+  private scaleMax: number = CameraService.SCALE_MAX;
   private speedZoom: number = 1;
   private moveData: TMoveData = {
     sx: 0,
@@ -123,8 +124,8 @@ export class CameraService extends EventEmitter {
 
   public move (dx: number = 0, dy: number = 0): void{
     this.set({
-      x: this.x + dx | 0,
-      y: this.y + dy | 0
+      x: this.x + dx,
+      y: this.y + dy
     });
   }
 
