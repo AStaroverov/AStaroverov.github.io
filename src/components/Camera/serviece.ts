@@ -124,8 +124,8 @@ export class CameraService extends EventEmitter {
 
   public move (dx: number = 0, dy: number = 0): void{
     this.set({
-      x: this.x + dx,
-      y: this.y + dy
+      x: (this.x + dx) | 0,
+      y: (this.y + dy) | 0
     });
   }
 
@@ -186,7 +186,7 @@ export class CameraService extends EventEmitter {
 
   private zoomEnd (scale: number, dx1: number, dy1: number, dx2: number, dy2: number): void {
     this.set({
-      scale,
+      scale: toFixed(scale, 3),
       x: this.x + ((dx2 - dx1) * scale) | 0,
       y: this.y + ((dy2 - dy1) * scale) | 0
     });
@@ -243,4 +243,10 @@ export class CameraService extends EventEmitter {
 
 function clamp (v: number, min: number, max: number): number {
   return Math.max(Math.min(v, min), max);
+}
+
+function toFixed (num: number, digits: number, base: number = 10): number {
+  const pow = Math.pow(base, digits);
+
+  return Math.round(num * pow) / pow;
 }

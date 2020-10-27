@@ -1,31 +1,33 @@
-import { MessageType, typedPostMessage } from './worker/messageType';
+import { MessageType, typedPostMessage, typedPromiseMessage } from './worker/messageType';
 import { PseudoWorker } from './lib/PseudoWorker';
 import { PIXEL_RATIO } from './utils';
 import { dispatcherEventToWorker } from './worker/events/dispatcherEventToWorker';
 
 const offscreenCanvasesSupported = HTMLCanvasElement.prototype.transferControlToOffscreen !== undefined;
 
-export function initRenderScript (
+export async function initRenderScript (
   root: HTMLElement,
   pathToScript: string
-): Worker {
+): Promise<Worker> {
   const canvases = Array.from(root.querySelectorAll('canvas'));
   const WorkerConstructor = offscreenCanvasesSupported ? Worker : PseudoWorker;
   const worker = (new WorkerConstructor(pathToScript)) as Worker;
 
   canvases.forEach(updateCanvasSize);
 
+  await typedPromiseMessage(worker, MessageType.WORKER_INIT);
+
   if (offscreenCanvasesSupported) {
     const offscreenCanvases = canvases.map(canvas => canvas.transferControlToOffscreen());
 
     typedPostMessage(
       worker,
-      MessageType.INIT,
+      MessageType.SEND_INIT_DATA,
       { devicePixelRatio: PIXEL_RATIO, canvases: offscreenCanvases },
       offscreenCanvasesSupported ? offscreenCanvases : []
     );
   } else {
-    typedPostMessage(worker, MessageType.INIT, {
+    typedPostMessage(worker, MessageType.SEND_INIT_DATA, {
       devicePixelRatio: PIXEL_RATIO,
       canvases: canvases as unknown as OffscreenCanvas[]
     });

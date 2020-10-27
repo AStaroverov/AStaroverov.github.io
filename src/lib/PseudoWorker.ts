@@ -10,6 +10,7 @@ export class PseudoWorker extends EventEmitter {
     terminate: any
     postMessage: any
     addEventListener: any
+    removeEventListener: any
 
     location: any
     requestAnimationFrame: any
@@ -40,6 +41,10 @@ export class PseudoWorker extends EventEmitter {
     // Parent can call this method instead of assigning methods directly
     this.self.addEventListener = function (type, callback) {
       this.on(type, callback);
+    };
+
+    this.self.removeEventListener = function (type, callback) {
+      this.off(type, callback);
     };
 
     this.self.terminate = function () {

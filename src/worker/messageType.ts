@@ -1,23 +1,25 @@
-export enum MessageType {
-  INIT,
+export const enum MessageType {
+  WORKER_INIT,
+  SEND_INIT_DATA,
   SEND_EVENT
 }
 
 export interface TMessageTypeToPayload {
-  [MessageType.INIT]: {
+  [MessageType.SEND_INIT_DATA]: {
     devicePixelRatio: number
     canvases: OffscreenCanvas[]
   }
   [MessageType.SEND_EVENT]: {
     event: Event
   }
+  [MessageType.WORKER_INIT]: {}
 }
 
 export function typedPostMessage<Type extends MessageType, Payload extends TMessageTypeToPayload[Type]> (
-  ctx: Worker | DedicatedWorkerGlobalScope, type: Type, payload: Payload, transfer: Transferable[] = []
+  ctx: Worker | DedicatedWorkerGlobalScope, type: Type, payload?: Payload, transfer?: Transferable[]
 ): void {
   try {
-    ctx.postMessage({ type, payload }, transfer);
+    ctx.postMessage({ type, payload }, transfer || []);
   } catch (err: unknown) {
     throw new Error(`Can't send message to worker - ${(err as Error).message}`);
   }
@@ -36,4 +38,16 @@ export function typedListenMessage<Type extends MessageType, Payload extends TMe
   ctx.addEventListener('message', cb);
 
   return () => ctx.removeEventListener('message', cb);
+}
+
+export async function typedPromiseMessage<Type extends MessageType, Payload extends TMessageTypeToPayload[Type]> (
+  ctx: Worker | DedicatedWorkerGlobalScope,
+  type: Type
+): Promise<Payload> {
+  return await new Promise((resolve) => {
+    const remove = typedListenMessage(ctx, type, ({ data }) => {
+      remove();
+      resolve(data.payload as Payload);
+    });
+  });
 }
