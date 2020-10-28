@@ -9,13 +9,13 @@ export interface TComponentProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function withReactDataFlow<
+export function likeReact<
   Props extends TComponentProps = object,
   State extends object = object,
   Context extends object = object,
   Base extends TConstructor<BaseComponent<Context>> = TConstructor<BaseComponent<Context>>,
 > (base: Base) {
-  return class WithReactDataFlow extends base {
+  return class LikeReact extends base {
     public props: Partial<Props> = {};
     public state: Partial<State> = {};
 
@@ -48,7 +48,7 @@ export function withReactDataFlow<
 
     public setContext (context: Context): void {
       Object.assign(this.context, context);
-      this.performRender();
+      this.requestUpdate();
     }
 
     public setProps (props?: Partial<Props>): void {
@@ -60,7 +60,7 @@ export function withReactDataFlow<
         Object.assign(this.nextProps, props);
       }
 
-      this.performRender();
+      this.requestUpdate();
     }
 
     protected setState (state?: Partial<State>): void {
@@ -72,7 +72,7 @@ export function withReactDataFlow<
         Object.assign(this.nextState, state);
       }
 
-      this.performRender();
+      this.requestUpdate();
     }
 
     protected willMount (nextProps: Partial<Props> | undefined, nextState: Partial<State> | undefined): void {}
