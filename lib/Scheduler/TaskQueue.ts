@@ -1,5 +1,5 @@
-import { noop } from '../../utils';
-import { ITask } from '../../types';
+import { noop } from '../Renderer/src/utils';
+import { ITask } from '../Renderer/src/types';
 
 export interface OptionsItems {
   order?: number

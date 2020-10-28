@@ -1,4 +1,4 @@
-import { scheduler, TaskQueue, Scheduler } from '../../src/lib/scheduler';
+import { scheduler, TaskQueue, Scheduler } from '../../../Scheduler';
 import { getInitData } from '../../src/worker/getInitData';
 import { getWorkerScope } from '../../src/worker/getWorkerScope';
 import { LayersManager } from '../../src/layers/LayersManager';

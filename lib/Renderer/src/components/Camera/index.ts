@@ -2,7 +2,7 @@ import { BaseComponent, PRIVATE_CONTEXT } from '../../BaseComponent';
 import { CameraService, TCameraServiceOptions } from './serviece';
 import { isMetaKeyEvent } from '../../utils';
 import { withdDrag } from '../../mixins/withdDrag';
-import { scheduler, Task } from '../../lib/scheduler';
+import { scheduler, Task } from '../../../../Scheduler';
 import { CanvasEvent, CanvasMouseEvent } from '../../worker/events/consts';
 
 export enum MANIPULATION_TYPE {

@@ -1,4 +1,4 @@
-import { scheduler, TaskQueue, Task } from '../../src/lib/scheduler';
+import { scheduler, TaskQueue, Task } from '../../../Scheduler';
 import { render } from '../../src/render';
 import { TComponentData } from '../../src/types';
 import { BaseComponent } from '../../src/BaseComponent';

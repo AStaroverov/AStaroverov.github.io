@@ -1,4 +1,4 @@
-import { scheduler, TaskQueue, Task } from '../../src/lib/scheduler';
+import { scheduler, TaskQueue, Task } from '../../../Scheduler';
 import { BaseComponent } from '../../src/BaseComponent';
 import { render } from '../../src/render';
 import { getWorkerScope } from '../../src/worker/getWorkerScope';
@@ -6,8 +6,6 @@ import { Layer } from '../../src/layers/Layer';
 import { LayersManager } from '../../src/layers/LayersManager';
 import { getInitData } from '../../src/worker/getInitData';
 import { withLayers } from '../../src/mixins/withLayers';
-import { observeComponent } from '../../src/stateManagment/mobx';
-import { action, observable } from 'mobx';
 
 main();
 
@@ -32,9 +30,7 @@ async function main (): Promise<void> {
     requestAnimationFrame(tick);
   })();
 
-  @observeComponent
   class Coube extends withLayers(BaseComponent)<TContext> {
-    @observable
     public state: { dx: number, dy: number } = { dx: 0, dy: 0 };
 
     protected layer: typeof layersManager.layers[keyof typeof layersManager.layers];
@@ -49,15 +45,18 @@ async function main (): Promise<void> {
     protected connected (): void {
       super.connected();
 
-      this.layer = this.attachToLayer('first');
-      queue.add(new Task(this.changeCoordinat, this));
+      if (Math.random() > 0.5) {
+        this.layer = this.attachToLayer('first');
+        queue.add(new Task(this.changeCoordinat, this));
+      } else {
+        this.layer = this.attachToLayer('second');
+      }
     }
 
     protected render (): void {
       this.layer.ctx.fillRect(this.props.x + this.state.dx, this.props.y + this.state.dy, this.props.s, this.props.s);
     }
 
-    @action
     protected changeCoordinat (): void {
       this.r = Math.random();
       this.delta += 0.01 * (this.r > 0.5 ? 1 : -1);
@@ -65,11 +64,13 @@ async function main (): Promise<void> {
 
       this.state.dx = Math.sin(this.count) * 10;
       this.state.dy = Math.cos(this.count) * 10;
+
+      this.requestUpdate();
     }
   }
 
   class Root extends BaseComponent<TContext> {
-    size = 400;
+    size = 10;
     rows = layersManager.list[0].canvas.width / this.size | 0;
 
     protected connected (): void {
@@ -77,7 +78,7 @@ async function main (): Promise<void> {
 
       this.context.layersManager = layersManager;
 
-      for (let i = 0; i < 3; i += 1) {
+      for (let i = 0; i < 10000; i += 1) {
         this.appendChild(
           new Coube(
             {

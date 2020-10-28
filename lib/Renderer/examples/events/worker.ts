@@ -1,4 +1,4 @@
-import { scheduler, TaskQueue } from '../../src/lib/scheduler';
+import { scheduler, TaskQueue } from '../../../Scheduler';
 import { render } from '../../src/render';
 import { BaseComponent } from '../../src/BaseComponent';
 import { createElement, withDeclarativeSetChildren } from '../../src/mixins/withDeclarativeSetChildren';

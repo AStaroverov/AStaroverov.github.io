@@ -9,13 +9,13 @@ export interface TComponentProps {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export function likeReact<
+export function withReactDataFlow<
   Props extends TComponentProps = object,
   State extends object = object,
   Context extends object = object,
   Base extends TConstructor<BaseComponent<Context>> = TConstructor<BaseComponent<Context>>,
 > (base: Base) {
-  return class LikeReact extends base {
+  return class WithReactDataFlow extends base {
     public props: Partial<Props> = {};
     public state: Partial<State> = {};
 

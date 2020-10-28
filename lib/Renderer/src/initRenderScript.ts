@@ -1,5 +1,5 @@
 import { MessageType, typedPostMessage, typedPromiseMessage } from './worker/messageType';
-import { PseudoWorker } from './lib/PseudoWorker';
+import { PseudoWorker } from '../../PseudoWorker';
 import { PIXEL_RATIO } from './utils';
 import { dispatcherEventToWorker } from './worker/events/dispatcherEventToWorker';
 

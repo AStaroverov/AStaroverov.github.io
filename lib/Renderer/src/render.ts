@@ -1,5 +1,5 @@
 import { BaseComponent, PRIVATE_CONTEXT } from './BaseComponent';
-import { scheduler } from './lib/scheduler';
+import { scheduler } from '../../Scheduler';
 import { updateRenderId } from './prototypes/helpers/renderId';
 import { zeroizeRenderIndex } from './prototypes/helpers/renderIndex';
 import { workerEventRedispatcher } from './worker/events/workerEventRedispatcher';
