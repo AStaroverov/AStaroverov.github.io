@@ -15,9 +15,6 @@ export interface ITask {
 export type TKey = string;
 export type TRef = ((inst: any) => void) | string;
 
-export const KEY_CONTEXT = Symbol('context');
-export const KEY_PRIVATE_CONTEXT = Symbol('private context');
-
 export interface TComponentData<
   Type extends BaseComponent = BaseComponent,
   Args extends unknown[] = unknown[],

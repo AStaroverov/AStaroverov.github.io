@@ -9,7 +9,6 @@ export class Layer<
 
   constructor (
     public canvas: Canvas,
-    public zIndex: number,
     createRenderContext?: (canas: Canvas) => Ctx
   ) {
     this.ctx = createRenderContext !== undefined

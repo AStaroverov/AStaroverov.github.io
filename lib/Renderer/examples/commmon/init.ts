@@ -20,9 +20,9 @@ export async function init (): Promise<{
   scheduler.add(queue);
 
   const layersManager = new LayersManager({
-    first: new Layer(canvases[0], 0),
-    second: new Layer(canvases[1], 1),
-    third: new Layer(canvases[2], 2)
+    first: new Layer(canvases[0]),
+    second: new Layer(canvases[1]),
+    third: new Layer(canvases[2])
   });
 
   (function tick () {
