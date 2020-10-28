@@ -1,0 +1,55 @@
+<head>
+  <title>fontscanner</title>
+</head>
+
+<body>
+	<h1 class="bigdots">Fontscanner</h1>
+
+ 	{{> scanner }}
+</body>
+
+<template name="scanner">
+
+    <div>
+	    <input name="text" value="{{text}}" />
+    </div>
+    <div>
+        <button data-action="download-font">download font file</button>
+    </div>
+
+	{{#each glyphs}}
+	  {{> glyph .}}
+	{{/each}}
+
+</template>
+
+<template name="glyph">
+<div class="glyph-container">
+	<div class="headers flex">
+		<h2>original glyph</h2>
+		<h2>scan map</h2>
+		<h2>svg circles</h2>
+		<h2>BDF code</h2>
+	</div>
+	<div class="flex">
+		<div class="glyph">
+			<div class="glyph-ajust">{{.}}</div>
+		</div>
+		<canvas width=256 height=256></canvas>
+		<svg width=256 height=256></svg>
+<!--<pre>STARTCHAR C00{{encoding}}-->
+<!--ENCODING {{encoding}}-->
+<!--SWIDTH 666 0-->
+<!--DWIDTH 16 0-->
+<!--BBX 16 16 0 -2-->
+<!--BITMAP-->
+<!--{{#each bytes}}{{.}}-->
+<!--{{/each}}ENDCHAR</pre>-->
+<pre>{{bdfCode}}</pre>
+	</div>
+</div>
+</template>
+
+<template name="bdfGlyph">
+	{{.}}
+</template>

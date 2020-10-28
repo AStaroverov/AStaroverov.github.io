@@ -1,13 +1,17 @@
 const path = require('path');
+const HtmlPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+
+const p = (str) => path.join(__dirname, str);
 
 module.exports = {
   mode: 'development',
   entry: {
-    main: path.join(__dirname, './src/index.ts'),
-    worker: path.join(__dirname, './src/worker/index.ts')
+    main: p('./src/index.ts'),
+    worker: p('./src/worker/index.ts')
   },
   output: {
-    path: path.join(__dirname, '/dist/'),
+    path: p('/dist/'),
     publicPath: '/dist/',
     filename: '[name].js'
   },
@@ -21,9 +25,14 @@ module.exports = {
     }]
   },
   plugins: [
-    new (require('html-webpack-plugin'))({
+    new HtmlPlugin({
       template: './src/index.html',
       inject: false
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: p('src/lib/Pxxl/fonts/'), to: 'fonts/' }
+      ]
     })
   ]
 };
