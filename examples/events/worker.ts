@@ -43,21 +43,21 @@ async function main (): Promise<void> {
       this.addEventListener('mousedown', (event) => {
         event.stopPropagation();
         this.dragging = true;
-        this.performRender();
+        this.requestUpdate();
       });
       root.addEventListener('mousemove', this.onMove);
       root.addEventListener('mouseup', (event) => {
         if (this.dragging) {
           this.setHitBox(this.props.x, this.props.y, this.props.s + this.props.x, this.props.s + this.props.y);
           this.dragging = false;
-          this.performRender();
+          this.requestUpdate();
         }
       });
       root.addEventListener('mouseleave', () => {
         if (this.dragging) {
           this.setHitBox(this.props.x, this.props.y, this.props.s + this.props.x, this.props.s + this.props.y);
           this.dragging = false;
-          this.performRender();
+          this.requestUpdate();
         }
       });
     }
@@ -91,7 +91,7 @@ async function main (): Promise<void> {
 
     private onClick = (event: CanvasEvent<MouseEvent>): void => {
       this.color = colors[Math.floor(Math.random() * 5)];
-      this.performRender();
+      this.requestUpdate();
 
       if (this.props.stopPropagation) {
         event.stopPropagation();
@@ -102,7 +102,7 @@ async function main (): Promise<void> {
       if (this.dragging) {
         this.props.x += event.movementX;
         this.props.y += event.movementY;
-        this.performRender();
+        this.requestUpdate();
       }
     };
   }

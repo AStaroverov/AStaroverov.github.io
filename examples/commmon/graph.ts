@@ -60,7 +60,7 @@ class Nod extends withLayers(BaseComponent)<TContext> {
     if (this.dragging) {
       this.props.x += event.movementX;
       this.props.y += event.movementY;
-      this.performRender();
+      this.requestUpdate();
     }
   };
 
@@ -69,7 +69,7 @@ class Nod extends withLayers(BaseComponent)<TContext> {
     this.dragging = true;
     this.layer = this.attachToLayer('dragging');
     this.zIndex = 1;
-    this.performRender();
+    this.requestUpdate();
   };
 
   private onDragEnd = (event: CanvasEvent<MouseEvent>): void => {
@@ -79,7 +79,7 @@ class Nod extends withLayers(BaseComponent)<TContext> {
       this.layer = this.attachToLayer('nodes');
       this.zIndex = 0;
       this.setHitBox(this.props.x, this.props.y, this.props.size + this.props.x, this.props.size + this.props.y);
-      this.performRender();
+      this.requestUpdate();
     }
   };
 }

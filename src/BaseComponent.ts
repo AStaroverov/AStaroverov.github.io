@@ -36,7 +36,7 @@ export class BaseComponent<Context extends object = object> extends CanvasElemen
     super.removeParent();
   }
 
-  public performRender (): void {
+  public requestUpdate (): void {
     this[PRIVATE_CONTEXT].scheduleUpdate();
   }
 

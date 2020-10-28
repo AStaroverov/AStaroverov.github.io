@@ -1,4 +1,4 @@
-import { TComponentProps } from './withReactDataFlow';
+import { TComponentProps } from '../stateManagment/likeReact';
 import { BaseComponent } from '../BaseComponent';
 import { TComponentConstructor, TComponentData, TConstructor, TKey, TRef } from '../types';
 

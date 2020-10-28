@@ -30,6 +30,12 @@ module.exports = [{
     main: path.join(__dirname, './examples/camera/index.ts'),
     worker: path.join(__dirname, './examples/camera/worker.ts')
   }
+}, {
+  outputPath: 'mobx',
+  entry: {
+    main: path.join(__dirname, './examples/mobx/index.ts'),
+    worker: path.join(__dirname, './examples/mobx/worker.ts')
+  }
 }].map(data => {
   return {
     mode: 'development',

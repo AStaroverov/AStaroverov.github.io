@@ -65,7 +65,7 @@ async function main (): Promise<void> {
       this.state.dx = Math.sin(this.count) * 10;
       this.state.dy = Math.cos(this.count) * 10;
 
-      this.performRender();
+      this.requestUpdate();
     }
   }
 

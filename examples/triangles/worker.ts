@@ -146,7 +146,7 @@ async function main (): Promise<void> {
       queue.add(new Task(() => {
         // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         this.context.angle = this.context.angle + 0.01;
-        this.performRender();
+        this.requestUpdate();
       }));
     }
 

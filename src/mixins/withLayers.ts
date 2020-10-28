@@ -21,8 +21,8 @@ export function withLayers<
       }
     }
 
-    public performRender (): void {
-      super.performRender();
+    public requestUpdate (): void {
+      super.requestUpdate();
       this.currentLayer?.update();
     }
 
@@ -41,7 +41,7 @@ export function withLayers<
 
       this.currentLayer?.update();
       this.currentLayer = layer;
-      this.performRender();
+      this.requestUpdate();
 
       return layer;
     }

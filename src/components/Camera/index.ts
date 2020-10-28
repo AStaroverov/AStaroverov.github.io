@@ -31,7 +31,7 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
   }
 
   private onCameraUpdate = (): void => {
-    this.performRender();
+    this.requestUpdate();
   };
 
   private _lastDragEvent: CanvasMouseEvent | undefined = undefined;
