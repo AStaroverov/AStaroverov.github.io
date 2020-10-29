@@ -1,7 +1,7 @@
 import { gsap } from 'gsap';
 import { CameraComponent } from '../../lib/Renderer/src/components/Camera';
 import { TContext } from '../types';
-import { TAnimationUpdatesContext, withAnimationUpdates } from '../mixins/withAnimationUpdates';
+import { withAnimationUpdates } from '../mixins/withAnimationUpdates';
 
 export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
   private scale = 0.3;
@@ -70,7 +70,7 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
     });
   }
 
-  protected handleEvent (event): void {
+  public handleEvent (event): void {
     if (!this.animated) {
       super.handleEvent(event);
     }
