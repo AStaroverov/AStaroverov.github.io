@@ -1,4 +1,4 @@
-import { Pxxl } from '../lib/Pxxl/dist/pxxl';
+import { Pxxl } from '../../lib/Pxxl/build/pxxl';
 import { TPoint } from '../../lib/Renderer/src/types';
 
 export type TWordPoint = TPoint & { row: number, column: number };
