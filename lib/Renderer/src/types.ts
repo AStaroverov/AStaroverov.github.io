@@ -9,7 +9,7 @@ export type TComponentConstructor<Type extends BaseComponent = BaseComponent> = 
 
 export interface ITask {
   run: (parent?: ITask) => void
-  next: () => ITask[] | void
+  next?: () => ITask[] | void
 }
 
 export type TKey = string;

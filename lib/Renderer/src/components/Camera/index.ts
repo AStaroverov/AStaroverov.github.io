@@ -10,6 +10,8 @@ export enum MANIPULATION_TYPE {
   MOUSE = 'mouse',
 }
 
+export type TCameraComponentProps = TCameraServiceOptions & { manipulationType?: MANIPULATION_TYPE };
+
 export class CameraComponent<Context extends object = object> extends withdDrag(BaseComponent)<Context> {
   public camera: CameraService;
 
@@ -22,7 +24,7 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
   private _cameraMoveStartData: number[] = [0, 0];
   private _cameraUpdateTask: Task;
 
-  constructor ({ manipulationType, ...cameraParams }: TCameraServiceOptions & { manipulationType?: MANIPULATION_TYPE } = {}) {
+  constructor ({ manipulationType, ...cameraParams }: TCameraComponentProps = {}) {
     super();
 
     this.manipulationType = manipulationType || this.manipulationType;
@@ -39,7 +41,7 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
   protected connected (): void {
     super.connected();
 
-    this.root = this[PRIVATE_CONTEXT].root;
+    this.root = this[PRIVATE_CONTEXT]!.root;
     this.root.addEventListener('click', this);
     this.root.addEventListener('mousedown', this);
     this.root.addEventListener('wheel', this);
@@ -122,7 +124,7 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
     e.preventDefault();
     e.stopPropagation();
 
-    this.camera.zoom(e.x, e.y, e.deltaY);
+    this.camera.zoom(e.x, e.y, e.deltaY / 1000);
   }
 
   private _onDragStart (e: CanvasMouseEvent): void {

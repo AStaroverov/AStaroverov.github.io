@@ -13,8 +13,9 @@ export const PRIVATE_CONTEXT = Symbol('PRIVATE_CONTEXT');
 
 export class BaseComponent<Context extends object = object> extends CanvasElement {
   public context: Context;
+  private tmpGlobalTransformMatrix?: mat4;
 
-  protected [PRIVATE_CONTEXT]: TPrivateContext;
+  protected [PRIVATE_CONTEXT]?: TPrivateContext;
 
   public setProps (props: object): void {
     Object.assign(this, props);
@@ -24,23 +25,33 @@ export class BaseComponent<Context extends object = object> extends CanvasElemen
     this.context = parent.context;
     this[PRIVATE_CONTEXT] = parent[PRIVATE_CONTEXT];
 
+    if (this.tmpGlobalTransformMatrix) {
+      this.setGlobalTransformMatrix(this.tmpGlobalTransformMatrix);
+      this.tmpGlobalTransformMatrix = undefined;
+    }
+
     super.setParent(parent);
   }
 
   public removeParent (): void {
     // @ts-expect-error
     this.context = undefined;
-    // @ts-expect-error
     this[PRIVATE_CONTEXT] = undefined;
 
     super.removeParent();
   }
 
   public requestUpdate (): void {
-    this[PRIVATE_CONTEXT].scheduleUpdate();
+    if (this[PRIVATE_CONTEXT]) {
+      this[PRIVATE_CONTEXT]!.scheduleUpdate();
+    }
   }
 
   public setGlobalTransformMatrix (matrix: mat4): void {
-    mat4.copy(this[PRIVATE_CONTEXT].globalTransformMatrix, matrix);
+    if (this[PRIVATE_CONTEXT]) {
+      mat4.copy(this[PRIVATE_CONTEXT]!.globalTransformMatrix, matrix);
+    } else {
+      this.tmpGlobalTransformMatrix = matrix;
+    }
   }
 }

@@ -1,11 +1,14 @@
 import { TaskQueue } from './TaskQueue';
+import { ITask } from '../Renderer/src/types';
+
+const push = Array.prototype.push;
 
 export class Scheduler extends TaskQueue {
   public traverse (): void {
     this.run();
 
-    let next;
-    let task;
+    let next: void | ITask[];
+    let task: ITask;
     let index: number = 0;
     const tasks = [...(this.next() || [])];
     const indexStack: number[] = [-1];
@@ -15,10 +18,10 @@ export class Scheduler extends TaskQueue {
 
     while (task !== undefined) {
       task.run();
-      next = task.next();
+      next = task.next && task.next();
 
       if (next !== undefined && next.length !== 0) {
-        Array.prototype.push.apply(tasks, next);
+        push.apply(tasks, next);
         indexStack.push(index + 1);
         indexStops.push(tasks.length);
         index = tasks.length - next.length;

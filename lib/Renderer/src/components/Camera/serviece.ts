@@ -26,6 +26,9 @@ type TMatrix = {
 };
 
 export class CameraService extends EventEmitter {
+  static toFixed = toFixed;
+  static clamp = clamp;
+
   static SCALE_MIN: number = 0.001;
   static SCALE_MAX: number = 100;
 
@@ -151,20 +154,18 @@ export class CameraService extends EventEmitter {
   public zoom (x: number, y: number, delta: number): void {
     if (delta === 0) { return; }
 
-    const ratio = this.scaleRatio || Math.abs(delta) < 20 ? 0.9 : 0.8;
-
     if (delta < 0) {
-      if (this.scaleMax !== this.scale) { this.zoomOut(ratio, x, y); }
+      if (this.scaleMax !== this.scale) { this.zoomOut(Math.abs(delta), x, y); }
     } else {
-      if (this.scaleMin !== this.scale) { this.zoomIn(ratio, x, y); }
+      if (this.scaleMin !== this.scale) { this.zoomIn(Math.abs(delta), x, y); }
     }
   }
 
-  private zoomIn (ratio: number, x = this.x, y = this.y): void {
+  private zoomIn (delta: number, x = this.x, y = this.y): void {
     const dx1 = this.getRelative(x - this.x);
     const dy1 = this.getRelative(y - this.y);
 
-    const scale = Math.max(this.scale * ratio, this.scaleMin);
+    const scale = Math.max(this.scale - delta, this.scaleMin);
 
     const dx2 = this.getRelative(x - this.x, scale);
     const dy2 = this.getRelative(y - this.y, scale);
@@ -172,11 +173,11 @@ export class CameraService extends EventEmitter {
     this.zoomEnd(scale, dx1, dy1, dx2, dy2);
   }
 
-  private zoomOut (ratio: number, x = this.x, y = this.y): void {
+  private zoomOut (delta: number, x = this.x, y = this.y): void {
     const dx1 = this.getRelative(x - this.x);
     const dy1 = this.getRelative(y - this.y);
 
-    const scale = Math.min(this.scale / ratio, this.scaleMax);
+    const scale = Math.min(this.scale + delta, this.scaleMax);
 
     const dx2 = this.getRelative(x - this.x, scale);
     const dy2 = this.getRelative(y - this.y, scale);
@@ -242,7 +243,7 @@ export class CameraService extends EventEmitter {
 }
 
 function clamp (v: number, min: number, max: number): number {
-  return Math.max(Math.min(v, min), max);
+  return Math.min(Math.max(v, min), max);
 }
 
 function toFixed (num: number, digits: number, base: number = 10): number {
