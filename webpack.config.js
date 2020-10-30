@@ -31,7 +31,7 @@ module.exports = {
     }),
     new CopyPlugin({
       patterns: [
-        { from: p('src/lib/Pxxl/fonts/'), to: 'fonts/' }
+        { from: p('lib/Pxxl/fonts/'), to: 'fonts/' }
       ]
     })
   ]

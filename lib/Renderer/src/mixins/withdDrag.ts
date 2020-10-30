@@ -9,7 +9,7 @@ export function withdDrag<Base extends TComponentConstructor<BaseComponent>> (ba
       onDragMove?: EventListenerOrEventListenerObject
       onDragEnd?: EventListenerOrEventListenerObject
     }): void {
-      const root = this[PRIVATE_CONTEXT].root;
+      const root = this[PRIVATE_CONTEXT]!.root;
       const dragEnd = (event: MouseEvent): void => {
         if (typeof callbacks.onDragEnd === 'function') {
           callbacks.onDragEnd(event);

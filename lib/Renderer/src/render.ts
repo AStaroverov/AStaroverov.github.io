@@ -44,5 +44,5 @@ export function render<Component extends BaseComponent> (
     }
   });
 
-  workerEventRedispatcher(workerScope, rootComponent[PRIVATE_CONTEXT]);
+  workerEventRedispatcher(workerScope, rootComponent[PRIVATE_CONTEXT]!);
 }
