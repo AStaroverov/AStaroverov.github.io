@@ -12,7 +12,6 @@ module.exports = {
   },
   output: {
     path: p('/dist/'),
-    publicPath: '/dist/',
     filename: '[name].js'
   },
   resolve: {
@@ -34,5 +33,8 @@ module.exports = {
         { from: p('lib/Pxxl/fonts/'), to: 'fonts/' }
       ]
     })
-  ]
+  ],
+  devServer: {
+    contentBase: path.join(__dirname, 'dist')
+  }
 };

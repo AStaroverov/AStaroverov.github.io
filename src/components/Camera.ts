@@ -11,8 +11,8 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
     super.connected();
 
     const os = this.context.originalSize;
-    const x = os.width / 2;
-    const y = os.height / 2;
+    const x = os.width / 2 | 0;
+    const y = os.height / 2 | 0;
 
     this.camera.setScale(this.scale);
     this.camera.set({
