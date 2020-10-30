@@ -9,7 +9,7 @@ const cache = new Map<string, TTextToPixels>();
 async function getTextToPixelsByFont (font: string): Promise<TTextToPixels> {
   if (!cache.has(font)) {
     cache.set(font, await new Promise<TTextToPixels>((resolve) => {
-      Pxxl.LoadFont(`/dist/fonts/${font}`, resolve);
+      Pxxl.LoadFont(`./fonts/${font}`, resolve);
     }));
   }
 
