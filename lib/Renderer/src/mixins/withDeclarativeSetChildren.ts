@@ -22,7 +22,9 @@ export function withDeclarativeSetChildren<Base extends TConstructor<BaseCompone
     private mapKeyToChild: Map<TKey, BaseComponent>;
     private componentsDatas: Array<TComponentData<BaseComponent>> | void;
 
-    public setChildren (nextComponentsDatas: Array<TComponentData<BaseComponent>> = EMPTY_CHILDREN): void {
+    public setChildren (nextComponentsDatas?: Array<TComponentData<BaseComponent>> | void): void {
+      nextComponentsDatas = nextComponentsDatas || EMPTY_CHILDREN;
+
       if (this.mapKeyToChild === undefined) {
         this.mapKeyToChild = new Map<TKey, BaseComponent>();
       }

@@ -1,6 +1,7 @@
 import { BaseComponent } from '../BaseComponent';
 import { CanvasElement } from '../prototypes/CanvasElement';
-import { TConstructor, TKey, TRef } from '../types';
+import { TComponentData, TConstructor, TKey, TRef } from '../types';
+import { withDeclarativeSetChildren } from './withDeclarativeSetChildren';
 
 export interface TComponentProps {
   [key: string]: any
@@ -15,7 +16,7 @@ export function withReactDataFlow<
   Context extends object = object,
   Base extends TConstructor<BaseComponent<Context>> = TConstructor<BaseComponent<Context>>,
 > (base: Base) {
-  return class WithReactDataFlow extends base {
+  return class WithReactDataFlow extends withDeclarativeSetChildren(base) {
     public props: Partial<Props> = {};
     public state: Partial<State> = {};
 
@@ -95,7 +96,7 @@ export function withReactDataFlow<
     protected didRender (): void {};
 
     protected willUpdateChildren (): void{}
-    protected updateChildren (): void{}
+    protected updateChildren (): Array<TComponentData<BaseComponent>> | void {}
     protected didUpdateChildren (): void{}
 
     protected willUnmount (): void{}
@@ -150,7 +151,9 @@ export function withReactDataFlow<
 
     protected childrenLifeCycle (): void {
       this.willUpdateChildren();
-      this.updateChildren();
+      this.setChildren(
+        this.updateChildren()
+      );
       this.didUpdateChildren();
 
       this.firstUpdateChildren = false;
