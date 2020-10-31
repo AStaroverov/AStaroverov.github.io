@@ -13,17 +13,11 @@ export class Root extends BaseComponent<TContext> {
 
     this.context = {
       root: this,
-      visualSize: {
+      size: {
         x: 0,
         y: 0,
         width: this.layersManager.layers.main.canvas.width / devicePixelRatio,
         height: this.layersManager.layers.main.canvas.height / devicePixelRatio
-      },
-      originalSize: {
-        x: 0,
-        y: 0,
-        width: this.layersManager.layers.main.canvas.width,
-        height: this.layersManager.layers.main.canvas.height
       },
       layersManager,
       devicePixelRatio
@@ -34,7 +28,7 @@ export class Root extends BaseComponent<TContext> {
     super.connected();
 
     const camera = new Camera({
-      ...this.context.originalSize,
+      ...this.context.size,
       scaleRatio: 0.1,
       scaleMin: 0.1,
       scaleMax: 4
@@ -42,7 +36,9 @@ export class Root extends BaseComponent<TContext> {
 
     this.appendChild(camera);
 
-    camera.appendChild(new About());
+    camera.appendChild(new About(
+      0, 0, this.context.size.width, this.context.size.height
+    ));
   }
 
   protected render (): void {

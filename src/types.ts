@@ -11,8 +11,7 @@ export type TLayers = {
 
 export type TContext = {
   root: BaseComponent
-  visualSize: TRect
-  originalSize: TRect
+  size: TRect
   devicePixelRatio: number
   layersManager: LayersManager<TLayers>
 };

@@ -10,12 +10,16 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
   protected connected (): void {
     super.connected();
 
-    const os = this.context.originalSize;
-    const x = os.width / 2 | 0;
-    const y = os.height / 2 | 0;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('CameraService', this.camera);
+    }
 
-    this.camera.setScale(this.scale);
+    const s = this.context.size;
+    const x = s.width / 2 | 0;
+    const y = s.height / 2 | 0;
+
     this.camera.set({
+      scale: this.scale,
       x,
       y
     });
@@ -44,14 +48,13 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
   protected render (): void {
     const c = this.camera;
     const dPR = this.context.devicePixelRatio;
-    const size = this.context.originalSize;
-    const scale = c.scale * dPR;
+    const size = this.context.size;
 
     this.setGlobalTransformMatrix([
-      1 / scale, 0, 0, 0,
-      0, 1 / scale, 0, 0,
+      1 / c.scale, 0, 0, 0,
+      0, 1 / c.scale, 0, 0,
       0, 0, 1, 0,
-      -c.x / scale, -c.y / scale, 0, 1
+      -c.x / c.scale, -c.y / c.scale, 0, 1
     ]);
 
     this.context.layersManager.list.forEach(layer => {
@@ -61,11 +64,11 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
         1, 0, 0
       );
       layer.ctx.clearRect(
-        0, 0, size.width, size.height
+        0, 0, size.width * dPR, size.height * dPR
       );
       layer.ctx.setTransform(
-        scale, 0, 0,
-        scale, c.x, c.y
+        c.scale * dPR, 0, 0,
+        c.scale * dPR, (c.x - size.width * c.scale / 2) * dPR, (c.y - size.height * c.scale / 2) * dPR
       );
     });
   }

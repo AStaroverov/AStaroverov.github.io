@@ -4,19 +4,25 @@ import { withLayers } from '../../lib/Renderer/src/mixins/withLayers';
 import { PixelFont } from './common/PixelFont';
 
 export class About extends withLayers(BaseComponent)<TContext> {
+  constructor (
+    protected x: number,
+    protected y: number,
+    protected width: number,
+    protected height: number
+  ) {
+    super();
+  }
+
   protected async connected (): Promise<void> {
     super.connected();
 
-    const s = this.context.visualSize;
-
-    this.setHitBox(-s.width / 2 + 100, -s.height / 2 + 100, s.width - 200, s.height - 200);
     this.attachToLayer(this.context.layersManager.layers.main);
 
     this.appendChild(
       new PixelFont({
         layer: this.currentLayer!,
-        x: -s.width / 2 + 200,
-        y: -s.height / 2 + 200,
+        x: this.x + 200,
+        y: this.y + 200,
         text: 'Hi,My name is Alexandr',
         color: 'white',
         withAnimation: true,
@@ -26,8 +32,8 @@ export class About extends withLayers(BaseComponent)<TContext> {
     this.appendChild(
       new PixelFont({
         layer: this.currentLayer!,
-        x: -s.width / 2 + 200,
-        y: -s.height / 2 + 300,
+        x: this.x + 200,
+        y: this.y + 300,
         text: 'And I am Developer!',
         color: 'white',
         withAnimation: true,
@@ -37,8 +43,8 @@ export class About extends withLayers(BaseComponent)<TContext> {
     this.appendChild(
       new PixelFont({
         layer: this.currentLayer!,
-        x: -s.width / 2 + 200,
-        y: -s.height / 2 + 400,
+        x: this.x + 200,
+        y: this.y + 400,
         text: 'Yeah Bitch!',
         color: 'white',
         withAnimation: true,
@@ -49,9 +55,8 @@ export class About extends withLayers(BaseComponent)<TContext> {
 
   protected render (): void {
     const ctx = this.currentLayer!.ctx;
-    const s = this.context.visualSize;
 
     ctx.fillStyle = 'black';
-    ctx.fillRect(-s.width / 2 + 100, -s.height / 2 + 100, s.width - 200, s.height - 200);
+    ctx.fillRect(this.x + 100, this.y + 100, this.width - 200, this.height - 200);
   }
 }
