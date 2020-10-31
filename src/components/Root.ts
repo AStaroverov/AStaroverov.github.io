@@ -11,7 +11,7 @@ export class Root extends BaseComponent<TContext> {
   ) {
     super();
 
-    this.context = {
+    this.setContext({
       root: this,
       size: {
         x: 0,
@@ -21,7 +21,7 @@ export class Root extends BaseComponent<TContext> {
       },
       layersManager,
       devicePixelRatio
-    };
+    });
   }
 
   protected connected (): void {

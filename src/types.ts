@@ -2,6 +2,7 @@ import { TRect } from '../lib/Renderer/src/types';
 import { BaseComponent } from '../lib/Renderer/src/BaseComponent';
 import { LayersManager } from '../lib/Renderer/src/layers/LayersManager';
 import { Layer } from '../lib/Renderer/src/layers/Layer';
+import { CameraService } from '../lib/Renderer/src/components/Camera/serviece';
 
 export type TLayers = {
   under: Layer
@@ -11,6 +12,7 @@ export type TLayers = {
 
 export type TContext = {
   root: BaseComponent
+  camera: CameraService
   size: TRect
   devicePixelRatio: number
   layersManager: LayersManager<TLayers>
