@@ -6,7 +6,6 @@ export type TCameraServiceOptions = {
   width?: number
   height?: number
   scale?: number
-  scaleRatio?: number
   scaleMin?: number
   scaleMax?: number
   speedZoom?: number
@@ -37,7 +36,6 @@ export class CameraService extends EventEmitter {
   public width: number = 0;
   public height: number = 0;
   public scale: number = 1;
-  public scaleRatio: number = 2;
   public relativeX: number = 0;
   public relativeY: number = 0;
   public relativeWidth: number = 0;
@@ -48,7 +46,6 @@ export class CameraService extends EventEmitter {
     width: number
     height: number
     scale: number
-    scaleRatio: number
     relativeX: number
     relativeY: number
     relativeWidth: number
@@ -59,7 +56,6 @@ export class CameraService extends EventEmitter {
     width: 0,
     height: 0,
     scale: 0.5,
-    scaleRatio: 1,
     relativeX: 0,
     relativeY: 0,
     relativeWidth: 0,
@@ -206,7 +202,6 @@ export class CameraService extends EventEmitter {
     this.prevState.width = this.width;
     this.prevState.height = this.height;
     this.prevState.scale = this.scale;
-    this.prevState.scaleRatio = this.scaleRatio;
     this.prevState.relativeX = this.relativeX;
     this.prevState.relativeY = this.relativeY;
     this.prevState.relativeWidth = this.relativeWidth;

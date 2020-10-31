@@ -55,12 +55,12 @@ function createEventData<E extends Event> (event: E): CanvasEvent<E> {
 }
 
 function mutateTargetEvent (canvasEvent: CanvasMouseEvent, parentEvent: MouseEvent, rect: DOMRect): void {
-  canvasEvent.clientX = PIXEL_RATIO * (parentEvent.clientX - rect.left);
-  canvasEvent.clientY = PIXEL_RATIO * (parentEvent.clientY - rect.top);
+  canvasEvent.clientX = parentEvent.clientX - rect.left;
+  canvasEvent.clientY = parentEvent.clientY - rect.top;
   canvasEvent.x = canvasEvent.clientX;
   canvasEvent.y = canvasEvent.clientY;
-  canvasEvent.movementX = PIXEL_RATIO * parentEvent.movementX;
-  canvasEvent.movementY = PIXEL_RATIO * parentEvent.movementY;
+  canvasEvent.movementX = parentEvent.movementX;
+  canvasEvent.movementY = parentEvent.movementY;
 
   canvasEvent.original = {
     clientX: canvasEvent.clientX,
