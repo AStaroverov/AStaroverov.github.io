@@ -3,6 +3,7 @@ import { LayersManager } from '../../lib/Renderer/src/layers/LayersManager';
 import { TContext, TLayers } from '../types';
 import { Camera } from './Camera';
 import { About } from './About';
+import { Deferred } from 'ts-deferred';
 
 export class Root extends BaseComponent<TContext> {
   constructor (
@@ -20,7 +21,8 @@ export class Root extends BaseComponent<TContext> {
         height: this.layersManager.layers.main.canvas.height / devicePixelRatio
       },
       layersManager,
-      devicePixelRatio
+      devicePixelRatio,
+      deferStartAnimation: new Deferred()
     });
   }
 
@@ -29,16 +31,18 @@ export class Root extends BaseComponent<TContext> {
 
     const camera = new Camera({
       ...this.context.size,
-      scaleRatio: 0.1,
       scaleMin: 0.1,
       scaleMax: 4
     });
 
     this.appendChild(camera);
 
-    camera.appendChild(new About(
-      0, 0, this.context.size.width, this.context.size.height
-    ));
+    camera.appendChild(new About({
+      x: 0,
+      y: 0,
+      width: this.context.size.width,
+      height: this.context.size.height
+    }));
   }
 
   protected render (): void {

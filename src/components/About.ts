@@ -1,65 +1,54 @@
-import { BaseComponent } from '../../lib/Renderer/src/BaseComponent';
-import { TContext } from '../types';
-import { withLayers } from '../../lib/Renderer/src/mixins/withLayers';
 import { PixelFont } from './common/PixelFont';
-import { WrapperSimplePage } from './common/WrapperSimplePage';
+import { Page } from './common/Page';
 
-export class About extends withLayers(BaseComponent)<TContext> {
-  constructor (
-    protected x: number,
-    protected y: number,
-    protected width: number,
-    protected height: number
-  ) {
-    super();
-  }
+export class About extends Page {
+  protected text = 'About';
 
   protected async connected (): Promise<void> {
     super.connected();
 
     this.attachToLayer(this.context.layersManager.layers.main);
 
-    const s = this.context.size;
+    this.appendChild(
+      new PixelFont({
+        layer: this.currentLayer!,
+        x: this.x + 200,
+        y: this.y + 200,
+        text: 'Hi,My name is Alexandr',
+        color: 'white',
+        withAnimation: true,
+        animationDelay: 1000
+      })
+    );
+    this.appendChild(
+      new PixelFont({
+        layer: this.currentLayer!,
+        x: this.x + 200,
+        y: this.y + 300,
+        text: 'And I am Developer!',
+        color: 'white',
+        withAnimation: true,
+        animationDelay: 2000
+      })
+    );
+    this.appendChild(
+      new PixelFont({
+        layer: this.currentLayer!,
+        x: this.x + 200,
+        y: this.y + 400,
+        text: 'Yeah Boy!',
+        color: 'white',
+        withAnimation: true,
+        animationDelay: 10000
+      })
+    );
 
-    this.appendChild(new WrapperSimplePage({
-      layer: this.context.layersManager.layers.main,
-      x: -s.width / 2 + 100,
-      y: -s.height / 2 + 100,
-      width: s.width - 200,
-      height: s.height - 200,
-      text: 'About',
-      child: [
-        new PixelFont({
-          layer: this.currentLayer!,
-          x: this.x + 200,
-          y: this.y + 200,
-          text: 'Hi,My name is Alexandr',
-          color: 'white',
-          withAnimation: true,
-          animationDelay: 1000
-        }),
-        new PixelFont({
-          layer: this.currentLayer!,
-          x: this.x + 200,
-          y: this.y + 300,
-          text: 'And I am Developer!',
-          color: 'white',
-          withAnimation: true,
-          animationDelay: 2000
-        }),
-        new PixelFont({
-          layer: this.currentLayer!,
-          x: this.x + 200,
-          y: this.y + 400,
-          text: 'Yeah Bitch!',
-          color: 'white',
-          withAnimation: true,
-          animationDelay: 10000
-        })
-    ]);
+    this.context.deferStartAnimation.promise.then(() => {
+      this.appendUnderhood();
+    });
   }
 
-  protected render (): void {
+  protected renderFullPage (): void {
     const ctx = this.currentLayer!.ctx;
 
     ctx.fillStyle = 'black';
