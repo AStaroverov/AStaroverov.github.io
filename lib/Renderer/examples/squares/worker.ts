@@ -17,8 +17,8 @@ async function main (): Promise<void> {
   const workerScope = await getWorkerScope();
   const { canvases } = await getInitData(workerScope);
   const layersManager = new LayersManager({
-    first: new Layer(canvases[0], 0),
-    second: new Layer(canvases[1], 1)
+    first: new Layer(canvases[0]),
+    second: new Layer(canvases[1])
   });
 
   const queue = new TaskQueue();
@@ -46,10 +46,10 @@ async function main (): Promise<void> {
       super.connected();
 
       if (Math.random() > 0.5) {
-        this.layer = this.attachToLayer('first');
+        this.layer = this.attachToLayer(this.context.layersManager.layers.first);
         queue.add(new Task(this.changeCoordinat, this));
       } else {
-        this.layer = this.attachToLayer('second');
+        this.layer = this.attachToLayer(this.context.layersManager.layers.second);
       }
     }
 

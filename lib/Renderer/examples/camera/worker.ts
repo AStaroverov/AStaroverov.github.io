@@ -8,14 +8,12 @@ import { GraphRoot, TContext, TLayers } from '../commmon/graph';
 class Camera extends CameraComponent<TContext> {
   public render (): void {
     const c = this.camera;
-    const dPR = this.context.devicePixelRatio;
-    const scale = c.scale * dPR;
 
     this.setGlobalTransformMatrix([
-      1 / scale, 0, 0, 0,
-      0, 1 / scale, 0, 0,
+      1 / c.scale, 0, 0, 0,
+      0, 1 / c.scale, 0, 0,
       0, 0, 1, 0,
-      -c.x / scale, -c.y / scale, 0, 1
+      -c.x / c.scale, -c.y / c.scale, 0, 1
     ]);
 
     this.context.layersManager.list.forEach(layer => {
@@ -27,9 +25,12 @@ class Camera extends CameraComponent<TContext> {
       layer.ctx.clearRect(
         0, 0, layer.canvas.width, layer.canvas.height
       );
+
+      const dPR = this.context.devicePixelRatio;
+
       layer.ctx.setTransform(
-        scale, 0, 0,
-        scale, c.x, c.y
+        c.scale * dPR, 0, 0,
+        c.scale * dPR, c.x * dPR, c.y * dPR
       );
     });
   }
@@ -67,9 +68,9 @@ async function main (): Promise<void> {
   } = await init();
 
   const layersManager = new LayersManager<TLayers>({
-    connections: new Layer(canvases[0], 0),
-    nodes: new Layer(canvases[1], 1),
-    dragging: new Layer(canvases[2], 2)
+    connections: new Layer(canvases[0]),
+    nodes: new Layer(canvases[1]),
+    dragging: new Layer(canvases[2])
   });
 
   render(workerScope, new RootWithCamera(layersManager, devicePixelRatio));

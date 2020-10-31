@@ -12,9 +12,9 @@ async function main (): Promise<void> {
   } = await init();
 
   const layersManager = new LayersManager<TLayers>({
-    connections: new Layer(canvases[0], 0),
-    nodes: new Layer(canvases[1], 1),
-    dragging: new Layer(canvases[2], 2)
+    connections: new Layer(canvases[0]),
+    nodes: new Layer(canvases[1]),
+    dragging: new Layer(canvases[2])
   });
 
   render(workerScope, new GraphRoot(layersManager, devicePixelRatio));

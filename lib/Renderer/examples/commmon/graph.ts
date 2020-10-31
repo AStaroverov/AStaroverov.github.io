@@ -40,7 +40,7 @@ class Nod extends withLayers(BaseComponent)<TContext> {
     this.addEventListener('mousedown', this.onDragStart);
     this.context.root.addEventListener('mousemove', this.onMove);
     this.context.root.addEventListener('mouseup', this.onDragEnd);
-    this.layer = this.attachToLayer('nodes');
+    this.layer = this.attachToLayer(this.context.layersManager.layers.nodes);
   }
 
   protected render (): void {
@@ -67,7 +67,7 @@ class Nod extends withLayers(BaseComponent)<TContext> {
   private onDragStart = (event: CanvasEvent<MouseEvent>): void => {
     event.stopPropagation();
     this.dragging = true;
-    this.layer = this.attachToLayer('dragging');
+    this.layer = this.attachToLayer(this.context.layersManager.layers.dragging);
     this.zIndex = 1;
     this.requestUpdate();
   };
@@ -76,7 +76,7 @@ class Nod extends withLayers(BaseComponent)<TContext> {
     event.stopPropagation();
     if (this.dragging) {
       this.dragging = false;
-      this.layer = this.attachToLayer('nodes');
+      this.layer = this.attachToLayer(this.context.layersManager.layers.nodes);
       this.zIndex = 0;
       this.setHitBox(this.props.x, this.props.y, this.props.size + this.props.x, this.props.size + this.props.y);
       this.requestUpdate();
@@ -102,14 +102,14 @@ export class Con extends withLayers(BaseComponent)<TContext> {
   protected connected (): void {
     super.connected();
 
-    this.layer = this.attachToLayer('connections');
+    this.layer = this.attachToLayer(this.context.layersManager.layers.connections);
   }
 
   public run (): void {
     if (this.props.node1.dragging || this.props.node2.dragging) {
-      this.layer = this.attachToLayer('dragging');
+      this.layer = this.attachToLayer(this.context.layersManager.layers.dragging);
     } else {
-      this.layer = this.attachToLayer('connections');
+      this.layer = this.attachToLayer(this.context.layersManager.layers.connections);
     }
 
     super.run();
