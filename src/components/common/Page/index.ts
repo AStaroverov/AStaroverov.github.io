@@ -80,7 +80,6 @@ export class Page extends withAnimationUpdates(withLayers(BaseComponent))<TConte
   protected renderFullPage (): void {}
 
   protected getChildren <T extends this> (): T[] | void {
-    console.log(this.simpleRender, !this.underhood?.isAnimating);
     return this.simpleRender && !this.underhood?.isAnimating
       ? [this.underhood as unknown as T]
       : (this.children as T[]);
