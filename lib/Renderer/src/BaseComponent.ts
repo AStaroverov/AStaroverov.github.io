@@ -13,9 +13,14 @@ export const PRIVATE_CONTEXT = Symbol('PRIVATE_CONTEXT');
 
 export class BaseComponent<Context extends object = object> extends CanvasElement {
   public context: Context;
+
   private tmpGlobalTransformMatrix?: mat4;
 
   protected [PRIVATE_CONTEXT]?: TPrivateContext;
+
+  public setContext (context: Partial<Context>): void {
+    this.context = Object.assign(this.context || {}, context);
+  }
 
   public setProps (props: object): void {
     Object.assign(this, props);

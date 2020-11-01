@@ -1,3 +1,4 @@
+import { promiseFont } from '../utils/loadFont';
 import { scheduler } from '../../lib/Scheduler';
 import { getWorkerScope } from '../../lib/Renderer/src/worker/getWorkerScope';
 import { getInitData } from '../../lib/Renderer/src/worker/getInitData';
@@ -9,6 +10,8 @@ export async function init (): Promise<{
 }> {
   const workerScope = await getWorkerScope();
   const { canvases, devicePixelRatio } = await getInitData(workerScope);
+
+  await promiseFont;
 
   (function tick () {
     scheduler.traverse();

@@ -2,9 +2,9 @@ import { EvTarget } from './EvTarget';
 
 export class Knot extends EvTarget {
   public isConnected = false;
-  protected children: Knot[];
+  protected children: unknown[];
 
-  protected parent?: Knot;
+  protected parent?: unknown;
 
   public getParent<Parent extends Knot> (): Parent | undefined {
     return this.parent as Parent | undefined;

@@ -10,6 +10,8 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
   protected connected (): void {
     super.connected();
 
+    this.context.camera = this.camera;
+
     if (process.env.NODE_ENV === 'development') {
       console.log('CameraService', this.camera);
     }
@@ -39,6 +41,7 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
         },
         onComplete: (): void => {
           this.animated = false;
+          this.context.deferStartAnimation.resolve();
           this.stopAnimation();
         }
       });

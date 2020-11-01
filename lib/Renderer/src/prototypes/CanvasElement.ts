@@ -9,8 +9,9 @@ export type THitBoxData<Item extends CanvasElement = CanvasElement> = BBox & {
   item: Item
 };
 
+1;
 export class CanvasElement extends Knot implements ITask {
-  public children: CanvasElement[];
+  public children: this[];
   public zIndex: number = 0;
   public renderId: number = 0;
   public renderIndex: number = 0;
@@ -62,11 +63,15 @@ export class CanvasElement extends Knot implements ITask {
     this.render();
   }
 
-  public next (): CanvasElement[] | void {
-    return this.children;
+  public next <T extends this> (): T[] | void {
+    return this.getChildren();
   }
 
   protected render (): void {}
+
+  protected getChildren <T extends this> (): T[] | void {
+    return this.children as T[];
+  }
 
   private beforeEachRender (): void {
     this.renderId = getRenderId();
