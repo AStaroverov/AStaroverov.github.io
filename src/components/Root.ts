@@ -2,7 +2,7 @@ import { BaseComponent } from '../../lib/Renderer/src/BaseComponent';
 import { LayersManager } from '../../lib/Renderer/src/layers/LayersManager';
 import { TContext, TLayers } from '../types';
 import { Camera } from './Camera';
-import { About } from './About';
+import { Home } from './Home';
 import { Deferred } from 'ts-deferred';
 
 export class Root extends BaseComponent<TContext> {
@@ -37,7 +37,7 @@ export class Root extends BaseComponent<TContext> {
 
     this.appendChild(camera);
 
-    camera.appendChild(new About({
+    camera.appendChild(new Home({
       x: 0,
       y: 0,
       width: this.context.size.width,

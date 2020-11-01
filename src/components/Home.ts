@@ -1,8 +1,8 @@
 import { PixelFont } from './common/PixelFont';
 import { Page } from './common/Page';
 
-export class About extends Page {
-  protected text = 'About';
+export class Home extends Page {
+  protected text = 'Home';
 
   protected async connected (): Promise<void> {
     super.connected();
