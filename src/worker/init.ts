@@ -11,9 +11,7 @@ export async function init (): Promise<{
   const workerScope = await getWorkerScope();
   const { canvases, devicePixelRatio } = await getInitData(workerScope);
 
-  const a = await promiseFont;
-
-  console.log(a);
+  await promiseFont;
 
   (function tick () {
     scheduler.traverse();
