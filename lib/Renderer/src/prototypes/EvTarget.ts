@@ -6,7 +6,7 @@ export class EvTarget implements EventTarget {
   private eventsMap: Record<TEventType, EventListenerOrEventListenerObject[]> = {};
 
   public hasEventListener (type): boolean {
-    return this.eventsMap.type !== undefined;
+    return this.eventsMap[type] !== undefined;
   }
 
   public addEventListener (type: TEventType, listener: EventListenerOrEventListenerObject): void {
@@ -25,6 +25,11 @@ export class EvTarget implements EventTarget {
         this.eventsMap[type].splice(i, 1);
       }
     }
+  }
+
+  public removeEventListeners(): void {
+    // @ts-ignore
+    this.eventsMap = undefined;
   }
 
   public hasListener (type: TEventType): boolean {
