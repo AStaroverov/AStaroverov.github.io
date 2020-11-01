@@ -32,7 +32,7 @@ export function withLayers<
       return layer;
     }
 
-    public disconnected (): void {
+    protected disconnected (): void {
       super.disconnected();
 
       this.currentLayer = undefined;

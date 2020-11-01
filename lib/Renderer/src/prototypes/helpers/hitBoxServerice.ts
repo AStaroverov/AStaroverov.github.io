@@ -1,5 +1,4 @@
 import RBush, { BBox } from 'rbush';
-import { vec2, mat4 } from 'gl-matrix';
 import { CanvasElement, THitBoxData } from '../CanvasElement';
 
 type TOptionsHitTest = {
@@ -25,7 +24,6 @@ export class HitBoxService<Component extends CanvasElement = CanvasElement> {
   }
 
   public testPoint (x: number, y: number, options?: TOptionsHitTest): Component[] {
-    // const transformedPoint = vec2.transformMat4([0, 0], [x, y], this.transformMatrix);
     this.tmpBox.minX = x - 1;
     this.tmpBox.minY = y - 1;
     this.tmpBox.maxX = x + 1;

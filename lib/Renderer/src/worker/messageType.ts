@@ -1,7 +1,7 @@
 export const enum MessageType {
-  WORKER_INIT,
-  SEND_INIT_DATA,
-  SEND_EVENT
+  WORKER_INIT = "WORKER_INIT",
+  SEND_INIT_DATA = "SEND_INIT_DATA",
+  SEND_EVENT = "SEND_EVENT"
 }
 
 export interface TMessageTypeToPayload {

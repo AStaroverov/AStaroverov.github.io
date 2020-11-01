@@ -1,7 +1,11 @@
 import { MessageType, typedPostMessage } from './messageType';
 
+let scope: DedicatedWorkerGlobalScope;
+
 export function getWorkerScope (): DedicatedWorkerGlobalScope {
-  let scope: DedicatedWorkerGlobalScope;
+  if (scope) {
+    return scope;
+  }
 
   if (globalThis.document === undefined) {
     scope = globalThis as unknown as DedicatedWorkerGlobalScope;
