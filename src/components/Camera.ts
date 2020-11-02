@@ -57,7 +57,7 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
       1 / c.scale, 0, 0, 0,
       0, 1 / c.scale, 0, 0,
       0, 0, 1, 0,
-      -(c.x - size.width * c.scale / 2) / c.scale, (c.y - size.height * c.scale / 2) / c.scale, 0, 1
+      -(c.x - size.width * c.scale / 2) / c.scale, -(c.y - size.height * c.scale / 2) / c.scale, 0, 1
     ]);
 
     this.context.layersManager.list.forEach(layer => {
