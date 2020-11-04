@@ -45,21 +45,6 @@ export class Home extends Page {
 
     this.context.deferStartAnimation.promise.then(() => {
       this.appendUnderhood();
-      //
-      // this.appendChild(
-      //   new Button({
-      //     layer: this.layer!,
-      //     x: this.x + this.width - GAP_CONTENT - 150 - 10,
-      //     y: this.y + this.height - GAP_CONTENT - 20 - 10,
-      //     width: 250,
-      //     height: 80,
-      //     text: 'CONTACTS',
-      //     textSize: 32,
-      //     color: 'black',
-      //     background: 'white',
-      //     onClick: this.moveCameraToContacts
-      //   })
-      // );
     });
   }
 
