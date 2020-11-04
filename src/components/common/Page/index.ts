@@ -1,5 +1,4 @@
 import { BaseComponent } from '../../../../lib/Renderer/src/BaseComponent';
-import { withLayers } from '../../../../lib/Renderer/src/mixins/withLayers';
 import { TContext } from '../../../types';
 import { withAnimationUpdates } from '../../../mixins/withAnimationUpdates';
 import { Underhood } from './Underhood';
@@ -14,7 +13,7 @@ export type TWrapperSimplePageProps = {
   color?: string
 };
 
-export class Page extends withAnimationUpdates(withLayers(BaseComponent))<TContext> {
+export class Page extends withAnimationUpdates(BaseComponent)<TContext> {
   protected x: number;
   protected y: number;
   protected width: number;
@@ -36,7 +35,7 @@ export class Page extends withAnimationUpdates(withLayers(BaseComponent))<TConte
   protected appendUnderhood (): void {
     this.appendChild(
       this.underhood = new Underhood({
-        layer: this.context.layersManager.layers.above,
+        layer: this.context.layers.above,
         x: this.x,
         y: this.y,
         width: this.width,

@@ -15,36 +15,35 @@ function getId (): number {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function withAnimationUpdates<
-  Base extends TComponentConstructor<BaseComponent>
+  Base extends TComponentConstructor
 > (base: Base) {
   return class WithAnimationUpdates extends base {
-    public context: TAnimationUpdatesContext;
     private animationId = getId();
 
     public startAnimation (): void {
-      if (this.context.animatedIds.size === 0) {
-        this.context.animated = true;
-        scheduler.add(this.context.animationTask);
+      if (getContext(this).animatedIds.size === 0) {
+        getContext(this).animated = true;
+        scheduler.add(getContext(this).animationTask);
       }
 
-      this.context.animatedIds.add(this.animationId);
+      getContext(this).animatedIds.add(this.animationId);
     }
 
     public stopAnimation (): void {
-      this.context.animatedIds.delete(this.animationId);
+      getContext(this).animatedIds.delete(this.animationId);
 
-      if (this.context.animatedIds.size === 0) {
-        this.context.animated = false;
-        scheduler.remove(this.context.animationTask);
+      if (getContext(this).animatedIds.size === 0) {
+        getContext(this).animated = false;
+        scheduler.remove(getContext(this).animationTask);
       }
     }
 
     protected connected (): void {
       super.connected();
 
-      if (this.context.animatedIds === undefined) {
-        this.context.animatedIds = new Set();
-        this.context.animationTask = {
+      if (getContext(this).animatedIds === undefined) {
+        getContext(this).animatedIds = new Set();
+        getContext(this).animationTask = {
           run: () => {
             this.requestUpdate();
           }
@@ -52,4 +51,8 @@ export function withAnimationUpdates<
       }
     }
   };
+}
+
+function getContext (inst: BaseComponent): TAnimationUpdatesContext {
+  return inst.context as TAnimationUpdatesContext;
 }

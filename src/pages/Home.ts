@@ -1,21 +1,19 @@
 import { PixelFont } from '../components/common/PixelFont';
 import { Page } from '../components/common/Page';
-import { Button } from '../components/common/Button';
 import { gsap } from 'gsap';
+import { GAP_BACKGROUND, GAP_CONTENT } from './defs';
 
 export class Home extends Page {
-  protected text = 'Home';
-
   protected connected (): void {
     super.connected();
 
-    this.attachToLayer(this.context.layersManager.layers.main);
+    this.attachToLayer(this.context.layers.main);
 
     this.appendChild(
       new PixelFont({
-        layer: this.currentLayer!,
-        x: this.x + 200,
-        y: this.y + 200,
+        layer: this.layer!,
+        x: this.x + GAP_CONTENT,
+        y: this.y + GAP_CONTENT,
         text: 'Hi,My name is Alexandr',
         color: 'white',
         withAnimation: true,
@@ -24,9 +22,9 @@ export class Home extends Page {
     );
     this.appendChild(
       new PixelFont({
-        layer: this.currentLayer!,
-        x: this.x + 200,
-        y: this.y + 300,
+        layer: this.layer!,
+        x: this.x + GAP_CONTENT,
+        y: this.y + GAP_CONTENT + 100,
         text: 'And I am Developer!',
         color: 'white',
         withAnimation: true,
@@ -35,9 +33,9 @@ export class Home extends Page {
     );
     this.appendChild(
       new PixelFont({
-        layer: this.currentLayer!,
-        x: this.x + 200,
-        y: this.y + 400,
+        layer: this.layer!,
+        x: this.x + GAP_CONTENT,
+        y: this.y + GAP_CONTENT + 200,
         text: 'Yeah Boy!',
         color: 'white',
         withAnimation: true,
@@ -47,29 +45,34 @@ export class Home extends Page {
 
     this.context.deferStartAnimation.promise.then(() => {
       this.appendUnderhood();
-
-      this.appendChild(
-        new Button({
-          layer: this.currentLayer!,
-          x: this.x + this.width - 350 - 10,
-          y: this.y + this.height - 180 - 10,
-          width: 250,
-          height: 80,
-          text: 'CONTACTS',
-          textSize: 32,
-          color: 'black',
-          background: 'white',
-          onClick: this.moveCameraToContacts
-        })
-      );
+      //
+      // this.appendChild(
+      //   new Button({
+      //     layer: this.layer!,
+      //     x: this.x + this.width - GAP_CONTENT - 150 - 10,
+      //     y: this.y + this.height - GAP_CONTENT - 20 - 10,
+      //     width: 250,
+      //     height: 80,
+      //     text: 'CONTACTS',
+      //     textSize: 32,
+      //     color: 'black',
+      //     background: 'white',
+      //     onClick: this.moveCameraToContacts
+      //   })
+      // );
     });
   }
 
   protected renderFullPage (): void {
-    const ctx = this.currentLayer!.ctx;
+    const ctx = this.layer!.ctx;
 
     ctx.fillStyle = 'black';
-    ctx.fillRect(this.x + 100, this.y + 100, this.width - 200, this.height - 200);
+    ctx.fillRect(
+      this.x + GAP_BACKGROUND,
+      this.y + GAP_BACKGROUND,
+      this.width - GAP_BACKGROUND * 2,
+      this.height - GAP_BACKGROUND * 2
+    );
   }
 
   protected moveCameraToContacts = (): void => {

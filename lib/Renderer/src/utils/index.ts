@@ -1,4 +1,4 @@
-export const PIXEL_RATIO = globalThis.devicePixelRatio || 1;
+export const EMPTY_ARRAY = Object.freeze([]) as unknown as any[];
 
 export function noop (): void {}
 

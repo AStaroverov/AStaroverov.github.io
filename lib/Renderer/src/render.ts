@@ -3,10 +3,8 @@ import { scheduler } from '../../Scheduler';
 import { updateRenderId } from './prototypes/helpers/renderId';
 import { zeroizeRenderIndex } from './prototypes/helpers/renderIndex';
 import { workerEventRedispatcher } from './worker/events/workerEventRedispatcher';
-import { HitBoxService } from './prototypes/helpers/hitBoxServerice';
-import { mat4 } from 'gl-matrix';
-
-const EMPTY_ARRAY = Object.freeze([]) as unknown as any[];
+import { HitBoxMap } from './prototypes/helpers/hitBoxServerice';
+import { EMPTY_ARRAY } from './utils';
 
 export function render<Component extends BaseComponent> (
   workerScope: DedicatedWorkerGlobalScope,
@@ -19,8 +17,7 @@ export function render<Component extends BaseComponent> (
   rootComponent.context = rootComponent.context || {};
   rootComponent[PRIVATE_CONTEXT] = {
     root: rootComponent,
-    hitBoxService: new HitBoxService(),
-    globalTransformMatrix: mat4.create(),
+    hitBoxMap: new HitBoxMap(),
     scheduleUpdate: (): void => {
       scheduled = true;
     }

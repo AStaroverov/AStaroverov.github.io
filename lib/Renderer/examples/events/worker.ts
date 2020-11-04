@@ -4,7 +4,7 @@ import { BaseComponent } from '../../src/BaseComponent';
 import { createElement, withDeclarativeSetChildren } from '../../src/mixins/withDeclarativeSetChildren';
 import { getInitData } from '../../src/worker/getInitData';
 import { getWorkerScope } from '../../src/worker/getWorkerScope';
-import { CanvasEvent } from '../../src/worker/events/consts';
+import { CanvasEvent } from '../../src/worker/events/defs';
 
 main();
 

@@ -1,5 +1,5 @@
 import { BaseComponent } from '../../src/BaseComponent';
-import { CanvasEvent } from '../../src/worker/events/consts';
+import { CanvasEvent } from '../../src/worker/events/defs';
 import { LayersManager } from '../../src/layers/LayersManager';
 import { Layer } from '../../src/layers/Layer';
 import { withLayers } from '../../src/mixins/withLayers';

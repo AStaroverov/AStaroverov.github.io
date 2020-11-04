@@ -1,11 +1,9 @@
 import { CanvasElement } from './prototypes/CanvasElement';
-import { mat4 } from 'gl-matrix';
-import { HitBoxService } from './prototypes/helpers/hitBoxServerice';
+import { HitBoxMap } from './prototypes/helpers/hitBoxServerice';
 
 export type TPrivateContext = {
   root: BaseComponent
-  hitBoxService: HitBoxService
-  globalTransformMatrix: mat4
+  hitBoxMap: HitBoxMap
   scheduleUpdate: () => void
 };
 
@@ -13,8 +11,6 @@ export const PRIVATE_CONTEXT = Symbol('PRIVATE_CONTEXT');
 
 export class BaseComponent<Context extends object = object> extends CanvasElement {
   public context: Context;
-
-  private tmpGlobalTransformMatrix?: mat4;
 
   protected [PRIVATE_CONTEXT]?: TPrivateContext;
 
@@ -30,11 +26,6 @@ export class BaseComponent<Context extends object = object> extends CanvasElemen
     this.context = parent.context;
     this[PRIVATE_CONTEXT] = parent[PRIVATE_CONTEXT];
 
-    if (this.tmpGlobalTransformMatrix) {
-      this.setGlobalTransformMatrix(this.tmpGlobalTransformMatrix);
-      this.tmpGlobalTransformMatrix = undefined;
-    }
-
     super.setParent(parent);
   }
 
@@ -48,15 +39,13 @@ export class BaseComponent<Context extends object = object> extends CanvasElemen
 
   public requestUpdate (): void {
     if (this[PRIVATE_CONTEXT]) {
+      this.layer?.update();
       this[PRIVATE_CONTEXT]!.scheduleUpdate();
     }
   }
 
-  public setGlobalTransformMatrix (matrix: mat4): void {
-    if (this[PRIVATE_CONTEXT]) {
-      mat4.copy(this[PRIVATE_CONTEXT]!.globalTransformMatrix, matrix);
-    } else {
-      this.tmpGlobalTransformMatrix = matrix;
-    }
+  public attachToLayer (nextLayer): void {
+    this.requestUpdate();
+    return super.attachToLayer(nextLayer);
   }
 }

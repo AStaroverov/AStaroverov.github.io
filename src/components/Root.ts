@@ -1,27 +1,28 @@
 import { BaseComponent } from '../../lib/Renderer/src/BaseComponent';
-import { LayersManager } from '../../lib/Renderer/src/layers/LayersManager';
 import { TContext, TLayers } from '../types';
 import { Camera } from './Camera';
 import { Home } from '../pages/Home';
 import { Deferred } from 'ts-deferred';
 import { Contacts } from '../pages/Contacts';
+import { mapPageToRect, EPageName } from '../pages/defs';
+import { Nav } from './Nav';
 
 export class Root extends BaseComponent<TContext> {
   constructor (
-    private layersManager: LayersManager<TLayers>,
-    private devicePixelRatio: number
+    private devicePixelRatio: number,
+    private layers: TLayers
   ) {
     super();
 
     this.setContext({
       root: this,
+      layers,
       size: {
         x: 0,
         y: 0,
-        width: this.layersManager.layers.main.canvas.width / devicePixelRatio,
-        height: this.layersManager.layers.main.canvas.height / devicePixelRatio
+        width: layers.main.canvas.width / devicePixelRatio,
+        height: layers.main.canvas.height / devicePixelRatio
       },
-      layersManager,
       devicePixelRatio,
       deferStartAnimation: new Deferred()
     });
@@ -38,26 +39,27 @@ export class Root extends BaseComponent<TContext> {
 
     this.appendChild(camera);
 
-    const s = this.context.size;
-
-    camera.appendChild(new Home({
-      x: 0,
-      y: 0,
-      width: s.width,
-      height: s.height
-    }));
+    camera.appendChild(
+      new Home({
+        text: EPageName.HOME,
+        ...mapPageToRect[EPageName.HOME]
+      })
+    );
 
     this.context.deferStartAnimation.promise.then(() => {
-      camera.appendChild(new Contacts({
-        x: s.width + 300,
-        y: 0,
-        width: s.width,
-        height: s.height
-      }));
+      camera.appendChild(
+        new Contacts({
+          text: EPageName.CONTACTS,
+          ...mapPageToRect[EPageName.CONTACTS]
+        })
+      );
+      camera.appendChild(new Nav());
     });
   }
 
   protected render (): void {
-    this.layersManager.prepareToFrame();
+    this.layers.keys.forEach((k) => {
+      this.layers[k].nextFrame();
+    });
   }
 }

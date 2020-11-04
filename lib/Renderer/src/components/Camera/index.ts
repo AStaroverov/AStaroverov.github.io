@@ -3,7 +3,8 @@ import { CameraService, TCameraServiceOptions } from './serviece';
 import { isMetaKeyEvent } from '../../utils';
 import { withdDrag } from '../../mixins/withdDrag';
 import { scheduler, Task } from '../../../../Scheduler';
-import { CanvasEvent, CanvasMouseEvent } from '../../worker/events/consts';
+import { CanvasEvent, CanvasMouseEvent } from '../../worker/events/defs';
+import { vec2 } from 'gl-matrix';
 
 export enum MANIPULATION_TYPE {
   TOUCH = 'touch',
@@ -49,7 +50,7 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
     this.root.addEventListener('keyup', this);
   }
 
-  protected disconnected (): void{
+  protected disconnected (): void {
     super.disconnected();
 
     this.root.removeEventListener('click', this);
@@ -103,6 +104,10 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
     }
   }
 
+  protected getPointFromEvent (event: CanvasMouseEvent): vec2 {
+    return [event.x, event.y];
+  }
+
   private _move (event): void {
     event.preventDefault();
     event.stopPropagation();
@@ -113,18 +118,20 @@ export class CameraComponent<Context extends object = object> extends withdDrag(
 
     if (event.type.indexOf('mouse') > -1) {
       this.camera.move(
-        event.original.x - this._lastDragEvent!.original.x,
-        event.original.y - this._lastDragEvent!.original.y
+        (this._lastDragEvent!.x - event.x) / this.camera.scale,
+        (this._lastDragEvent!.y - event.y) / this.camera.scale
       );
     }
   }
 
-  private _zoom (e): void {
+  private _zoom (event): void {
     // To prevent back gesture
-    e.preventDefault();
-    e.stopPropagation();
+    event.preventDefault();
+    event.stopPropagation();
 
-    this.camera.zoom(e.x, e.y, e.deltaY / 1000);
+    const xy = this.getPointFromEvent(event);
+
+    this.camera.zoom(xy[0], xy[1], event.deltaY / 1000);
   }
 
   private _onDragStart (e: CanvasMouseEvent): void {

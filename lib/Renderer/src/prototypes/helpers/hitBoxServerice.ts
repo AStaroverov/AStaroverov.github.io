@@ -1,9 +1,47 @@
 import RBush, { BBox } from 'rbush';
 import { CanvasElement, THitBoxData } from '../CanvasElement';
+import { ILayer } from '../../layers/Layer';
+import { vec2 } from 'gl-matrix';
 
-type TOptionsHitTest = {
-  noSort?: Boolean
-};
+export class HitBoxMap extends Map<ILayer, HitBoxService> {
+  private dirty = true;
+  private sortedList: Array<[HitBoxService, ILayer]> = [];
+
+  public set (k: ILayer, v: HitBoxService): this {
+    console.log('set', k);
+    this.dirty = true;
+
+    return super.set(k, v);
+  }
+
+  public delete (key: ILayer): boolean {
+    this.dirty = true;
+
+    return super.delete(key);
+  }
+
+  public clear (): void {
+    this.dirty = true;
+
+    return super.clear();
+  }
+
+  public getSortedList (): Array<[HitBoxService, ILayer]> {
+    if (this.dirty) {
+      this.sortedList = [];
+
+      Map.prototype.forEach.call(this, (a: HitBoxService, b: ILayer) => {
+        this.sortedList.push([a, b]);
+      });
+
+      this.sortedList.sort((a, b) => {
+        return b[1].zIndex - a[1].zIndex;
+      });
+    }
+
+    return this.sortedList;
+  }
+}
 
 export class HitBoxService<Component extends CanvasElement = CanvasElement> {
   private rbush = new RBush<THitBoxData<Component>>(16);
@@ -23,27 +61,23 @@ export class HitBoxService<Component extends CanvasElement = CanvasElement> {
     this.rbush.remove(item);
   }
 
-  public testPoint (x: number, y: number, options?: TOptionsHitTest): Component[] {
-    this.tmpBox.minX = x - 1;
-    this.tmpBox.minY = y - 1;
-    this.tmpBox.maxX = x + 1;
-    this.tmpBox.maxY = y + 1;
+  public testPoint (point: vec2): Component[] {
+    this.tmpBox.minX = point[0] - 1;
+    this.tmpBox.minY = point[1] - 1;
+    this.tmpBox.maxX = point[0] + 1;
+    this.tmpBox.maxY = point[1] + 1;
 
-    return this.testHitBox(this.tmpBox, options);
+    return this.testHitBox(this.tmpBox);
   }
 
-  public testHitBox (data: BBox, options?: TOptionsHitTest): Component[] {
+  public testHitBox (data: BBox): Component[] {
     const result: Component[] = [];
     const searched: Array<THitBoxData<Component>> = this.rbush.search(data);
 
     for (let i = 0; i < searched.length; i += 1) {
-      if (searched[i].item?.onHitBox(data)) {
+      if (searched[i].item?.verifyHitToBox(data)) {
         result.push(searched[i].item);
       }
-    }
-
-    if (options && options.noSort) {
-      return result;
     }
 
     return result.sort((a, b) => {

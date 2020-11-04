@@ -184,8 +184,8 @@ export class CameraService extends EventEmitter {
   private zoomEnd (scale: number, dx1: number, dy1: number, dx2: number, dy2: number): void {
     this.set({
       scale: toFixed(scale, 3),
-      x: this.x + ((dx2 - dx1) * scale) | 0,
-      y: this.y + ((dy2 - dy1) * scale) | 0
+      x: this.x - ((dx2 - dx1) * scale) | 0,
+      y: this.y - ((dy2 - dy1) * scale) | 0
     });
   }
 

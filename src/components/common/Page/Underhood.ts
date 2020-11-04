@@ -1,6 +1,5 @@
 import { gsap } from 'gsap';
 import { BaseComponent } from '../../../../lib/Renderer/src/BaseComponent';
-import { withLayers } from '../../../../lib/Renderer/src/mixins/withLayers';
 import { TContext } from '../../../types';
 import { withAnimationUpdates } from '../../../mixins/withAnimationUpdates';
 import { Layer } from '../../../../lib/Renderer/src/layers/Layer';
@@ -17,7 +16,7 @@ export type TUnderhoodProps = {
   color?: string
 };
 
-export class Underhood extends withAnimationUpdates(withLayers(BaseComponent))<TContext> {
+export class Underhood extends withAnimationUpdates(BaseComponent)<TContext> {
   public isShowed = false;
   public isAnimating = false;
 
@@ -37,8 +36,6 @@ export class Underhood extends withAnimationUpdates(withLayers(BaseComponent))<T
   constructor (props: TUnderhoodProps) {
     super();
 
-    this.attachToLayer(props.layer);
-
     Object.assign(this, props);
 
     this.colorRGB = hexToRgb(this.color).join(',');
@@ -47,7 +44,7 @@ export class Underhood extends withAnimationUpdates(withLayers(BaseComponent))<T
 
   protected render (): void {
     if (this.isShowed) {
-      const ctx = this.currentLayer!.ctx;
+      const ctx = this.layer!.ctx;
 
       ctx.fillStyle = `rgba(${this.backgroundRGB}, ${this.opacity})`;
       ctx.fillRect(this.x, this.y, this.width, this.height);

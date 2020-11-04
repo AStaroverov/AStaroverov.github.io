@@ -1,8 +1,7 @@
 import { BaseComponent } from '../../../lib/Renderer/src/BaseComponent';
-import { withLayers } from '../../../lib/Renderer/src/mixins/withLayers';
 import { TContext } from '../../types';
 import { Layer } from '../../../lib/Renderer/src/layers/Layer';
-import { CanvasMouseEvent } from '../../../lib/Renderer/src/worker/events/consts';
+import { CanvasMouseEvent } from '../../../lib/Renderer/src/worker/events/defs';
 
 export type TProps = {
   layer: Layer
@@ -10,19 +9,23 @@ export type TProps = {
   y: number
   width: number
   height: number
-  text: string
-  textSize: number
-  color?: string
-  colorHover?: string
+  strokeWidth?: number
+  strokeStyle?: string
+  strokeStyleHover?: string
   background?: string
   backgroundHover?: string
+  text: string
+  color?: string
+  colorHover?: string
+  textSize: number
   onClick: (event: CanvasMouseEvent) => void
 };
 
 const COLOR = '#fff';
 const BACKGROUND = '#000';
+const STROKE_STYLE = '#fff';
 
-export class Button extends withLayers(BaseComponent)<TContext> {
+export class Button extends BaseComponent<TContext> {
   public isHovered: boolean = false;
 
   constructor (public props: TProps) {
@@ -34,8 +37,8 @@ export class Button extends withLayers(BaseComponent)<TContext> {
 
     const p = this.props;
 
-    this.setHitBox(p.x, p.y, p.x + p.width, p.y + p.height);
     this.attachToLayer(p.layer);
+    this.setHitBox(p.x, p.y, p.x + p.width, p.y + p.height);
 
     this.addEventListener('mouseenter', () => {
       this.isHovered = true;
@@ -55,7 +58,7 @@ export class Button extends withLayers(BaseComponent)<TContext> {
   }
 
   protected render (): void {
-    const ctx = this.currentLayer!.ctx;
+    const ctx = this.layer!.ctx;
     const props = this.props;
 
     ctx.fillStyle = (this.isHovered
@@ -63,6 +66,13 @@ export class Button extends withLayers(BaseComponent)<TContext> {
       : this.props.background) || BACKGROUND;
 
     ctx.fillRect(props.x, props.y, props.width, props.height);
+
+    if (props.strokeWidth !== undefined) {
+      ctx.strokeStyle = (this.isHovered
+        ? (this.props.strokeStyleHover || this.props.strokeStyle)
+        : this.props.strokeStyle) || STROKE_STYLE;
+      ctx.strokeRect(props.x, props.y, props.width, props.height);
+    }
 
     ctx.font = `${props.textSize}px Roboto`;
     ctx.fillStyle = (this.isHovered

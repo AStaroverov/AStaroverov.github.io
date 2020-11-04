@@ -1,6 +1,5 @@
 import { MessageType, typedPostMessage } from '../messageType';
-import { CanvasEvent, CanvasMouseEvent, FIELDS_FOR_COPY } from './consts';
-import { PIXEL_RATIO } from '../../utils';
+import { CanvasEvent, CanvasMouseEvent, FIELDS_FOR_COPY } from './defs';
 
 export function dispatcherEventToWorker (worker: Worker, root: Element): VoidFunction {
   const redispatch = <E extends Event>(event: E): void => {
@@ -61,13 +60,4 @@ function mutateTargetEvent (canvasEvent: CanvasMouseEvent, parentEvent: MouseEve
   canvasEvent.y = canvasEvent.clientY;
   canvasEvent.movementX = parentEvent.movementX;
   canvasEvent.movementY = parentEvent.movementY;
-
-  canvasEvent.original = {
-    clientX: canvasEvent.clientX,
-    clientY: canvasEvent.clientY,
-    x: canvasEvent.x,
-    y: canvasEvent.y,
-    movementX: canvasEvent.movementX,
-    movementY: canvasEvent.movementY
-  };
 }

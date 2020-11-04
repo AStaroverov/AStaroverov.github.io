@@ -1,5 +1,4 @@
 import { BaseComponent } from '../../../lib/Renderer/src/BaseComponent';
-import { withLayers } from '../../../lib/Renderer/src/mixins/withLayers';
 import { TContext } from '../../types';
 import { textToPixels, TWordPoint } from '../../utils/textToPixels';
 import { Layer } from '../../../lib/Renderer/src/layers/Layer';
@@ -21,8 +20,7 @@ export type TProps = {
   animationDelay?: number
 };
 
-export class PixelFont extends withAnimationUpdates(withLayers(BaseComponent))<TContext> {
-  public layer: Layer;
+export class PixelFont extends withAnimationUpdates(BaseComponent)<TContext> {
   public x: number;
   public y: number;
   public width: number;
@@ -88,7 +86,7 @@ export class PixelFont extends withAnimationUpdates(withLayers(BaseComponent))<T
 
   protected render (): void {
     if (this.canRender) {
-      const ctx = this.currentLayer!.ctx;
+      const ctx = this.layer!.ctx;
 
       ctx.fillStyle = this.color;
       if (this.row !== undefined) {

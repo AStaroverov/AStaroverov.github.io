@@ -1,9 +1,15 @@
 import { MessageType, typedListenMessage } from '../messageType';
 import { Knot } from '../../prototypes/Knot';
-import { CanvasEvent, shouldPreventDefault, shouldStopImmediatePropagation, shouldStopPropagation } from './consts';
+import {
+  CanvasEvent,
+  CanvasMouseEvent,
+  shouldPreventDefault,
+  shouldStopImmediatePropagation,
+  shouldStopPropagation
+} from './defs';
 import { CanvasElement } from '../../prototypes/CanvasElement';
 import { TPrivateContext } from '../../BaseComponent';
-import { vec2, mat4 } from 'gl-matrix';
+import { EMPTY_ARRAY } from '../../utils';
 
 export function workerEventRedispatcher (
   workerScope: DedicatedWorkerGlobalScope,
@@ -16,17 +22,20 @@ export function workerEventRedispatcher (
   typedListenMessage(workerScope, MessageType.SEND_EVENT, ({ data }) => {
     const event = extendEvent(data.payload.event);
 
-    if (event.type.indexOf('mouse') > -1 || event.type.indexOf('touch') > -1) {
-      mutateTargetEvent(event as unknown as CanvasEvent<MouseEvent>, privateContext.globalTransformMatrix);
-    }
-
     switch (event.type) {
       case 'mousemove': {
-        const mouseEvent = (event as unknown as CanvasEvent<MouseEvent>);
-        const hoveredKnots = privateContext.hitBoxService.testPoint(
-          mouseEvent.clientX,
-          mouseEvent.clientY
-        );
+        const list = privateContext.hitBoxMap.getSortedList();
+        const mouseEvent = (event as unknown as CanvasMouseEvent);
+        let hoveredKnots: CanvasElement[] = EMPTY_ARRAY;
+        let i = 0;
+
+        while (hoveredKnots.length === 0 && i < list.length) {
+          hoveredKnots = list[i][0].testPoint(
+            list[i][1].getTransformedVec2([mouseEvent.x, mouseEvent.y])
+          );
+
+          i++;
+        }
 
         if (hoveredKnots.length === 0) {
           hoveredKnots[0] = privateContext.root as CanvasElement;
@@ -116,6 +125,7 @@ function extendEvent<E extends Event, T extends Knot> (event: E): CanvasEvent<E 
     [shouldPreventDefault]: false,
     stopImmediatePropagation: () => {
       event[shouldStopImmediatePropagation] = true;
+      event[shouldStopPropagation] = true;
     },
     stopPropagation: () => {
       event[shouldStopPropagation] = true;
@@ -188,20 +198,4 @@ function createPath (target: Knot | undefined): Knot[] {
   }
 
   return path;
-}
-
-const tmpPoint: vec2 = [0, 0];
-const tmp2Point: vec2 = [0, 0];
-function mutateTargetEvent (event: CanvasEvent<MouseEvent>, matrix: mat4): void {
-  tmp2Point[0] = event.clientX;
-  tmp2Point[1] = event.clientY;
-
-  vec2.transformMat4(tmpPoint, tmp2Point, matrix);
-
-  event.clientX = tmpPoint[0];
-  event.clientY = tmpPoint[1];
-  event.x = event.clientX;
-  event.y = event.clientY;
-  event.movementX = event.movementX * matrix[0];
-  event.movementY = event.movementY * matrix[5];
 }

@@ -2,18 +2,8 @@ import { TMutable } from '../../types';
 import { Knot } from '../../prototypes/Knot';
 
 export type withPath = { path: Knot[] };
-export type withOriginals = {
-  original: {
-    clientX: number
-    clientY: number
-    x: number
-    y: number
-    movementX: number
-    movementY: number
-  }
-};
 export type CanvasEvent<E extends Event = Event> = TMutable<E> & withPath;
-export type CanvasMouseEvent<E extends MouseEvent = MouseEvent> = TMutable<E> & withPath & withOriginals;
+export type CanvasMouseEvent<E extends MouseEvent = MouseEvent> = TMutable<E> & withPath;
 
 export const shouldStopImmediatePropagation = Symbol('shouldStopImmediatePropagation');
 export const shouldStopPropagation = Symbol('shouldStopPropagation');

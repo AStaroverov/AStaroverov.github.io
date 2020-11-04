@@ -1,4 +1,4 @@
-import { CanvasEvent, shouldPreventDefault, shouldStopImmediatePropagation } from '../worker/events/consts';
+import { CanvasEvent, shouldPreventDefault, shouldStopImmediatePropagation } from '../worker/events/defs';
 
 type TEventType = string;
 

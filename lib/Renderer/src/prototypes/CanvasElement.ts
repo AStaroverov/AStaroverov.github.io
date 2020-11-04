@@ -4,14 +4,16 @@ import { Knot } from './Knot';
 import { BBox } from 'rbush';
 import { ITask } from '../types';
 import { PRIVATE_CONTEXT } from '../BaseComponent';
+import { ILayer } from '../layers/Layer';
+import { HitBoxService } from './helpers/hitBoxServerice';
 
 export type THitBoxData<Item extends CanvasElement = CanvasElement> = BBox & {
   item: Item
 };
 
-1;
 export class CanvasElement extends Knot implements ITask {
   public children: this[];
+  public layer: ILayer | undefined;
   public zIndex: number = 0;
   public renderId: number = 0;
   public renderIndex: number = 0;
@@ -27,40 +29,74 @@ export class CanvasElement extends Knot implements ITask {
     return this.renderId === getRenderId();
   }
 
+  public attachToLayer (nextLayer: ILayer): void {
+    if (nextLayer !== this.layer) {
+      this.removeHitBox();
+
+      this.layer?.update();
+      this.layer = nextLayer;
+      this.layer.update();
+
+      this.setHitBox(
+        this.hitBoxData.minX,
+        this.hitBoxData.minY,
+        this.hitBoxData.maxX,
+        this.hitBoxData.maxY
+      );
+    } else {
+      this.layer.update();
+    }
+  }
+
   public setHitBox (
     minX: number,
     minY: number,
     maxX: number,
     maxY: number
   ): void {
-    if (this.hitBoxData.minX !== undefined) {
-      this[PRIVATE_CONTEXT].hitBoxService.remove(this.hitBoxData);
+    if (this[PRIVATE_CONTEXT].hitBoxMap.has(this.layer) === false && this.layer !== undefined) {
+      this[PRIVATE_CONTEXT].hitBoxMap.set(this.layer, new HitBoxService());
     }
 
-    this.hitBoxData.minX = minX;
-    this.hitBoxData.minY = minY;
-    this.hitBoxData.maxX = maxX;
-    this.hitBoxData.maxY = maxY;
+    const hitBoxService = this[PRIVATE_CONTEXT].hitBoxMap.get(this.layer);
 
-    this[PRIVATE_CONTEXT].hitBoxService.add(this.hitBoxData);
+    if (hitBoxService) {
+      if (this.hitBoxData.minX !== undefined) {
+        hitBoxService.remove(this.hitBoxData);
+      }
+
+      this.hitBoxData.minX = minX;
+      this.hitBoxData.minY = minY;
+      this.hitBoxData.maxX = maxX;
+      this.hitBoxData.maxY = maxY;
+
+      hitBoxService.add(this.hitBoxData);
+    }
   }
 
   protected removeHitBox (): void {
-    this[PRIVATE_CONTEXT].hitBoxService.remove(this.hitBoxData);
+    const hitBoxService = this[PRIVATE_CONTEXT].hitBoxMap.get(this.layer);
+
+    if (hitBoxService) {
+      hitBoxService.remove(this.hitBoxData);
+    }
   }
 
-  public onHitBox (area: BBox): boolean {
+  public verifyHitToBox (area: BBox): boolean {
     return true;
   }
 
   protected disconnected (): void {
     super.disconnected();
     this.removeHitBox();
+    this.layer = undefined;
   }
 
   public run (): void {
-    this.beforeEachRender();
-    this.render();
+    if (this.layer?.isDirty === true) {
+      this.beforeEachRender();
+      this.render();
+    }
   }
 
   public next <T extends this> (): T[] | void {
