@@ -2,7 +2,7 @@ import { gsap } from 'gsap';
 import { CameraComponent } from '../../lib/Renderer/src/components/Camera';
 import { TContext } from '../types';
 import { withAnimationUpdates } from '../mixins/withAnimationUpdates';
-import { mapPageToRect, EPageName } from '../pages/defs';
+import { mapPageToRect, EPage } from '../pages/defs';
 import { CanvasMouseEvent } from '../../lib/Renderer/src/worker/events/defs';
 import { ILayer } from '../../lib/Renderer/src/layers/Layer';
 import { vec2 } from 'gl-matrix';
@@ -27,7 +27,7 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
       console.log('CameraService', this.camera);
     }
 
-    const rect = mapPageToRect[EPageName.HOME];
+    const rect = mapPageToRect[EPage.HOME];
     const x = rect.x + rect.width / 2 | 0;
     const y = rect.y + rect.height / 2 | 0;
 
@@ -66,7 +66,7 @@ export class Camera extends withAnimationUpdates(CameraComponent)<TContext> {
     const dx = size.width / 2 - c.x * c.scale;
     const dy = size.height / 2 - c.y * c.scale;
 
-    this.context.layers.keys.forEach((key, index: number) => {
+    this.context.layers.keys.forEach((key) => {
       const layer = this.context.layers[key];
 
       if (this.cameraUpdated) {

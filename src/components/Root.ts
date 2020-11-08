@@ -4,9 +4,10 @@ import { Camera } from './Camera';
 import { Home } from '../pages/Home';
 import { Deferred } from 'ts-deferred';
 import { Contacts } from '../pages/Contacts';
-import { mapPageToRect, EPageName } from '../pages/defs';
+import { mapPageToRect, EPage, mapPageToName } from '../pages/defs';
 import { Nav } from './Nav';
 import { Experience } from '../pages/Experience';
+import { AboutSite } from '../pages/AboutSite';
 
 export class Root extends BaseComponent<TContext> {
   constructor (
@@ -42,21 +43,25 @@ export class Root extends BaseComponent<TContext> {
 
     camera.appendChild(
       new Home({
-        text: EPageName.HOME,
-        ...mapPageToRect[EPageName.HOME]
+        text: mapPageToName[EPage.HOME],
+        ...mapPageToRect[EPage.HOME]
       })
     );
 
     this.context.deferStartAnimation.promise.then(() => {
       camera.appendChild(
         new Contacts({
-          text: EPageName.CONTACTS,
-          ...mapPageToRect[EPageName.CONTACTS]
+          text: mapPageToName[EPage.CONTACTS],
+          ...mapPageToRect[EPage.CONTACTS]
         })
       );
       camera.appendChild(new Experience({
-        text: EPageName.EXPERIENCE,
-        ...mapPageToRect[EPageName.EXPERIENCE]
+        text: mapPageToName[EPage.EXPERIENCE],
+        ...mapPageToRect[EPage.EXPERIENCE]
+      }));
+      camera.appendChild(new AboutSite({
+        text: mapPageToName[EPage.ABOUT_SITE],
+        ...mapPageToRect[EPage.ABOUT_SITE]
       }));
       camera.appendChild(new Nav());
     });

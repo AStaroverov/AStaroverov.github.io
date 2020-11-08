@@ -8,7 +8,6 @@ export class HitBoxMap extends Map<ILayer, HitBoxService> {
   private sortedList: Array<[HitBoxService, ILayer]> = [];
 
   public set (k: ILayer, v: HitBoxService): this {
-    console.log('set', k);
     this.dirty = true;
 
     return super.set(k, v);
