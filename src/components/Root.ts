@@ -6,6 +6,7 @@ import { Deferred } from 'ts-deferred';
 import { Contacts } from '../pages/Contacts';
 import { mapPageToRect, EPageName } from '../pages/defs';
 import { Nav } from './Nav';
+import { Experience } from '../pages/Experience';
 
 export class Root extends BaseComponent<TContext> {
   constructor (
@@ -53,6 +54,10 @@ export class Root extends BaseComponent<TContext> {
           ...mapPageToRect[EPageName.CONTACTS]
         })
       );
+      camera.appendChild(new Experience({
+        text: EPageName.EXPERIENCE,
+        ...mapPageToRect[EPageName.EXPERIENCE]
+      }));
       camera.appendChild(new Nav());
     });
   }
