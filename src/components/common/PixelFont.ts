@@ -5,14 +5,12 @@ import { Layer } from '../../../lib/Renderer/src/layers/Layer';
 import { gsap } from 'gsap';
 import { withAnimationUpdates } from '../../mixins/withAnimationUpdates';
 
-const SIZE_WORD_POINT = 5;
-const SIZE_WORD_GAP = 1;
-
 export type TProps = {
   layer: Layer
   x: number
   y: number
   text: string
+  font?: string
   color?: string
   size?: number
   gap?: number
@@ -27,9 +25,10 @@ export class PixelFont extends withAnimationUpdates(BaseComponent)<TContext> {
   public height: number;
   public row: TWordPoint[];
   public text: string;
+  public font: string = 'c64.bdf';
   public color: string = 'black';
-  public size: number = SIZE_WORD_POINT;
-  public gap: number = SIZE_WORD_GAP;
+  public size: number = 5;
+  public gap: number = 1;
   public withAnimation: boolean = false;
   public animationDelay: number = 0;
 
@@ -50,7 +49,7 @@ export class PixelFont extends withAnimationUpdates(BaseComponent)<TContext> {
 
     this.attachToLayer(this.layer);
 
-    this.row = await textToPixels(this.text);
+    this.row = await textToPixels(this.text, this.font);
     this.width = this.row[this.row.length - 1].column * (this.size + this.gap);
     this.height = this.row[this.row.length - 1].row * (this.size + this.gap);
 
