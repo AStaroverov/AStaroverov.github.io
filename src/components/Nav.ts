@@ -2,7 +2,7 @@ import { gsap } from 'gsap';
 import { TContext } from '../types';
 import { BaseComponent } from '../../lib/Renderer/src/BaseComponent';
 import { Button } from './common/Button';
-import { mapPageToRect, EPageName } from '../pages/defs';
+import { mapPageToRect, EPage } from '../pages/defs';
 import { withAnimationUpdates } from '../mixins/withAnimationUpdates';
 
 const BUTTON_HEIGHT: number = 60;
@@ -25,10 +25,10 @@ export class Nav extends withAnimationUpdates(BaseComponent)<TContext> {
         background: 'black',
         strokeWidth: 2,
         strokeStyle: 'white',
-        text: EPageName.HOME,
+        text: EPage.HOME,
         color: 'white',
         textSize: 24,
-        onClick: () => this.moveCameraTo(EPageName.HOME)
+        onClick: () => this.moveCameraTo(EPage.HOME)
       })
     );
     this.appendChild(
@@ -41,10 +41,10 @@ export class Nav extends withAnimationUpdates(BaseComponent)<TContext> {
         background: 'black',
         strokeWidth: 2,
         strokeStyle: 'white',
-        text: EPageName.CONTACTS,
+        text: EPage.CONTACTS,
         color: 'white',
         textSize: 24,
-        onClick: () => this.moveCameraTo(EPageName.CONTACTS)
+        onClick: () => this.moveCameraTo(EPage.CONTACTS)
       })
     );
     this.appendChild(
@@ -57,15 +57,15 @@ export class Nav extends withAnimationUpdates(BaseComponent)<TContext> {
         background: 'black',
         strokeWidth: 2,
         strokeStyle: 'white',
-        text: EPageName.EXPERIENCE,
+        text: EPage.EXPERIENCE,
         color: 'white',
         textSize: 24,
-        onClick: () => this.moveCameraTo(EPageName.EXPERIENCE)
+        onClick: () => this.moveCameraTo(EPage.EXPERIENCE)
       })
     );
   }
 
-  protected moveCameraTo = (pageName: EPageName): void => {
+  protected moveCameraTo = (pageName: EPage): void => {
     this.startAnimation();
 
     const camera = this.context.camera;
